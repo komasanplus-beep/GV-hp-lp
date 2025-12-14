@@ -57,6 +57,14 @@ export default function Navbar({ settings, onBookClick }) {
                   {link.name}
                 </a>
               ))}
+              <Link 
+                to={createPageUrl('Dashboard')}
+                className={`text-sm font-light tracking-wide transition-colors hover:text-amber-500 ${
+                  isScrolled ? 'text-slate-700' : 'text-white/90'
+                }`}
+              >
+                Admin
+              </Link>
               <button
                 onClick={onBookClick}
                 className={`px-6 py-2.5 text-sm font-light tracking-wide transition-all ${
@@ -116,6 +124,19 @@ export default function Navbar({ settings, onBookClick }) {
                     {link.name}
                   </motion.a>
                 ))}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.1 }}
+                >
+                  <Link 
+                    to={createPageUrl('Dashboard')}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-3xl font-light text-white hover:text-amber-400 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                </motion.div>
               </div>
 
               <button
