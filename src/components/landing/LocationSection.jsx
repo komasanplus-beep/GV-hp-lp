@@ -1,8 +1,25 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icon in react-leaflet
+import L from 'leaflet';
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 
 export default function LocationSection({ settings }) {
+  // Default coordinates (Bali, Indonesia)
+  const defaultPosition = [-8.4095, 115.1889];
+  const position = settings?.latitude && settings?.longitude 
+    ? [settings.latitude, settings.longitude] 
+    : defaultPosition;
+
   return (
     <section id="location" className="py-24 md:py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,26 +46,27 @@ export default function LocationSection({ settings }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="h-[400px] bg-slate-100 overflow-hidden"
+            className="h-[400px] bg-slate-100 overflow-hidden rounded-lg shadow-md"
           >
-            {settings?.map_embed_url ? (
-              <iframe
-                src={settings.map_embed_url}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+            <MapContainer
+              center={position}
+              zoom={15}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={false}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
-                <div className="text-center text-slate-400">
-                  <MapPin className="w-12 h-12 mx-auto mb-3" />
-                  <p>Map will be displayed here</p>
-                </div>
-              </div>
-            )}
+              <Marker position={position}>
+                <Popup>
+                  <div className="text-center">
+                    <p className="font-semibold">{settings?.hotel_name || 'Bawi Hotel'}</p>
+                    <p className="text-sm text-slate-600">{settings?.address || 'Bali, Indonesia'}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            </MapContainer>
           </motion.div>
 
           {/* Contact Info */}
