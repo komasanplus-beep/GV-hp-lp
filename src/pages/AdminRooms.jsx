@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { 
   Plus, 
   Pencil, 
@@ -168,7 +169,8 @@ export default function AdminRooms() {
   };
 
   return (
-    <AdminLayout title="Room Management">
+    <ProtectedRoute>
+      <AdminLayout title="Room Management">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
@@ -473,5 +475,6 @@ export default function AdminRooms() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

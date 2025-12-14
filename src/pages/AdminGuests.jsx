@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { 
   Search,
   Plus,
@@ -135,7 +136,8 @@ export default function AdminGuests() {
   );
 
   return (
-    <AdminLayout title="Guest Management">
+    <ProtectedRoute>
+      <AdminLayout title="Guest Management">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div className="relative flex-1 w-full sm:max-w-md">
@@ -367,5 +369,6 @@ export default function AdminGuests() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

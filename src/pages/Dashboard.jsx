@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -55,7 +56,8 @@ export default function Dashboard() {
   };
 
   return (
-    <AdminLayout title="Dashboard">
+    <ProtectedRoute>
+      <AdminLayout title="Dashboard">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard 
@@ -181,5 +183,6 @@ export default function Dashboard() {
         </Card>
       </div>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

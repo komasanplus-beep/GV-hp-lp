@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { 
   Plus,
   Pencil,
@@ -150,7 +151,8 @@ export default function AdminContent() {
   };
 
   return (
-    <AdminLayout title="Content Management">
+    <ProtectedRoute>
+      <AdminLayout title="Content Management">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <TabsList className="bg-slate-100">
@@ -471,5 +473,6 @@ export default function AdminContent() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

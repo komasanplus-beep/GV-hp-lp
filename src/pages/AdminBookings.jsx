@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { format, differenceInDays } from 'date-fns';
 import { motion } from 'framer-motion';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { 
   Calendar,
   Mail,
@@ -88,7 +89,8 @@ export default function AdminBookings() {
   };
 
   return (
-    <AdminLayout title="Booking Management">
+    <ProtectedRoute>
+      <AdminLayout title="Booking Management">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
@@ -322,5 +324,6 @@ export default function AdminBookings() {
         </DialogContent>
       </Dialog>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }

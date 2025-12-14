@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { 
   Save,
   Upload,
@@ -90,16 +91,19 @@ export default function AdminSettings() {
 
   if (isLoading) {
     return (
-      <AdminLayout title="Settings">
+      <ProtectedRoute>
+        <AdminLayout title="Settings">
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
         </div>
       </AdminLayout>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <AdminLayout title="Settings">
+    <ProtectedRoute>
+      <AdminLayout title="Settings">
       <form onSubmit={handleSubmit} className="max-w-4xl space-y-6">
         {/* Hotel Profile */}
         <Card>
@@ -312,5 +316,6 @@ export default function AdminSettings() {
         </div>
       </form>
     </AdminLayout>
+    </ProtectedRoute>
   );
 }
