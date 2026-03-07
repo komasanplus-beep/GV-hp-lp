@@ -14,7 +14,10 @@ import {
   Facebook,
   Instagram,
   Twitter,
-  X
+  X,
+  Image,
+  Navigation,
+  Layout
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Button } from '@/components/ui/button';
