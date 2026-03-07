@@ -5,9 +5,10 @@ import BlockRenderer from '@/components/lp/BlockRenderer';
 import { Loader2 } from 'lucide-react';
 
 export default function LPView() {
-  // /lp/{slug} の形でアクセスされる
+  // ?slug=xxx または /lp/xxx の両方に対応
+  const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
-  const slug = pathParts[pathParts.indexOf('lp') + 1] || '';
+  const slug = urlParams.get('slug') || pathParts[pathParts.indexOf('lp') + 1] || '';
 
   const { data: pages = [], isLoading: lpLoading } = useQuery({
     queryKey: ['lpBySlug', slug],
