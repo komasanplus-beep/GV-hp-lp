@@ -240,9 +240,10 @@ export default function AdminContent() {
                         </div>
                         
                         {item.content && (
-                          <p className="text-sm text-slate-600 line-clamp-3 mb-3">
-                            {item.content}
-                          </p>
+                          <div 
+                            className="text-sm text-slate-600 line-clamp-3 mb-3 prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: item.content }}
+                          />
                         )}
 
                         {item.icon && (
