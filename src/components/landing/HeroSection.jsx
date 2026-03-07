@@ -35,7 +35,7 @@ export default function HeroSection({ onBookClick }) {
           className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-6 tracking-wide"
           style={{ fontFamily: 'serif' }}
         >
-          Bawi Hotel
+          サロン
         </motion.h1>
 
         <motion.p

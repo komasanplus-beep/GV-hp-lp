@@ -40,9 +40,7 @@ export default function AboutSection({ content }) {
             </h2>
             <div className="space-y-6 text-slate-600 font-light leading-relaxed text-lg">
               <p>
-                {content?.content || `Nestled in a breathtaking location, Bawi Hotel offers an unparalleled 
-                experience of luxury and comfort. Our commitment to excellence ensures that every 
-                moment of your stay is nothing short of extraordinary.`}
+                {content?.content || `私たちのサロンは、お客様に最高の体験をご提供することを使命としています。熟練したスタッフが心を込めて施術し、日常の疲れを癒す特別な時間をお届けします。`}
               </p>
               <p>
                 With meticulously designed rooms, world-class amenities, and personalized service, 
@@ -53,15 +51,15 @@ export default function AboutSection({ content }) {
             <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-slate-200">
               <div>
                 <div className="text-4xl font-light text-amber-600">50+</div>
-                <div className="text-sm text-slate-500 mt-1">Luxury Rooms</div>
+                <div className="text-sm text-slate-500 mt-1">メニュー数</div>
               </div>
               <div>
                 <div className="text-4xl font-light text-amber-600">15+</div>
-                <div className="text-sm text-slate-500 mt-1">Years Experience</div>
+                <div className="text-sm text-slate-500 mt-1">年の実績</div>
               </div>
               <div>
                 <div className="text-4xl font-light text-amber-600">4.9</div>
-                <div className="text-sm text-slate-500 mt-1">Guest Rating</div>
+                <div className="text-sm text-slate-500 mt-1">お客様評価</div>
               </div>
             </div>
           </motion.div>
