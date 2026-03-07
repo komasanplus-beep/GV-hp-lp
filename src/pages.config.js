@@ -50,26 +50,36 @@
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
 import AdminGuests from './pages/AdminGuests';
+import AdminLPEditor from './pages/AdminLPEditor';
+import AdminLPList from './pages/AdminLPList';
 import AdminRooms from './pages/AdminRooms';
 import AdminSettings from './pages/AdminSettings';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
-import AdminLPList from './pages/AdminLPList';
-import AdminLPEditor from './pages/AdminLPEditor';
 import LPView from './pages/LPView';
+import MasterUsers from './pages/MasterUsers';
+import MasterFeatureControl from './pages/MasterFeatureControl';
+import MasterAISettings from './pages/MasterAISettings';
+import MasterAIKnowledge from './pages/MasterAIKnowledge';
+import MasterSystemLogs from './pages/MasterSystemLogs';
 
 
 export const PAGES = {
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
     "AdminGuests": AdminGuests,
+    "AdminLPEditor": AdminLPEditor,
+    "AdminLPList": AdminLPList,
     "AdminRooms": AdminRooms,
     "AdminSettings": AdminSettings,
     "Dashboard": Dashboard,
     "Home": Home,
-    "AdminLPList": AdminLPList,
-    "AdminLPEditor": AdminLPEditor,
     "LPView": LPView,
+    "MasterUsers": MasterUsers,
+    "MasterFeatureControl": MasterFeatureControl,
+    "MasterAISettings": MasterAISettings,
+    "MasterAIKnowledge": MasterAIKnowledge,
+    "MasterSystemLogs": MasterSystemLogs,
 }
 
 export const pagesConfig = {
