@@ -87,7 +87,7 @@ export default function AdminLPList() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild>
-                    <a href={`/lp/${lp.slug}`} target="_blank" rel="noreferrer">
+                    <a href={createPageUrl(`LPView?slug=${lp.slug}`)} target="_blank" rel="noreferrer">
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   </Button>
