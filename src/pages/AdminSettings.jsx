@@ -100,6 +100,15 @@ export default function AdminSettings() {
     setIsUploading(false);
   };
 
+  const handleHeroImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingHero(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setFormData(prev => ({ ...prev, hero_image_url: file_url }));
+    setIsUploadingHero(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     saveMutation.mutate(formData);
