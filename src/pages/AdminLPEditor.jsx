@@ -202,6 +202,7 @@ export default function AdminLPEditor() {
                   {block.data?.headline || block.data?.title || block.data?.cta_text || '未編集'}
                 </div>
                 <div className="flex gap-1">
+                  <AIRegenerateButton block={block} lpId={lpId} />
                   <Button variant="ghost" size="sm" onClick={() => setEditingBlock(block)}>
                     <Pencil className="w-4 h-4" />
                   </Button>
