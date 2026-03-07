@@ -10,6 +10,7 @@ export default function HeroSection({ onBookClick, settings = {} }) {
   const title = settings.hero_title || settings.hotel_name || 'サロン';
   const subtitle = settings.hero_subtitle || 'Experience luxury redefined. Where timeless elegance meets modern comfort in the heart of paradise.';
   const buttonText = settings.hero_button_text || 'Book Your Stay';
+  const buttonUrl = settings.hero_button_url || '';
   const bgImage = settings.hero_image_url || DEFAULT_IMAGE;
 
   return (
