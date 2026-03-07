@@ -500,7 +500,7 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
           )}
 
           {/* Step 2: AI生成 */}
-          {step === 2 && (
+          {mode === 'wizard' && step === 2 && (
             <div className="bg-white rounded-xl border border-slate-200 p-6">
               <h3 className="font-semibold text-slate-800 mb-4">AI生成中...</h3>
               <div className="space-y-2 mb-6">
