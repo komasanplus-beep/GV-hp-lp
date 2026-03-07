@@ -34,7 +34,18 @@ const defaultSettings = {
   social_facebook: '',
   social_instagram: '',
   social_twitter: '',
-  map_embed_url: ''
+  map_embed_url: '',
+  hero_eyebrow: 'Welcome to',
+  hero_title: '',
+  hero_subtitle: '',
+  hero_button_text: '予約する',
+  hero_image_url: '',
+  nav_about: 'About',
+  nav_services: 'Services',
+  nav_facilities: 'Facilities',
+  nav_gallery: 'Gallery',
+  nav_contact: 'Contact',
+  nav_book_button: 'Book Now',
 };
 
 export default function AdminSettings() {
