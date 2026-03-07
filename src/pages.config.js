@@ -64,6 +64,8 @@ import MasterAIKnowledge from './pages/MasterAIKnowledge';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import BlogPage from './pages/BlogPage';
 import BlogPost from './pages/BlogPost';
+import AdminLPGenerate from './pages/AdminLPGenerate';
+import AdminABTest from './pages/AdminABTest';
 
 
 export const PAGES = {
@@ -84,6 +86,8 @@ export const PAGES = {
     "MasterSystemLogs": MasterSystemLogs,
     "BlogPage": BlogPage,
     "BlogPost": BlogPost,
+    "AdminLPGenerate": AdminLPGenerate,
+    "AdminABTest": AdminABTest,
 }
 
 export const pagesConfig = {
