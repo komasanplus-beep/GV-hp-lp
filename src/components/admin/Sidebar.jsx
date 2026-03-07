@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   { name: 'ダッシュボード', icon: LayoutDashboard, page: 'Dashboard' },
-  { name: '客室管理', icon: Bed, page: 'AdminRooms' },
+  { name: 'サービス管理', icon: Briefcase, page: 'AdminRooms' },
   { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
   { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
   { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
