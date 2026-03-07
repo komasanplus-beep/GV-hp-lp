@@ -102,7 +102,15 @@ export default function Sidebar({ isOpen, onClose }) {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-slate-800">
+          <div className="p-4 border-t border-slate-800 space-y-1">
+            <Link
+              to={createPageUrl('MasterUsers')}
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all"
+            >
+              <Shield className="w-5 h-5" />
+              <span className="font-medium">Master Panel</span>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all"
