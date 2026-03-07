@@ -15,6 +15,7 @@ import {
   ChevronUp, ChevronDown, Pencil, Trash2, Plus, ExternalLink, ArrowLeft, Globe, FileText, Copy, Sparkles, FlaskConical
 } from 'lucide-react';
 import AIRegenerateButton from '@/components/lp/AIRegenerateButton';
+import SEOAnalyzePanel from '@/components/lp/SEOAnalyzePanel';
 
 const ALL_BLOCK_TYPES = ['Hero','Problem','Solution','Feature','Benefit','Evidence','Voice','CaseStudy','Flow','Comparison','FAQ','CTA','Future','Pricing','Profile','Gallery','Video','List','Campaign','Countdown','Contact'];
 
