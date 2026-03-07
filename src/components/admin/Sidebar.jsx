@@ -29,7 +29,7 @@ const menuItems = [
   { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
   { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
   { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
-  { name: 'ブログ', icon: BookOpen, page: 'BlogPage' },
+  { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
   { name: '設定', icon: Settings, page: 'AdminSettings' },
 ];
 
