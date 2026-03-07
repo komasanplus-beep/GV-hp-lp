@@ -35,6 +35,7 @@ export default function AdminLPEditor() {
   const urlParams = new URLSearchParams(window.location.search);
   const lpId = urlParams.get('id');
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [editingBlock, setEditingBlock] = useState(null);
   const [showAddBlock, setShowAddBlock] = useState(false);
 
