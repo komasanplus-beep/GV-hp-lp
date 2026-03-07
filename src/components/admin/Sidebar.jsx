@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   LayoutDashboard, 
-  Bed, 
+  Briefcase,
   CalendarCheck, 
   Users, 
   FileText, 
