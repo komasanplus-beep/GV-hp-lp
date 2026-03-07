@@ -7,7 +7,8 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
@@ -29,6 +30,16 @@ export default function AdminLPList() {
     queryKey: ['landingPages'],
     queryFn: () => base44.entities.LandingPage.list('-created_date'),
   });
+
+  const { data: limitsList = [] } = useQuery({
+    queryKey: ['myLimits'],
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.UserLimits.filter({ user_id: user.id });
+    },
+  });
+  const limits = limitsList[0];
+  const atLimit = limits && limits.lp_create_limit !== undefined && pages.length >= limits.lp_create_limit;
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
