@@ -283,7 +283,145 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
             </div>
           </div>
 
-          <StepIndicator current={step} />
+          {/* モード切替 */}
+          <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-lg">
+            <button
+              onClick={() => setMode('wizard')}
+              className={`flex-1 flex items-center justify-center gap-2 text-sm py-2 rounded-md font-medium transition-colors ${mode === 'wizard' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <Sparkles className="w-4 h-4" /> ウィザード生成
+            </button>
+            <button
+              onClick={() => setMode('freetext')}
+              className={`flex-1 flex items-center justify-center gap-2 text-sm py-2 rounded-md font-medium transition-colors ${mode === 'freetext' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <Code2 className="w-4 h-4" /> テキスト貼り付け分析
+            </button>
+          </div>
+
+          {/* フリーテキストモード */}
+          {mode === 'freetext' && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-1">サービス内容を貼り付けて一括分析</h3>
+                  <p className="text-xs text-slate-400 mb-3">対象者・サービス内容をそのままテキストで貼り付けてください。SEO/LMO分析とLP構成をJSON形式で出力します。</p>
+                  <Textarea
+                    rows={10}
+                    value={freeText}
+                    onChange={e => setFreeText(e.target.value)}
+                    placeholder={`例:\n対象者: 中小企業の経営者\n\nサービス内容:\nAIがランディングページを自動生成するツールです。\n自然言語で指示するだけでLPを作成できます。`}
+                    className="text-sm font-mono"
+                  />
+                </div>
+                <Button
+                  className="w-full bg-amber-600 hover:bg-amber-700"
+                  disabled={!freeText || freeTextMutation.isPending}
+                  onClick={() => { setFreeTextResult(null); freeTextMutation.mutate(); }}
+                >
+                  {freeTextMutation.isPending ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />WEB検索・分析中...</>
+                  ) : (
+                    <><Search className="w-4 h-4 mr-2" />SEO/LMO分析 + LP構成を生成</>
+                  )}
+                </Button>
+              </div>
+
+              {freeTextResult && (
+                <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <span className="font-semibold text-slate-800">分析完了</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleCopy}>
+                      <ClipboardCopy className="w-4 h-4 mr-1" />
+                      {copied ? 'コピー済！' : 'JSONをコピー'}
+                    </Button>
+                  </div>
+
+                  {/* SEOキーワード */}
+                  {freeTextResult.seo_keywords?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1.5">SEOキーワード（{freeTextResult.seo_keywords.length}件）</p>
+                      <div className="flex flex-wrap gap-1">
+                        {freeTextResult.seo_keywords.map((kw, i) => (
+                          <span key={i} className={`text-xs px-2 py-0.5 rounded border ${i < 5 ? 'bg-amber-50 border-amber-200 text-amber-800 font-medium' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                            {i < 5 && '★ '}{kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 検索意図 */}
+                  {freeTextResult.search_intent && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1.5">検索意図分析</p>
+                      <div className="space-y-1">
+                        {Object.entries(freeTextResult.search_intent).map(([key, vals]) => (
+                          Array.isArray(vals) && vals.length > 0 && (
+                            <div key={key} className="text-xs">
+                              <span className="text-blue-600 font-medium">{key} ▶ </span>
+                              <span className="text-slate-600">{vals.slice(0, 3).join('、')}</span>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LMOサマリー */}
+                  {freeTextResult.lmo_summary && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-xs font-medium text-blue-700 mb-1">LMOサマリー（AI検索向け）</p>
+                      <p className="text-xs text-slate-700 leading-relaxed">{freeTextResult.lmo_summary}</p>
+                    </div>
+                  )}
+
+                  {/* FAQ */}
+                  {freeTextResult.faq?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1.5">FAQ（{freeTextResult.faq.length}件）</p>
+                      <div className="space-y-1.5">
+                        {freeTextResult.faq.map((f, i) => (
+                          <div key={i} className="bg-slate-50 rounded p-2">
+                            <p className="text-xs font-medium text-slate-700">Q. {f.question}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">A. {f.answer}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LP構成 */}
+                  {freeTextResult.blocks?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1.5">LP構成（{freeTextResult.blocks.length}ブロック）</p>
+                      <div className="flex flex-wrap gap-1">
+                        {freeTextResult.blocks.map((b, i) => (
+                          <span key={i} className="text-xs bg-purple-50 border border-purple-200 text-purple-700 px-2 py-0.5 rounded">
+                            {i + 1}. {b.block_type}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Raw JSON */}
+                  <div>
+                    <p className="text-xs font-medium text-slate-600 mb-1.5">JSON出力</p>
+                    <pre className="bg-slate-900 text-green-400 text-xs p-3 rounded-lg overflow-auto max-h-64 leading-relaxed">
+                      {JSON.stringify(freeTextResult, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ウィザードモード */}
+          {mode === 'wizard' && <StepIndicator current={step} />}
 
           {/* Step 0: 対象者 */}
           {step === 0 && (
