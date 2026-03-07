@@ -446,7 +446,7 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
           )}
 
           {/* Step 1: サービス内容 */}
-          {step === 1 && (
+          {mode === 'wizard' && step === 1 && (
             <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
               <h3 className="font-semibold text-slate-800">サービス内容を入力してください</h3>
               <div>
