@@ -3,14 +3,22 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function HeroSection({ onBookClick }) {
+const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80';
+
+export default function HeroSection({ onBookClick, settings = {} }) {
+  const eyebrow = settings.hero_eyebrow || 'Welcome to';
+  const title = settings.hero_title || settings.hotel_name || 'サロン';
+  const subtitle = settings.hero_subtitle || 'Experience luxury redefined. Where timeless elegance meets modern comfort in the heart of paradise.';
+  const buttonText = settings.hero_button_text || 'Book Your Stay';
+  const bgImage = settings.hero_image_url || DEFAULT_IMAGE;
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <img
-          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80"
-          alt="Bawi Hotel"
+          src={bgImage}
+          alt={title}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -24,7 +32,7 @@ export default function HeroSection({ onBookClick }) {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <span className="inline-block text-amber-300 tracking-[0.3em] text-sm font-light mb-6 uppercase">
-            Welcome to
+            {eyebrow}
           </span>
         </motion.div>
 
@@ -35,7 +43,7 @@ export default function HeroSection({ onBookClick }) {
           className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-6 tracking-wide"
           style={{ fontFamily: 'serif' }}
         >
-          サロン
+          {title}
         </motion.h1>
 
         <motion.p
@@ -44,8 +52,7 @@ export default function HeroSection({ onBookClick }) {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="text-lg md:text-xl text-white/90 font-light mb-10 max-w-2xl mx-auto leading-relaxed"
         >
-          Experience luxury redefined. Where timeless elegance meets modern comfort 
-          in the heart of paradise.
+          {subtitle}
         </motion.p>
 
         <motion.div
@@ -58,7 +65,7 @@ export default function HeroSection({ onBookClick }) {
             size="lg"
             className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-6 text-lg font-light tracking-wider rounded-none border border-amber-500 transition-all duration-300 hover:scale-105"
           >
-            Book Your Stay
+            {buttonText}
           </Button>
         </motion.div>
       </div>
