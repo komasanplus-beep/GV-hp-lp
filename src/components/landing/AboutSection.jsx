@@ -5,7 +5,7 @@ export default function AboutSection({ content }) {
   return (
     <section id="about" className="py-24 md:py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
           {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
