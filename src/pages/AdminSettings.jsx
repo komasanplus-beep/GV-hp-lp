@@ -313,6 +313,131 @@ export default function AdminSettings() {
           </CardContent>
         </Card>
 
+        {/* Hero Section Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Layout className="w-5 h-5" />
+              ヒーローセクション
+            </CardTitle>
+            <CardDescription>トップページのメインビジュアルエリアのテキストを設定します</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">上部小テキスト（eyebrow）</label>
+                <Input
+                  value={formData.hero_eyebrow}
+                  onChange={(e) => handleChange('hero_eyebrow', e.target.value)}
+                  placeholder="Welcome to"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">メインタイトル</label>
+                <Input
+                  value={formData.hero_title}
+                  onChange={(e) => handleChange('hero_title', e.target.value)}
+                  placeholder="店舗名・キャッチタイトル"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">サブタイトル</label>
+              <Textarea
+                value={formData.hero_subtitle}
+                onChange={(e) => handleChange('hero_subtitle', e.target.value)}
+                rows={2}
+                placeholder="サブタイトルや説明文を入力..."
+              />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ボタンテキスト</label>
+                <Input
+                  value={formData.hero_button_text}
+                  onChange={(e) => handleChange('hero_button_text', e.target.value)}
+                  placeholder="予約する"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-1">
+                  <Image className="w-4 h-4" />
+                  背景画像URL
+                </label>
+                <Input
+                  value={formData.hero_image_url}
+                  onChange={(e) => handleChange('hero_image_url', e.target.value)}
+                  placeholder="https://..."
+                />
+                <p className="text-xs text-slate-500 mt-1">空欄の場合はデフォルト画像が使用されます</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Navigation Menu Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Navigation className="w-5 h-5" />
+              ナビゲーションメニュー
+            </CardTitle>
+            <CardDescription>ヘッダーメニューの各項目ラベルを設定します</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">About（紹介）</label>
+                <Input
+                  value={formData.nav_about}
+                  onChange={(e) => handleChange('nav_about', e.target.value)}
+                  placeholder="About"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Services（サービス）</label>
+                <Input
+                  value={formData.nav_services}
+                  onChange={(e) => handleChange('nav_services', e.target.value)}
+                  placeholder="Services"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Facilities（設備）</label>
+                <Input
+                  value={formData.nav_facilities}
+                  onChange={(e) => handleChange('nav_facilities', e.target.value)}
+                  placeholder="Facilities"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Gallery（ギャラリー）</label>
+                <Input
+                  value={formData.nav_gallery}
+                  onChange={(e) => handleChange('nav_gallery', e.target.value)}
+                  placeholder="Gallery"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">Contact（連絡先）</label>
+                <Input
+                  value={formData.nav_contact}
+                  onChange={(e) => handleChange('nav_contact', e.target.value)}
+                  placeholder="Contact"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">予約ボタン</label>
+                <Input
+                  value={formData.nav_book_button}
+                  onChange={(e) => handleChange('nav_book_button', e.target.value)}
+                  placeholder="Book Now"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Save Button */}
         <div className="flex justify-end">
           <Button 
