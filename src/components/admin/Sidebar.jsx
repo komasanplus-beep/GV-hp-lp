@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   <Hotel className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-lg font-medium text-white">Bawi Hotel</h1>
+                  <h1 className="text-lg font-medium text-white">店舗管理</h1>
                   <p className="text-xs text-slate-400">管理パネル</p>
                 </div>
               </Link>

@@ -61,8 +61,8 @@ export default function LocationSection({ settings }) {
               <Marker position={position}>
                 <Popup>
                   <div className="text-center">
-                    <p className="font-semibold">{settings?.hotel_name || 'Bawi Hotel'}</p>
-                    <p className="text-sm text-slate-600">{settings?.address || 'Bali, Indonesia'}</p>
+                    <p className="font-semibold">{settings?.hotel_name || '店舗名'}</p>
+                    <p className="text-sm text-slate-600">{settings?.address || '住所未設定'}</p>
                   </div>
                 </Popup>
               </Marker>
@@ -78,7 +78,7 @@ export default function LocationSection({ settings }) {
             className="flex flex-col justify-center"
           >
             <h3 className="text-2xl font-light text-slate-900 mb-8">
-              {settings?.hotel_name || 'Bawi Hotel'}
+              {settings?.hotel_name || '店舗名'}
             </h3>
 
             <div className="space-y-6">
@@ -89,7 +89,7 @@ export default function LocationSection({ settings }) {
                 <div>
                   <div className="font-medium text-slate-900 mb-1">Address</div>
                   <div className="text-slate-600 font-light">
-                    {settings?.address || '123 Paradise Avenue, Oceanview, Bali 80361, Indonesia'}
+                    {settings?.address || '住所未設定'}
                   </div>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function LocationSection({ settings }) {
                 <div>
                   <div className="font-medium text-slate-900 mb-1">Phone</div>
                   <div className="text-slate-600 font-light">
-                    {settings?.phone || '+62 361 123 4567'}
+                    {settings?.phone || '電話番号未設定'}
                   </div>
                 </div>
               </div>
@@ -113,7 +113,7 @@ export default function LocationSection({ settings }) {
                 <div>
                   <div className="font-medium text-slate-900 mb-1">Email</div>
                   <div className="text-slate-600 font-light">
-                    {settings?.email || 'info@bawihotel.com'}
+                    {settings?.email || 'メールアドレス未設定'}
                   </div>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function LocationSection({ settings }) {
                 <div>
                   <div className="font-medium text-slate-900 mb-1">Check-in / Check-out</div>
                   <div className="text-slate-600 font-light">
-                    Check-in: 2:00 PM | Check-out: 12:00 PM
+                    営業時間: 設定ページより変更できます
                   </div>
                 </div>
               </div>
