@@ -371,16 +371,55 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-1">
-                  <Image className="w-4 h-4" />
-                  背景画像URL
-                </label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ボタンのリンク先URL</label>
                 <Input
-                  value={formData.hero_image_url}
-                  onChange={(e) => handleChange('hero_image_url', e.target.value)}
-                  placeholder="https://..."
+                  value={formData.hero_button_url}
+                  onChange={(e) => handleChange('hero_button_url', e.target.value)}
+                  placeholder="https://... （空欄の場合は予約モーダルを開く）"
                 />
-                <p className="text-xs text-slate-500 mt-1">空欄の場合はデフォルト画像が使用されます</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-2 block flex items-center gap-1">
+                <Image className="w-4 h-4" />
+                背景画像
+              </label>
+              <div className="flex items-center gap-4">
+                {formData.hero_image_url ? (
+                  <div className="relative">
+                    <img
+                      src={formData.hero_image_url}
+                      alt="Hero"
+                      className="h-24 w-40 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleChange('hero_image_url', '')}
+                      className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex items-center justify-center h-24 w-40 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-amber-400">
+                    {isUploadingHero ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+                    ) : (
+                      <div className="text-center">
+                        <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+                        <span className="text-xs text-slate-500">画像をアップロード</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleHeroImageUpload}
+                      disabled={isUploadingHero}
+                    />
+                  </label>
+                )}
+                <p className="text-xs text-slate-500">空欄の場合はデフォルト画像が使用されます</p>
               </div>
             </div>
           </CardContent>
