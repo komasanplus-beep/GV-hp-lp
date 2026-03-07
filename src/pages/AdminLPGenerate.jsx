@@ -47,11 +47,13 @@ export default function AdminLPGenerate() {
     mutationFn: async () => {
       setAiProgress([]);
       const steps = [
-        'WEB検索でトレンド分析中...',
-        'SEOキーワードを抽出中...',
-        '検索意図を分析中...',
-        'LMO最適化中...',
-        'LPブロックを生成中...',
+        'STEP1: ターゲット分析中...',
+        'STEP2: WEB検索でSEOキーワードを抽出中...',
+        'STEP3: 検索意図を分析中...',
+        'STEP4: LMO（AI検索最適化）構造を生成中...',
+        'STEP5: キャッチコピーを生成中...',
+        'STEP6: LP構成を最適化中...',
+        'STEP7: 各ブロックの文章を生成中...',
       ];
       for (const s of steps) {
         await new Promise(r => setTimeout(r, 400));
