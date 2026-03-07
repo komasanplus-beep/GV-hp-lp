@@ -65,10 +65,10 @@ export default function AdminBookings() {
   });
 
   const statusConfig = {
-    pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: 'Pending' },
-    confirmed: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: 'Confirmed' },
-    cancelled: { icon: XCircle, color: 'bg-red-100 text-red-700 border-red-200', label: 'Cancelled' },
-    completed: { icon: CheckCircle2, color: 'bg-blue-100 text-blue-700 border-blue-200', label: 'Completed' },
+    pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-700 border-yellow-200', label: '保留中' },
+    confirmed: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 border-emerald-200', label: '確認済み' },
+    cancelled: { icon: XCircle, color: 'bg-red-100 text-red-700 border-red-200', label: 'キャンセル' },
+    completed: { icon: CheckCircle2, color: 'bg-blue-100 text-blue-700 border-blue-200', label: '完了' },
   };
 
   const filteredBookings = bookings.filter(booking => {
@@ -96,7 +96,7 @@ export default function AdminBookings() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by guest name or email..."
+            placeholder="ゲスト名またはメールで検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -108,11 +108,11 @@ export default function AdminBookings() {
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="all">すべてのステータス</SelectItem>
+            <SelectItem value="pending">保留中</SelectItem>
+            <SelectItem value="confirmed">確認済み</SelectItem>
+            <SelectItem value="cancelled">キャンセル</SelectItem>
+            <SelectItem value="completed">完了</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -141,23 +141,23 @@ export default function AdminBookings() {
         ) : filteredBookings.length === 0 ? (
           <div className="text-center py-20">
             <Calendar className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No bookings found</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">予約が見つかりません</h3>
             <p className="text-slate-500">
               {searchQuery || statusFilter !== 'all' 
-                ? 'Try adjusting your filters'
-                : 'Booking requests will appear here'}
+                ? 'フィルターを変更してみてください'
+                : '予約リクエストがここに表示されます'}
             </p>
           </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50">
-                <TableHead>Guest</TableHead>
-                <TableHead>Dates</TableHead>
-                <TableHead>Room</TableHead>
-                <TableHead>Guests</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>ゲスト</TableHead>
+                <TableHead>日程</TableHead>
+                <TableHead>客室</TableHead>
+                <TableHead>人数</TableHead>
+                <TableHead>ステータス</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -190,7 +190,7 @@ export default function AdminBookings() {
                           {booking.check_out && format(new Date(booking.check_out), 'MMM d, yyyy')}
                         </p>
                         <p className="text-sm text-slate-500">
-                          {calculateNights(booking.check_in, booking.check_out)} nights
+                          {calculateNights(booking.check_in, booking.check_out)} 泊
                         </p>
                       </div>
                     </TableCell>
@@ -215,10 +215,10 @@ export default function AdminBookings() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="confirmed">Confirmed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
+                          <SelectItem value="pending">保留中</SelectItem>
+                          <SelectItem value="confirmed">確認済み</SelectItem>
+                          <SelectItem value="cancelled">キャンセル</SelectItem>
+                          <SelectItem value="completed">完了</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -234,14 +234,14 @@ export default function AdminBookings() {
       <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Booking Details</DialogTitle>
+            <DialogTitle>予約詳細</DialogTitle>
           </DialogHeader>
 
           {selectedBooking && (
             <div className="space-y-6 mt-4">
               {/* Guest Info */}
               <div className="p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-900 mb-3">Guest Information</h4>
+                <h4 className="font-medium text-slate-900 mb-3">ゲスト情報</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3 text-sm">
                     <User className="w-4 h-4 text-slate-400" />
@@ -262,27 +262,27 @@ export default function AdminBookings() {
 
               {/* Stay Details */}
               <div className="p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-900 mb-3">Stay Details</h4>
+                <h4 className="font-medium text-slate-900 mb-3">滞在詳細</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Check-in</p>
+                    <p className="text-xs text-slate-500 mb-1">チェックイン</p>
                     <p className="font-medium">
                       {selectedBooking.check_in && format(new Date(selectedBooking.check_in), 'MMM d, yyyy')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Check-out</p>
+                    <p className="text-xs text-slate-500 mb-1">チェックアウト</p>
                     <p className="font-medium">
                       {selectedBooking.check_out && format(new Date(selectedBooking.check_out), 'MMM d, yyyy')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Room Type</p>
+                    <p className="text-xs text-slate-500 mb-1">客室タイプ</p>
                     <p className="font-medium">{selectedBooking.room_type || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Guests</p>
-                    <p className="font-medium">{selectedBooking.guests_count || 1} guest(s)</p>
+                    <p className="text-xs text-slate-500 mb-1">人数</p>
+                    <p className="font-medium">{selectedBooking.guests_count || 1} 名</p>
                   </div>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function AdminBookings() {
 
               {/* Status */}
               <div className="flex items-center justify-between pt-4 border-t">
-                <span className="text-sm text-slate-500">Update Status:</span>
+                <span className="text-sm text-slate-500">ステータス更新：</span>
                 <Select 
                   value={selectedBooking.status} 
                   onValueChange={(val) => {
@@ -312,10 +312,10 @@ export default function AdminBookings() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="pending">保留中</SelectItem>
+                    <SelectItem value="confirmed">確認済み</SelectItem>
+                    <SelectItem value="cancelled">キャンセル</SelectItem>
+                    <SelectItem value="completed">完了</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
