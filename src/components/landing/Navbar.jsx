@@ -17,12 +17,13 @@ export default function Navbar({ settings, onBookClick }) {
   }, []);
 
   const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Rooms', href: '#rooms' },
-    { name: 'Facilities', href: '#facilities' },
-    { name: 'Gallery', href: '#gallery' },
-    { name: 'Contact', href: '#location' },
+    { name: settings?.nav_about || 'About', href: '#about' },
+    { name: settings?.nav_services || 'Services', href: '#rooms' },
+    { name: settings?.nav_facilities || 'Facilities', href: '#facilities' },
+    { name: settings?.nav_gallery || 'Gallery', href: '#gallery' },
+    { name: settings?.nav_contact || 'Contact', href: '#location' },
   ];
+  const bookButtonText = settings?.nav_book_button || 'Book Now';
 
   return (
     <>
