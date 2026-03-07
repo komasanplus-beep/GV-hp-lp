@@ -74,7 +74,7 @@ export default function Navbar({ settings, onBookClick }) {
                     : 'bg-white/10 backdrop-blur-sm text-white border border-white/30 hover:bg-white/20'
                 }`}
               >
-                Book Now
+                {bookButtonText}
               </button>
             </div>
 
