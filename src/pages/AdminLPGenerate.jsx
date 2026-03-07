@@ -35,6 +35,10 @@ function StepIndicator({ current }) {
 export default function AdminLPGenerate() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [mode, setMode] = useState('wizard'); // 'wizard' | 'freetext'
+  const [freeText, setFreeText] = useState('');
+  const [freeTextResult, setFreeTextResult] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     target: '', service: '', price: '', features: '', differentiators: '',
