@@ -49,10 +49,10 @@ export default function Dashboard() {
   const recentBookings = bookings.slice(0, 5);
 
   const statusConfig = {
-    pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-700', label: 'Pending' },
-    confirmed: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700', label: 'Confirmed' },
-    cancelled: { icon: XCircle, color: 'bg-red-100 text-red-700', label: 'Cancelled' },
-    completed: { icon: CheckCircle2, color: 'bg-blue-100 text-blue-700', label: 'Completed' },
+    pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-700', label: '保留中' },
+    confirmed: { icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700', label: '確認済み' },
+    cancelled: { icon: XCircle, color: 'bg-red-100 text-red-700', label: 'キャンセル' },
+    completed: { icon: CheckCircle2, color: 'bg-blue-100 text-blue-700', label: '完了' },
   };
 
   return (
@@ -61,25 +61,25 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard 
-          title="Total Rooms" 
+          title="総客室数" 
           value={totalRooms} 
           icon={Bed} 
           color="amber"
         />
         <StatsCard 
-          title="Available Rooms" 
+          title="空室数" 
           value={availableRooms} 
           icon={Bed} 
           color="emerald"
         />
         <StatsCard 
-          title="Pending Bookings" 
+          title="保留中の予約" 
           value={pendingBookings} 
           icon={CalendarCheck} 
           color="blue"
         />
         <StatsCard 
-          title="Total Guests" 
+          title="総ゲスト数" 
           value={totalGuests} 
           icon={Users} 
           color="purple"
@@ -91,7 +91,7 @@ export default function Dashboard() {
         {/* Recent Bookings */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Recent Bookings</CardTitle>
+            <CardTitle className="text-lg font-semibold">最近の予約</CardTitle>
             <Link 
               to={createPageUrl('AdminBookings')}
               className="text-sm text-amber-600 hover:text-amber-700 flex items-center gap-1"
@@ -102,7 +102,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="space-y-4">
               {recentBookings.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No bookings yet</p>
+                <p className="text-slate-500 text-center py-8">予約はまだありません</p>
               ) : (
                 recentBookings.map((booking, index) => {
                   const status = statusConfig[booking.status] || statusConfig.pending;
@@ -142,14 +142,14 @@ export default function Dashboard() {
         {/* Room Status */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Room Status</CardTitle>
+            <CardTitle className="text-lg font-semibold">客室状況</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-emerald-500 rounded-full" />
-                  <span className="text-slate-700">Available</span>
+                  <span className="text-slate-700">空室</span>
                 </div>
                 <span className="text-2xl font-semibold text-slate-900">{availableRooms}</span>
               </div>
@@ -157,7 +157,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-amber-500 rounded-full" />
-                  <span className="text-slate-700">Booked</span>
+                  <span className="text-slate-700">予約済み</span>
                 </div>
                 <span className="text-2xl font-semibold text-slate-900">{bookedRooms}</span>
               </div>
@@ -165,7 +165,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between p-4 bg-slate-100 rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 bg-slate-500 rounded-full" />
-                  <span className="text-slate-700">Maintenance</span>
+                  <span className="text-slate-700">メンテナンス</span>
                 </div>
                 <span className="text-2xl font-semibold text-slate-900">
                   {rooms.filter(r => r.status === 'maintenance').length}
@@ -177,7 +177,7 @@ export default function Dashboard() {
               to={createPageUrl('AdminRooms')}
               className="mt-6 flex items-center justify-center gap-2 w-full py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
             >
-              Manage Rooms <ArrowRight className="w-4 h-4" />
+              客室を管理 <ArrowRight className="w-4 h-4" />
             </Link>
           </CardContent>
         </Card>
