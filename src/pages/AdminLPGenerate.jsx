@@ -167,6 +167,81 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
     onSuccess: (data) => setGenerated(data),
   });
 
+  const freeTextMutation = useMutation({
+    mutationFn: async () => {
+      const prompt = `
+あなたはSEOとAI検索（LMO）分析の専門AIです。
+ユーザーが入力したサービス内容を元にWEB検索を行い、SEOとAI検索に最適なキーワードを分析してください。
+
+【サービス・対象者情報】
+${freeText}
+
+■ STEP1 SEOキーワード抽出
+WEB検索を行い、日本語・購買意図明確なキーワードを重要度順に10〜20個抽出。
+
+■ STEP2 検索意図分析
+・悩み・比較対象・導入目的・検討段階を分析
+
+■ STEP3 LMO最適化
+AI検索（ChatGPT/Gemini/Perplexity）が引用しやすい情報：
+・200文字の要約・サービス定義・FAQ（3〜5個）・数値や根拠
+
+■ STEP4 LP構成生成
+以下のブロックタイプから最大10ブロックの最適なLP構成を生成（日本語で各ブロックの文章を作成）：
+Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ, CTA, Comparison, Pricing, Profile, List, Contact
+
+各ブロックのデータ形式：
+- Hero: { headline, subheadline, cta_text }
+- Problem: { title, description, problems (array of strings) }
+- Solution: { title, description, points (array of strings) }
+- Feature: { title, features (array of {title, description}) }
+- Benefit: { title, benefits (array of {title, description}) }
+- Evidence: { title, stats (array of {number, label}) }
+- Voice: { title, voices (array of {name, comment, role}) }
+- FAQ: { title, faqs (array of {question, answer}) }
+- CTA: { headline, subheadline, cta_text, subtext }
+- Comparison: { title, items (array of {label, ours, theirs}) }
+- Pricing: { title, plans (array of {name, price, unit, features}) }
+- Contact: { title, description, cta_text }
+
+必ずJSON形式のみで返してください：
+{
+  "seo_keywords": ["キーワード1", "キーワード2", ...],
+  "search_intent": {
+    "悩み": ["..."],
+    "比較対象": ["..."],
+    "導入目的": ["..."],
+    "検討段階": ["..."]
+  },
+  "lmo_summary": "200文字程度",
+  "faq": [{"question": "...", "answer": "..."}, ...],
+  "blocks": [{"block_type": "Hero", "data": {...}}, ...]
+}
+      `;
+      return await base44.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            seo_keywords: { type: 'array', items: { type: 'string' } },
+            search_intent: { type: 'object' },
+            lmo_summary: { type: 'string' },
+            faq: { type: 'array', items: { type: 'object' } },
+            blocks: { type: 'array', items: { type: 'object' } },
+          },
+        },
+      });
+    },
+    onSuccess: (data) => setFreeTextResult(data),
+  });
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(JSON.stringify(freeTextResult, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const lp = await base44.entities.LandingPage.create({
