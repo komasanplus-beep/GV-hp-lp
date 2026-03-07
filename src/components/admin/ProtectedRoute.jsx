@@ -2,34 +2,56 @@ import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 
-export default function ProtectedRoute({ children }) {
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+/**
+ * ProtectedRoute
+ * requiredRole: 'master' | 'admin' | 'any' (default: 'any')
+ * - 'master': masterロールのみアクセス可、それ以外は /dashboard へ
+ * - 'admin': admin/editorロールのみ、masterは /master へ
+ * - 'any': 認証のみチェック
+ */
+export default function ProtectedRoute({ children, requiredRole = 'any' }) {
+  const [status, setStatus] = useState('checking'); // checking | ok | redirect
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authenticated = await base44.auth.isAuthenticated();
-        
-        if (!authenticated) {
-          // Redirect to login with return URL
-          base44.auth.redirectToLogin(window.location.pathname);
-          return;
-        }
-
-        setIsAuthenticated(true);
-      } catch (error) {
-        // If error, redirect to login
+    const check = async () => {
+      const authenticated = await base44.auth.isAuthenticated();
+      if (!authenticated) {
         base44.auth.redirectToLogin(window.location.pathname);
-      } finally {
-        setIsChecking(false);
+        return;
+      }
+
+      if (requiredRole === 'any') {
+        setStatus('ok');
+        return;
+      }
+
+      try {
+        const user = await base44.auth.me();
+        const role = user?.role || 'user';
+
+        if (requiredRole === 'master') {
+          if (role === 'master') {
+            setStatus('ok');
+          } else {
+            // admin/editor -> /dashboard
+            window.location.href = '/dashboard';
+          }
+        } else if (requiredRole === 'admin') {
+          if (role === 'master') {
+            // master -> /master
+            window.location.href = '/master';
+          } else {
+            setStatus('ok');
+          }
+        }
+      } catch {
+        base44.auth.redirectToLogin(window.location.pathname);
       }
     };
+    check();
+  }, [requiredRole]);
 
-    checkAuth();
-  }, []);
-
-  if (isChecking) {
+  if (status === 'checking' || status === 'redirect') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
@@ -38,10 +60,6 @@ export default function ProtectedRoute({ children }) {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect to login
   }
 
   return children;
