@@ -140,7 +140,21 @@ export default function AdminLPEditor() {
               <span className="text-sm text-slate-400">/lp/{lp?.slug}</span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" asChild>
+              <Link to={createPageUrl('AdminLPGenerate')}>
+                <Sparkles className="w-4 h-4 mr-1" />AI生成
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" disabled={copyLPMutation.isPending}
+              onClick={() => copyLPMutation.mutate()}>
+              <Copy className="w-4 h-4 mr-1" />{copyLPMutation.isPending ? '...' : 'コピー'}
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to={createPageUrl('AdminABTest')}>
+                <FlaskConical className="w-4 h-4 mr-1" />ABテスト
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild>
               <a href={createPageUrl(`LPView?slug=${lp?.slug}`)} target="_blank" rel="noreferrer">
                 <ExternalLink className="w-4 h-4 mr-1" />プレビュー
