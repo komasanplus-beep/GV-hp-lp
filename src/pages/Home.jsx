@@ -67,6 +67,8 @@ export default function Home() {
       <GallerySection gallery={gallery} />
       
       <TestimonialsSection testimonials={testimonials} />
+
+      <HomeBlogSection />
       
       <LocationSection settings={settings} />
       
