@@ -42,6 +42,7 @@ const defaultSettings = {
   hero_title: '',
   hero_subtitle: '',
   hero_button_text: '予約する',
+  hero_button_url: '',
   hero_image_url: '',
   nav_about: 'About',
   nav_services: 'Services',
