@@ -12,12 +12,12 @@ export default function AboutSection({ content }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative"
+            className="relative self-start"
           >
             <div className="relative z-10">
               <img
-                src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"
-                alt="Hotel Interior"
+                src={content?.image_url || "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&q=80"}
+                alt="About"
                 className="w-full h-[500px] object-cover"
               />
             </div>
@@ -31,6 +31,7 @@ export default function AboutSection({ content }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            className="self-start"
           >
             <span className="text-amber-600 tracking-[0.2em] text-sm font-medium uppercase">
               About Us
@@ -38,14 +39,12 @@ export default function AboutSection({ content }) {
             <h2 className="text-4xl md:text-5xl font-light text-slate-900 mt-4 mb-8" style={{ fontFamily: 'serif' }}>
               {content?.title || 'A Legacy of Luxury & Hospitality'}
             </h2>
-            <div className="space-y-6 text-slate-600 font-light leading-relaxed text-lg">
-              <p>
-                {content?.content || `私たちのサロンは、お客様に最高の体験をご提供することを使命としています。熟練したスタッフが心を込めて施術し、日常の疲れを癒す特別な時間をお届けします。`}
-              </p>
-              <p>
-                With meticulously designed rooms, world-class amenities, and personalized service, 
-                we invite you to discover a sanctuary where every detail has been crafted with care.
-              </p>
+            <div className="text-slate-600 font-light leading-relaxed text-lg prose prose-lg max-w-none prose-strong:font-semibold prose-strong:text-slate-800">
+              {content?.content ? (
+                <div dangerouslySetInnerHTML={{ __html: content.content }} />
+              ) : (
+                <p>私たちのサロンは、お客様に最高の体験をご提供することを使命としています。熟練したスタッフが心を込めて施術し、日常の疲れを癒す特別な時間をお届けします。</p>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-8 mt-12 pt-8 border-t border-slate-200">
