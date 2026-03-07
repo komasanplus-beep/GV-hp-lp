@@ -282,7 +282,7 @@ export default function AdminContent() {
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl w-full">
           <DialogHeader>
             <DialogTitle>
               {editingContent ? 'コンテンツを編集' : 'コンテンツを追加'}
@@ -330,10 +330,24 @@ export default function AdminContent() {
             {(formData.section === 'about' || formData.section === 'facility' || formData.section === 'testimonial') && (
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">本文</label>
-                <Textarea
+                <ReactQuill
+                  theme="snow"
                   value={formData.content}
-                  onChange={(e) => handleChange('content', e.target.value)}
-                  rows={4}
+                  onChange={(val) => handleChange('content', val)}
+                  modules={{
+                    toolbar: [
+                      [{ header: [1, 2, 3, false] }],
+                      [{ font: [] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ color: [] }, { background: [] }],
+                      [{ list: 'ordered' }, { list: 'bullet' }],
+                      [{ align: [] }],
+                      ['link'],
+                      ['clean'],
+                    ]
+                  }}
+                  className="bg-white"
+                  style={{ minHeight: '200px' }}
                 />
               </div>
             )}
