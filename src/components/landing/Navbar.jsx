@@ -147,7 +147,7 @@ export default function Navbar({ settings, onBookClick }) {
                 }}
                 className="w-full py-4 bg-amber-600 text-white text-lg font-light tracking-wide"
               >
-                Book Your Stay
+                {bookButtonText}
               </button>
             </div>
           </motion.div>
