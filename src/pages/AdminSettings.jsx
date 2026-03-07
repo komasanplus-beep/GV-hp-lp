@@ -110,18 +110,18 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Hotel className="w-5 h-5" />
-              ホテル基本情報
+              店舗基本情報
             </CardTitle>
-            <CardDescription>ホテルの基本情報を設定してください</CardDescription>
+            <CardDescription>店舗の基本情報を設定してください</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">ホテル名</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">店舗名</label>
                 <Input
                   value={formData.hotel_name}
                   onChange={(e) => handleChange('hotel_name', e.target.value)}
-                  placeholder="Bawi Hotel"
+                  placeholder="店舗名"
                 />
               </div>
               <div>
@@ -175,12 +175,12 @@ export default function AdminSettings() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">ホテル紹介文</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">店舗紹介文</label>
               <Textarea
                 value={formData.about_text}
                 onChange={(e) => handleChange('about_text', e.target.value)}
                 rows={4}
-                placeholder="ホテルの紹介文を入力してください..."
+                placeholder="店舗の紹介文を入力してください..."
               />
             </div>
           </CardContent>
