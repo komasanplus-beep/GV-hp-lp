@@ -144,10 +144,10 @@ export default function AdminContent() {
   const getContentBySection = (section) => content.filter(c => c.section === section);
 
   const sectionConfig = {
-    about: { icon: FileText, label: 'About', fields: ['title', 'content'] },
-    facility: { icon: Sparkles, label: 'Facilities', fields: ['title', 'content', 'icon'] },
-    gallery: { icon: Image, label: 'Gallery', fields: ['title', 'image_url'] },
-    testimonial: { icon: MessageSquare, label: 'Testimonials', fields: ['author', 'content', 'rating'] },
+    about: { icon: FileText, label: 'About（紹介）', fields: ['title', 'content'] },
+    facility: { icon: Sparkles, label: '施設', fields: ['title', 'content', 'icon'] },
+    gallery: { icon: Image, label: 'ギャラリー', fields: ['title', 'image_url'] },
+    testimonial: { icon: MessageSquare, label: '口コミ', fields: ['author', 'content', 'rating'] },
   };
 
   return (
@@ -234,7 +234,7 @@ export default function AdminContent() {
                             )}
                           </div>
                           {!item.is_active && (
-                            <Badge variant="secondary">Inactive</Badge>
+                            <Badge variant="secondary">非公開</Badge>
                           )}
                         </div>
                         
@@ -258,7 +258,7 @@ export default function AdminContent() {
                             onClick={() => handleOpenModal(item)}
                           >
                             <Pencil className="w-4 h-4 mr-1" />
-                            Edit
+                            編集
                           </Button>
                           <Button
                             variant="outline"
@@ -284,13 +284,13 @@ export default function AdminContent() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingContent ? 'Edit Content' : 'Add Content'}
+              {editingContent ? 'コンテンツを編集' : 'コンテンツを追加'}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Section</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">セクション</label>
               <Select 
                 value={formData.section} 
                 onValueChange={(val) => handleChange('section', val)}
@@ -308,7 +308,7 @@ export default function AdminContent() {
 
             {(formData.section === 'about' || formData.section === 'facility' || formData.section === 'gallery') && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Title</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">タイトル</label>
                 <Input
                   value={formData.title}
                   onChange={(e) => handleChange('title', e.target.value)}
@@ -318,7 +318,7 @@ export default function AdminContent() {
 
             {formData.section === 'testimonial' && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Author Name</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">投稿者名</label>
                 <Input
                   value={formData.author}
                   onChange={(e) => handleChange('author', e.target.value)}
@@ -328,7 +328,7 @@ export default function AdminContent() {
 
             {(formData.section === 'about' || formData.section === 'facility' || formData.section === 'testimonial') && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Content</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">本文</label>
                 <Textarea
                   value={formData.content}
                   onChange={(e) => handleChange('content', e.target.value)}
@@ -339,13 +339,13 @@ export default function AdminContent() {
 
             {formData.section === 'facility' && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Icon</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">アイコン</label>
                 <Select 
                   value={formData.icon} 
                   onValueChange={(val) => handleChange('icon', val)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select icon" />
+                    <SelectValue placeholder="アイコンを選択" />
                   </SelectTrigger>
                   <SelectContent>
                     {iconOptions.map((icon) => (
@@ -358,7 +358,7 @@ export default function AdminContent() {
 
             {formData.section === 'testimonial' && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Rating</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">評価</label>
                 <Select 
                   value={String(formData.rating)} 
                   onValueChange={(val) => handleChange('rating', parseInt(val))}
@@ -368,7 +368,7 @@ export default function AdminContent() {
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 5].map((r) => (
-                      <SelectItem key={r} value={String(r)}>{r} Star{r > 1 ? 's' : ''}</SelectItem>
+                      <SelectItem key={r} value={String(r)}>{r} 星</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -377,7 +377,7 @@ export default function AdminContent() {
 
             {(formData.section === 'gallery' || formData.section === 'about') && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-2 block">Image</label>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">画像</label>
                 {formData.image_url ? (
                   <div className="relative">
                     <img 
@@ -400,7 +400,7 @@ export default function AdminContent() {
                     ) : (
                       <>
                         <Upload className="w-8 h-8 text-slate-400 mb-2" />
-                        <span className="text-sm text-slate-500">Click to upload</span>
+                        <span className="text-sm text-slate-500">クリックしてアップロード</span>
                       </>
                     )}
                     <input
@@ -416,7 +416,7 @@ export default function AdminContent() {
             )}
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Order</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">表示順</label>
               <Input
                 type="number"
                 value={formData.order}
@@ -426,7 +426,7 @@ export default function AdminContent() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-slate-700">Active</label>
+              <label className="text-sm font-medium text-slate-700">公開する</label>
               <Switch
                 checked={formData.is_active}
                 onCheckedChange={(val) => handleChange('is_active', val)}
@@ -435,7 +435,7 @@ export default function AdminContent() {
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={handleCloseModal}>
-                Cancel
+                キャンセル
               </Button>
               <Button 
                 type="submit" 
@@ -445,7 +445,7 @@ export default function AdminContent() {
                 {(createMutation.isPending || updateMutation.isPending) && (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 )}
-                {editingContent ? 'Update' : 'Create'}
+                {editingContent ? '更新する' : '作成する'}
               </Button>
             </div>
           </form>
@@ -456,18 +456,18 @@ export default function AdminContent() {
       <AlertDialog open={!!deleteContent} onOpenChange={() => setDeleteContent(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Content</AlertDialogTitle>
+            <AlertDialogTitle>コンテンツを削除</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this content? This action cannot be undone.
+              このコンテンツを削除してもよろしいですか？この操作は取り消せません。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(deleteContent.id)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              削除する
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
