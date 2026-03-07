@@ -12,7 +12,7 @@ export default function Footer({ settings }) {
           {/* Brand */}
           <div className="md:col-span-2">
             <h3 className="text-2xl font-light mb-4" style={{ fontFamily: 'serif' }}>
-              {settings?.hotel_name || 'Bawi Hotel'}
+              {settings?.hotel_name || '店舗名'}
             </h3>
             <p className="text-slate-400 font-light leading-relaxed mb-6 max-w-md">
               Experience luxury redefined. Where timeless elegance meets modern comfort 
@@ -58,15 +58,15 @@ export default function Footer({ settings }) {
             <ul className="space-y-4 text-slate-400 font-light">
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>{settings?.address || '123 Paradise Avenue, Bali'}</span>
+                <span>{settings?.address || '住所未設定'}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-5 h-5 flex-shrink-0" />
-                <span>{settings?.phone || '+62 361 123 4567'}</span>
+                <span>{settings?.phone || '電話番号未設定'}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 flex-shrink-0" />
-                <span>{settings?.email || 'info@bawihotel.com'}</span>
+                <span>{settings?.email || 'メールアドレス未設定'}</span>
               </li>
             </ul>
           </div>
@@ -74,7 +74,7 @@ export default function Footer({ settings }) {
 
         {/* Bottom Bar */}
         <div className="border-t border-slate-800 py-6 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-          <p>© {currentYear} {settings?.hotel_name || 'Bawi Hotel'}. All rights reserved.</p>
+          <p>© {currentYear} {settings?.hotel_name || '店舗名'}. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="#" className="hover:text-amber-400 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-amber-400 transition-colors">Terms of Service</a>

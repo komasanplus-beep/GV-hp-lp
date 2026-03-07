@@ -41,7 +41,7 @@ export default function Navbar({ settings, onBookClick }) {
             <a href="#" className={`text-2xl font-light transition-colors ${
               isScrolled ? 'text-slate-900' : 'text-white'
             }`} style={{ fontFamily: 'serif' }}>
-              {settings?.hotel_name || 'Bawi Hotel'}
+              {settings?.hotel_name || '店舗名'}
             </a>
 
             {/* Desktop Nav */}
@@ -100,7 +100,7 @@ export default function Navbar({ settings, onBookClick }) {
             <div className="flex flex-col h-full p-6">
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-light text-white" style={{ fontFamily: 'serif' }}>
-                  {settings?.hotel_name || 'Bawi Hotel'}
+                  {settings?.hotel_name || '店舗名'}
                 </span>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
