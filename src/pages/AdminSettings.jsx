@@ -55,6 +55,7 @@ const defaultSettings = {
 export default function AdminSettings() {
   const [formData, setFormData] = useState(defaultSettings);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingHero, setIsUploadingHero] = useState(false);
 
   const queryClient = useQueryClient();
 
