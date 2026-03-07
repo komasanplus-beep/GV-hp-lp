@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Search, Zap, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Sparkles, Search, Zap, ChevronRight, CheckCircle2, Loader2, Code2, ClipboardCopy } from 'lucide-react';
 
 const STEPS = ['対象者', 'サービス内容', 'AI生成'];
 
