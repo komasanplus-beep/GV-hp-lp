@@ -54,6 +54,7 @@ import AdminRooms from './pages/AdminRooms';
 import AdminSettings from './pages/AdminSettings';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
+import AdminLPList from './pages/AdminLPList';
 
 
 export const PAGES = {
@@ -64,6 +65,7 @@ export const PAGES = {
     "AdminSettings": AdminSettings,
     "Dashboard": Dashboard,
     "Home": Home,
+    "AdminLPList": AdminLPList,
 }
 
 export const pagesConfig = {
