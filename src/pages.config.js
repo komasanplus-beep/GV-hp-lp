@@ -66,6 +66,7 @@ import MasterAISettings from './pages/MasterAISettings';
 import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
+import AdminBlog from './pages/AdminBlog';
 
 
 export const PAGES = {
@@ -88,6 +89,7 @@ export const PAGES = {
     "MasterFeatureControl": MasterFeatureControl,
     "MasterSystemLogs": MasterSystemLogs,
     "MasterUsers": MasterUsers,
+    "AdminBlog": AdminBlog,
 }
 
 export const pagesConfig = {
