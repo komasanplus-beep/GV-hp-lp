@@ -62,6 +62,8 @@ import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterAISettings from './pages/MasterAISettings';
 import MasterAIKnowledge from './pages/MasterAIKnowledge';
 import MasterSystemLogs from './pages/MasterSystemLogs';
+import BlogPage from './pages/BlogPage';
+import BlogPost from './pages/BlogPost';
 
 
 export const PAGES = {
@@ -80,6 +82,8 @@ export const PAGES = {
     "MasterAISettings": MasterAISettings,
     "MasterAIKnowledge": MasterAIKnowledge,
     "MasterSystemLogs": MasterSystemLogs,
+    "BlogPage": BlogPage,
+    "BlogPost": BlogPost,
 }
 
 export const pagesConfig = {
