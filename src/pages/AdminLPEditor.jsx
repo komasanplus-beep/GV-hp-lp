@@ -252,6 +252,8 @@ export default function AdminLPEditor() {
               </div>
             </div>
 
+            <SEOAnalyzePanel lpId={lpId} />
+
             <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 text-sm text-amber-800">
               <p className="font-medium mb-1">使い方</p>
               <ul className="space-y-1 text-xs list-disc list-inside">
