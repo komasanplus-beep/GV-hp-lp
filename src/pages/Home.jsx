@@ -55,7 +55,7 @@ export default function Home() {
     <div className="min-h-screen">
       <Navbar settings={settings} onBookClick={handleOpenBooking} />
       
-      <HeroSection onBookClick={handleOpenBooking} />
+      <HeroSection onBookClick={handleOpenBooking} settings={settings} />
       
       <AboutSection content={aboutContent} />
       
