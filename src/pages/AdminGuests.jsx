@@ -143,7 +143,7 @@ export default function AdminGuests() {
         <div className="relative flex-1 w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search guests..."
+            placeholder="ゲストを検索..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -151,7 +151,7 @@ export default function AdminGuests() {
         </div>
         <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700">
           <Plus className="w-4 h-4 mr-2" />
-          Add Guest
+          ゲストを追加
         </Button>
       </div>
 
@@ -163,14 +163,14 @@ export default function AdminGuests() {
       ) : filteredGuests.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl">
           <User className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">No guests found</h3>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">ゲストが見つかりません</h3>
           <p className="text-slate-500 mb-6">
-            {searchQuery ? 'Try a different search term' : 'Add your first guest'}
+            {searchQuery ? '別の検索ワードをお試しください' : '最初のゲストを追加してください'}
           </p>
           {!searchQuery && (
             <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700">
               <Plus className="w-4 h-4 mr-2" />
-              Add Guest
+              ゲストを追加
             </Button>
           )}
         </div>
@@ -223,7 +223,7 @@ export default function AdminGuests() {
 
                     <div className="flex items-center justify-between pt-4 border-t">
                       <Badge variant="secondary" className="bg-slate-100">
-                        {guestBookings.length} booking{guestBookings.length !== 1 ? 's' : ''}
+                        {guestBookings.length} 件の予約
                       </Badge>
                       <div className="flex gap-2">
                         <Button
@@ -256,13 +256,13 @@ export default function AdminGuests() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingGuest ? 'Edit Guest' : 'Add New Guest'}
+              {editingGuest ? 'ゲストを編集' : 'ゲストを追加'}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Full Name *</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">氏名 *</label>
               <Input
                 value={formData.full_name}
                 onChange={(e) => handleChange('full_name', e.target.value)}
@@ -271,7 +271,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Email *</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">メールアドレス *</label>
               <Input
                 type="email"
                 value={formData.email}
@@ -281,7 +281,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Phone</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">電話番号</label>
               <Input
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
@@ -289,7 +289,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Nationality</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">国籍</label>
               <Input
                 value={formData.nationality}
                 onChange={(e) => handleChange('nationality', e.target.value)}
@@ -297,7 +297,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Address</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">住所</label>
               <Input
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
@@ -305,7 +305,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">ID/Passport Number</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">ID・パスポート番号</label>
               <Input
                 value={formData.id_number}
                 onChange={(e) => handleChange('id_number', e.target.value)}
@@ -313,7 +313,7 @@ export default function AdminGuests() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Notes</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">メモ</label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => handleChange('notes', e.target.value)}
@@ -322,7 +322,7 @@ export default function AdminGuests() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-slate-700">VIP Guest</label>
+              <label className="text-sm font-medium text-slate-700">VIPゲスト</label>
               <Switch
                 checked={formData.vip_status}
                 onCheckedChange={(val) => handleChange('vip_status', val)}
@@ -331,7 +331,7 @@ export default function AdminGuests() {
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={handleCloseModal}>
-                Cancel
+                キャンセル
               </Button>
               <Button 
                 type="submit" 
@@ -341,7 +341,7 @@ export default function AdminGuests() {
                 {(createMutation.isPending || updateMutation.isPending) && (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 )}
-                {editingGuest ? 'Update' : 'Create'}
+                {editingGuest ? '更新する' : '作成する'}
               </Button>
             </div>
           </form>
@@ -352,18 +352,18 @@ export default function AdminGuests() {
       <AlertDialog open={!!deleteGuest} onOpenChange={() => setDeleteGuest(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Guest</AlertDialogTitle>
+            <AlertDialogTitle>ゲストを削除</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteGuest?.full_name}"? This action cannot be undone.
+              「{deleteGuest?.full_name}」を削除してもよろしいですか？この操作は取り消せません。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(deleteGuest.id)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              削除する
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
