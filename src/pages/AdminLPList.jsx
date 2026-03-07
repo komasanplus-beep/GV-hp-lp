@@ -68,12 +68,30 @@ export default function AdminLPList() {
   return (
     <ProtectedRoute>
       <AdminLayout title="LP管理">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-slate-800">ランディングページ一覧</h2>
-          <Button onClick={() => setShowCreate(true)} className="bg-amber-600 hover:bg-amber-700">
-            <Plus className="w-4 h-4 mr-2" /> 新規作成
-          </Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800">ランディングページ一覧</h2>
+            {limits && (
+              <p className="text-xs text-slate-400 mt-1">{pages.length} / {limits.lp_create_limit} 件使用中</p>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to={createPageUrl('AdminLPGenerate')}>
+                <Sparkles className="w-4 h-4 mr-1" />AI生成
+              </Link>
+            </Button>
+            <Button onClick={() => setShowCreate(true)} className="bg-amber-600 hover:bg-amber-700" disabled={atLimit}
+              title={atLimit ? 'LP作成数の上限に達しています' : ''}>
+              <Plus className="w-4 h-4 mr-2" />新規作成
+            </Button>
+          </div>
         </div>
+        {atLimit && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+            LP作成数の上限（{limits.lp_create_limit}件）に達しています。管理者に上限引き上げを依頼してください。
+          </div>
+        )}
 
         {pages.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
