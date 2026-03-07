@@ -90,6 +90,25 @@ export default function AdminLPEditor() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landingPage', lpId] }),
   });
 
+  const copyLPMutation = useMutation({
+    mutationFn: async () => {
+      const newLP = await base44.entities.LandingPage.create({
+        title: `${lp.title} - コピー`,
+        slug: `${lp.slug}-copy-${Date.now().toString(36)}`,
+        template_type: lp.template_type,
+        status: 'draft',
+      });
+      await Promise.all(blocks.map(b =>
+        base44.entities.LPBlock.create({ lp_id: newLP.id, block_type: b.block_type, sort_order: b.sort_order, data: b.data })
+      ));
+      return newLP;
+    },
+    onSuccess: (newLP) => {
+      queryClient.invalidateQueries({ queryKey: ['landingPages'] });
+      navigate(createPageUrl(`AdminLPEditor?id=${newLP.id}`));
+    },
+  });
+
   const moveBlock = (index, direction) => {
     const newBlocks = [...blocks];
     const targetIndex = index + direction;
