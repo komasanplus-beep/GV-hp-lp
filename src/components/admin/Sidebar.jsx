@@ -22,6 +22,7 @@ const menuItems = [
   { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
   { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
   { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
+  { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
   { name: '設定', icon: Settings, page: 'AdminSettings' },
 ];
 
