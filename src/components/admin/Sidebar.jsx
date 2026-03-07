@@ -10,7 +10,8 @@ import {
   Settings,
   LogOut,
   Hotel,
-  X
+  X,
+  Layout
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
