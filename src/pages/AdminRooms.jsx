@@ -168,17 +168,23 @@ export default function AdminRooms() {
     maintenance: 'bg-slate-100 text-slate-700',
   };
 
+  const statusLabels = {
+    available: '空室',
+    booked: '予約済み',
+    maintenance: 'メンテナンス',
+  };
+
   return (
     <ProtectedRoute>
       <AdminLayout title="Room Management">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <p className="text-slate-500">Manage your hotel rooms and availability</p>
+          <p className="text-slate-500">客室と空き状況を管理する</p>
         </div>
         <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700">
           <Plus className="w-4 h-4 mr-2" />
-          Add Room
+          客室を追加
         </Button>
       </div>
 
@@ -190,11 +196,11 @@ export default function AdminRooms() {
       ) : rooms.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-xl">
           <Bed className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-2">No rooms yet</h3>
-          <p className="text-slate-500 mb-6">Get started by adding your first room</p>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">客室がまだありません</h3>
+          <p className="text-slate-500 mb-6">最初の客室を追加してください</p>
           <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700">
             <Plus className="w-4 h-4 mr-2" />
-            Add Room
+            客室を追加
           </Button>
         </div>
       ) : (
@@ -221,7 +227,7 @@ export default function AdminRooms() {
                   </div>
                 )}
                 <Badge className={`absolute top-4 right-4 ${statusColors[room.status]}`}>
-                  {room.status}
+                  {statusLabels[room.status] || room.status}
                 </Badge>
               </div>
 
@@ -263,7 +269,7 @@ export default function AdminRooms() {
                     onClick={() => handleOpenModal(room)}
                   >
                     <Pencil className="w-4 h-4 mr-1" />
-                    Edit
+                    編集
                   </Button>
                   <Button
                     variant="outline"
@@ -285,7 +291,7 @@ export default function AdminRooms() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingRoom ? 'Edit Room' : 'Add New Room'}
+              {editingRoom ? '客室を編集' : '客室を追加'}
             </DialogTitle>
           </DialogHeader>
 
@@ -293,7 +299,7 @@ export default function AdminRooms() {
             {/* Basic Info */}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Room Name</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">客室名</label>
                 <Input
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
@@ -303,7 +309,7 @@ export default function AdminRooms() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Price per Night ($)</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">1泊料金 ($)</label>
                 <Input
                   type="number"
                   value={formData.price_per_night}
@@ -314,7 +320,7 @@ export default function AdminRooms() {
               </div>
               
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Capacity</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">定員</label>
                 <Input
                   type="number"
                   value={formData.capacity}
@@ -325,21 +331,21 @@ export default function AdminRooms() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Status</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ステータス</label>
                 <Select value={formData.status} onValueChange={(val) => handleChange('status', val)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="available">Available</SelectItem>
-                    <SelectItem value="booked">Booked</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="available">空室</SelectItem>
+                    <SelectItem value="booked">予約済み</SelectItem>
+                    <SelectItem value="maintenance">メンテナンス</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Room Size (m²)</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">客室面積 (m²)</label>
                 <Input
                   type="number"
                   value={formData.size}
@@ -349,7 +355,7 @@ export default function AdminRooms() {
               </div>
 
               <div className="col-span-2">
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Bed Type</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ベッドタイプ</label>
                 <Input
                   value={formData.bed_type}
                   onChange={(e) => handleChange('bed_type', e.target.value)}
@@ -358,7 +364,7 @@ export default function AdminRooms() {
               </div>
 
               <div className="col-span-2">
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Description</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">説明</label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
@@ -370,7 +376,7 @@ export default function AdminRooms() {
 
             {/* Images */}
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-2 block">Room Images</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">客室画像</label>
               <div className="grid grid-cols-4 gap-3">
                 {formData.images?.map((url, index) => (
                   <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
@@ -390,7 +396,7 @@ export default function AdminRooms() {
                   ) : (
                     <>
                       <Upload className="w-6 h-6 text-slate-400 mb-1" />
-                      <span className="text-xs text-slate-400">Upload</span>
+                      <span className="text-xs text-slate-400">アップロード</span>
                     </>
                   )}
                   <input
@@ -406,7 +412,7 @@ export default function AdminRooms() {
 
             {/* Amenities */}
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-2 block">Amenities</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">アメニティ</label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {formData.amenities?.map((amenity, index) => (
                   <Badge key={index} variant="secondary" className="pr-1">
@@ -425,11 +431,11 @@ export default function AdminRooms() {
                 <Input
                   value={newAmenity}
                   onChange={(e) => setNewAmenity(e.target.value)}
-                  placeholder="Add amenity..."
+                  placeholder="アメニティを追加..."
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAmenity())}
                 />
                 <Button type="button" variant="outline" onClick={handleAddAmenity}>
-                  Add
+                  追加
                 </Button>
               </div>
             </div>
@@ -437,7 +443,7 @@ export default function AdminRooms() {
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button type="button" variant="outline" onClick={handleCloseModal}>
-                Cancel
+                キャンセル
               </Button>
               <Button 
                 type="submit" 
@@ -447,7 +453,7 @@ export default function AdminRooms() {
                 {(createMutation.isPending || updateMutation.isPending) && (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 )}
-                {editingRoom ? 'Update Room' : 'Create Room'}
+                {editingRoom ? '更新する' : '作成する'}
               </Button>
             </div>
           </form>
@@ -458,18 +464,18 @@ export default function AdminRooms() {
       <AlertDialog open={!!deleteRoom} onOpenChange={() => setDeleteRoom(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Room</AlertDialogTitle>
+            <AlertDialogTitle>客室を削除</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteRoom?.name}"? This action cannot be undone.
+              「{deleteRoom?.name}」を削除してもよろしいですか？この操作は取り消せません。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteMutation.mutate(deleteRoom.id)}
               className="bg-red-600 hover:bg-red-700"
             >
-              Delete
+              削除する
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
