@@ -47,47 +47,47 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import AdminABTest from './pages/AdminABTest';
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
 import AdminGuests from './pages/AdminGuests';
 import AdminLPEditor from './pages/AdminLPEditor';
+import AdminLPGenerate from './pages/AdminLPGenerate';
 import AdminLPList from './pages/AdminLPList';
 import AdminRooms from './pages/AdminRooms';
 import AdminSettings from './pages/AdminSettings';
+import BlogPage from './pages/BlogPage';
+import BlogPost from './pages/BlogPost';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
 import LPView from './pages/LPView';
-import MasterUsers from './pages/MasterUsers';
-import MasterFeatureControl from './pages/MasterFeatureControl';
-import MasterAISettings from './pages/MasterAISettings';
 import MasterAIKnowledge from './pages/MasterAIKnowledge';
+import MasterAISettings from './pages/MasterAISettings';
+import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
-import BlogPage from './pages/BlogPage';
-import BlogPost from './pages/BlogPost';
-import AdminLPGenerate from './pages/AdminLPGenerate';
-import AdminABTest from './pages/AdminABTest';
+import MasterUsers from './pages/MasterUsers';
 
 
 export const PAGES = {
+    "AdminABTest": AdminABTest,
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
     "AdminGuests": AdminGuests,
     "AdminLPEditor": AdminLPEditor,
+    "AdminLPGenerate": AdminLPGenerate,
     "AdminLPList": AdminLPList,
     "AdminRooms": AdminRooms,
     "AdminSettings": AdminSettings,
+    "BlogPage": BlogPage,
+    "BlogPost": BlogPost,
     "Dashboard": Dashboard,
     "Home": Home,
     "LPView": LPView,
-    "MasterUsers": MasterUsers,
-    "MasterFeatureControl": MasterFeatureControl,
-    "MasterAISettings": MasterAISettings,
     "MasterAIKnowledge": MasterAIKnowledge,
+    "MasterAISettings": MasterAISettings,
+    "MasterFeatureControl": MasterFeatureControl,
     "MasterSystemLogs": MasterSystemLogs,
-    "BlogPage": BlogPage,
-    "BlogPost": BlogPost,
-    "AdminLPGenerate": AdminLPGenerate,
-    "AdminABTest": AdminABTest,
+    "MasterUsers": MasterUsers,
 }
 
 export const pagesConfig = {

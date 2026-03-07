@@ -12,6 +12,7 @@ import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import LocationSection from '@/components/landing/LocationSection';
 import BookingForm from '@/components/landing/BookingForm';
 import Footer from '@/components/landing/Footer';
+import HomeBlogSection from '@/components/landing/HomeBlogSection';
 
 export default function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
