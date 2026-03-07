@@ -58,42 +58,90 @@ export default function AdminLPGenerate() {
         setAiProgress(p => [...p, s]);
       }
 
+      // AIKnowledgeを取得してプロンプトに注入
+      let knowledgeContext = '';
+      try {
+        const knowledge = await base44.entities.AIKnowledge.list('type', 30);
+        if (knowledge.length > 0) {
+          const copyKnowledge = knowledge.filter(k => k.type === 'copy').map(k => `【${k.title}】\n${k.content}`).join('\n');
+          const ctaKnowledge = knowledge.filter(k => k.type === 'cta').map(k => `【${k.title}】\n${k.content}`).join('\n');
+          const structureKnowledge = knowledge.filter(k => k.type === 'structure').map(k => `【${k.title}】\n${k.content}`).join('\n');
+          if (copyKnowledge) knowledgeContext += `\n=== 登録済みキャッチコピーナレッジ（優先使用）===\n${copyKnowledge}\n`;
+          if (ctaKnowledge) knowledgeContext += `\n=== 登録済みCTAナレッジ（優先使用）===\n${ctaKnowledge}\n`;
+          if (structureKnowledge) knowledgeContext += `\n=== 登録済み構成ナレッジ（優先使用）===\n${structureKnowledge}\n`;
+        }
+      } catch (e) { /* ignore */ }
+
       const prompt = `
-あなたはLP（ランディングページ）のプロのコピーライターです。
-以下の情報をもとに、高コンバージョンのLPコンテンツをJSON形式で生成してください。
+あなたはプロのLPマーケターです。SEOとLMO（AI検索最適化）の両方を考慮して、以下の7ステップで効果的なランディングページを構築してください。
+${knowledgeContext}
 
-【対象者】${form.target}
-【サービス内容】${form.service}
-【価格帯】${form.price}
-【主な特徴】${form.features}
-【競合との差別化】${form.differentiators}
+【入力情報】
+- 対象者: ${form.target}
+- サービス内容: ${form.service}
+- 価格帯: ${form.price}
+- 主な特徴・機能: ${form.features}
+- 競合との差別化: ${form.differentiators}
 
-以下のブロックタイプの中から最適なものを選び、各ブロックのデータを生成してください：
-Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ, CTA
+■ STEP1 ターゲット分析
+入力された対象者を分析し、年齢層・職業・課題・検索意図を推測する。
+
+■ STEP2 SEOキーワード抽出
+WEB検索を行い、SEOに重要な日本語検索キーワードを重要度順に10〜20個抽出する。
+検索意図が明確なキーワードを優先すること。
+
+■ STEP3 検索意図分析
+SEOキーワードから「知りたい情報」「比較したい内容」「購入動機」を分析する。
+
+■ STEP4 LMO最適化
+AI検索（ChatGPT / Gemini等）が引用しやすい構造を作成：
+- 200文字の要約
+- FAQ（質問と回答）
+- 定義説明
+- データ根拠
+
+■ STEP5 キャッチコピー生成
+SEOキーワードと検索意図を元に以下を作成：
+- メインキャッチコピー（インパクト重視、20文字以内）
+- サブコピー（ベネフィット訴求、40文字以内）
+- CTAコピー（行動喚起、10文字以内）
+${knowledgeContext ? '※ 上記のナレッジに登録されたキャッチコピー・CTAを優先的に参考にすること。' : ''}
+
+■ STEP6 LP構成生成
+以下のブロックタイプから最適な構成を最大10ブロックで作成：
+Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ, CTA, Comparison, Pricing, Profile, Gallery, Video, List, Campaign, Countdown, Contact
+
+■ STEP7 LP文章生成
+各ブロックに見出し・本文・CTAを作成。読みやすい日本語・マーケティングコピー・短い段落・箇条書きを使用。
 
 各ブロックのデータ形式：
-- Hero: { headline, subheadline, cta_text, cta_url }
-- Problem: { title, problems (array of strings) }
+- Hero: { headline, subheadline, cta_text, cta_url, bg_image_url }
+- Problem: { title, description, problems (array of strings) }
 - Solution: { title, description, points (array of strings) }
-- Feature: { title, features (array of {icon, title, description}) }
-- Benefit: { title, benefits (array of {title, description}) }
-- Evidence: { title, stats (array of {number, label}) }
-- Voice: { title, voices (array of {name, comment, role}) }
-- CaseStudy: { title, cases (array of {name, before, after, result}) }
-- Flow: { title, steps (array of {step, title, description}) }
+- Feature: { title, description, features (array of {icon, title, description}) }
+- Benefit: { title, description, benefits (array of {title, description}) }
+- Evidence: { title, description, stats (array of {number, label, description}) }
+- Voice: { title, voices (array of {name, comment, role, rating}) }
+- CaseStudy: { title, cases (array of {name, before, after, result, period}) }
+- Flow: { title, description, steps (array of {step, title, description}) }
 - FAQ: { title, faqs (array of {question, answer}) }
-- CTA: { headline, cta_text, cta_url, subtext }
+- CTA: { headline, subheadline, cta_text, cta_url, subtext, urgency_text }
+- Comparison: { title, description, items (array of {label, ours, theirs}) }
+- Pricing: { title, description, plans (array of {name, price, unit, features, is_recommended}) }
+- Profile: { title, name, role, bio, image_url, achievements (array of strings) }
+- List: { title, description, items (array of {title, description}) }
+- Campaign: { title, description, cta_text, cta_url, end_date }
+- Contact: { title, description, cta_text, email, phone }
 
-またSEOデータも生成してください：
-- seo_keywords: 10個のSEOキーワード配列
-- search_intent: { informational: [], navigational: [], transactional: [] }
-- lmo_summary: AI検索向けの200文字程度のサマリー
-- faq_data: よくある質問5個
-
-必ずJSON形式で返してください。
+必ずJSON形式のみで返してください：
 {
   "blocks": [{"block_type": "Hero", "data": {...}}, ...],
-  "seo": {"seo_keywords": [...], "search_intent": {...}, "lmo_summary": "...", "faq_data": [...]}
+  "seo": {
+    "seo_keywords": ["キーワード1", ...],
+    "search_intent": { "informational": [], "navigational": [], "transactional": [] },
+    "lmo_summary": "200文字程度のAI検索向けサマリー",
+    "faq_data": [{"question": "...", "answer": "..."}, ...]
+  }
 }
       `;
 
