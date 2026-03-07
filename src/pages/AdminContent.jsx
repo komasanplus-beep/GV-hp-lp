@@ -283,7 +283,7 @@ export default function AdminContent() {
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl w-full">
+        <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingContent ? 'コンテンツを編集' : 'コンテンツを追加'}
