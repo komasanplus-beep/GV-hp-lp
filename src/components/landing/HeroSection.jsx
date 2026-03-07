@@ -61,13 +61,24 @@ export default function HeroSection({ onBookClick, settings = {} }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
         >
-          <Button
-            onClick={onBookClick}
-            size="lg"
-            className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-6 text-lg font-light tracking-wider rounded-none border border-amber-500 transition-all duration-300 hover:scale-105"
-          >
-            {buttonText}
-          </Button>
+          {buttonUrl ? (
+            <a href={buttonUrl} target="_blank" rel="noopener noreferrer">
+              <Button
+                size="lg"
+                className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-6 text-lg font-light tracking-wider rounded-none border border-amber-500 transition-all duration-300 hover:scale-105"
+              >
+                {buttonText}
+              </Button>
+            </a>
+          ) : (
+            <Button
+              onClick={onBookClick}
+              size="lg"
+              className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-6 text-lg font-light tracking-wider rounded-none border border-amber-500 transition-all duration-300 hover:scale-105"
+            >
+              {buttonText}
+            </Button>
+          )}
         </motion.div>
       </div>
 
