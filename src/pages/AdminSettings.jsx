@@ -66,7 +66,7 @@ export default function AdminSettings() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotelSettings'] });
-      toast.success('Settings saved successfully');
+      toast.success('設定を保存しました');
     },
   });
 
@@ -110,14 +110,14 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Hotel className="w-5 h-5" />
-              Hotel Profile
+              ホテル基本情報
             </CardTitle>
-            <CardDescription>Basic information about your hotel</CardDescription>
+            <CardDescription>ホテルの基本情報を設定してください</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Hotel Name</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ホテル名</label>
                 <Input
                   value={formData.hotel_name}
                   onChange={(e) => handleChange('hotel_name', e.target.value)}
@@ -125,17 +125,17 @@ export default function AdminSettings() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">Tagline</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">キャッチコピー</label>
                 <Input
                   value={formData.tagline}
                   onChange={(e) => handleChange('tagline', e.target.value)}
-                  placeholder="Your hotel tagline"
+                  placeholder="ホテルのキャッチコピー"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-2 block">Logo</label>
+              <label className="text-sm font-medium text-slate-700 mb-2 block">ロゴ</label>
               <div className="flex items-center gap-4">
                 {formData.logo_url ? (
                   <div className="relative">
@@ -159,7 +159,7 @@ export default function AdminSettings() {
                     ) : (
                       <div className="text-center">
                         <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-500">Upload logo</span>
+                        <span className="text-xs text-slate-500">ロゴをアップロード</span>
                       </div>
                     )}
                     <input
@@ -175,12 +175,12 @@ export default function AdminSettings() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">About Text</label>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">ホテル紹介文</label>
               <Textarea
                 value={formData.about_text}
                 onChange={(e) => handleChange('about_text', e.target.value)}
                 rows={4}
-                placeholder="A brief description about your hotel..."
+                placeholder="ホテルの紹介文を入力してください..."
               />
             </div>
           </CardContent>
@@ -191,16 +191,16 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Phone className="w-5 h-5" />
-              Contact Information
+              連絡先情報
             </CardTitle>
-            <CardDescription>How guests can reach you</CardDescription>
+            <CardDescription>ゲストが連絡できる情報を入力してください</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                Address
-              </label>
+                住所
+                </label>
               <Input
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
@@ -212,7 +212,7 @@ export default function AdminSettings() {
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-2">
                   <Phone className="w-4 h-4" />
-                  Phone
+                  電話番号
                 </label>
                 <Input
                   value={formData.phone}
@@ -223,7 +223,7 @@ export default function AdminSettings() {
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  Email
+                  メールアドレス
                 </label>
                 <Input
                   type="email"
@@ -237,16 +237,16 @@ export default function AdminSettings() {
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block flex items-center gap-2">
                 <Globe className="w-4 h-4" />
-                Google Maps Embed URL
-              </label>
-              <Input
+                Google マップ埋め込みURL
+                </label>
+                <Input
                 value={formData.map_embed_url}
                 onChange={(e) => handleChange('map_embed_url', e.target.value)}
                 placeholder="https://www.google.com/maps/embed?..."
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Get embed URL from Google Maps: Share → Embed a map → Copy HTML and extract the src URL
-              </p>
+                />
+                <p className="text-xs text-slate-500 mt-1">
+                Google マップで「共有」→「地図を埋め込む」→ HTMLの src URL をコピーして貼り付けてください
+                </p>
             </div>
           </CardContent>
         </Card>
@@ -256,9 +256,9 @@ export default function AdminSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              Social Media
+              ソーシャルメディア
             </CardTitle>
-            <CardDescription>Your social media profiles</CardDescription>
+            <CardDescription>SNSアカウントのURLを入力してください</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -311,7 +311,7 @@ export default function AdminSettings() {
             ) : (
               <Save className="w-4 h-4 mr-2" />
             )}
-            Save Settings
+            設定を保存
           </Button>
         </div>
       </form>
