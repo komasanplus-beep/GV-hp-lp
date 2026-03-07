@@ -11,7 +11,11 @@ import {
   LogOut,
   Hotel,
   X,
-  Layout
+  Layout,
+  BookOpen,
+  Sparkles,
+  FlaskConical,
+  Shield
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -23,6 +27,9 @@ const menuItems = [
   { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
   { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
   { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
+  { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
+  { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
+  { name: 'ブログ', icon: BookOpen, page: 'BlogPage' },
   { name: '設定', icon: Settings, page: 'AdminSettings' },
 ];
 
