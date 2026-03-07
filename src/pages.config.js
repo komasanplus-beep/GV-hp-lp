@@ -67,6 +67,7 @@ import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
 import AdminBlog from './pages/AdminBlog';
+import UserDashboard from './pages/UserDashboard';
 
 
 export const PAGES = {
@@ -90,6 +91,7 @@ export const PAGES = {
     "MasterSystemLogs": MasterSystemLogs,
     "MasterUsers": MasterUsers,
     "AdminBlog": AdminBlog,
+    "UserDashboard": UserDashboard,
 }
 
 export const pagesConfig = {
