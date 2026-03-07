@@ -17,15 +17,6 @@ export default function ProtectedRoute({ children }) {
           return;
         }
 
-        // Check if user has access (optional: check for admin role)
-        const user = await base44.auth.me();
-        
-        // If you want to restrict to admin only, uncomment:
-        // if (user.role !== 'admin') {
-        //   window.location.href = '/';
-        //   return;
-        // }
-
         setIsAuthenticated(true);
       } catch (error) {
         // If error, redirect to login
