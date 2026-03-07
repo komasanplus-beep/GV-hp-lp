@@ -54,7 +54,7 @@ export default function AdminHeader({ onMenuClick, title }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => base44.auth.logout()}>
-                Logout
+                ログアウト
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -16,12 +16,12 @@ import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { name: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard' },
-  { name: 'Rooms', icon: Bed, page: 'AdminRooms' },
-  { name: 'Bookings', icon: CalendarCheck, page: 'AdminBookings' },
-  { name: 'Guests', icon: Users, page: 'AdminGuests' },
-  { name: 'Content', icon: FileText, page: 'AdminContent' },
-  { name: 'Settings', icon: Settings, page: 'AdminSettings' },
+  { name: 'ダッシュボード', icon: LayoutDashboard, page: 'Dashboard' },
+  { name: '客室管理', icon: Bed, page: 'AdminRooms' },
+  { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
+  { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
+  { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
+  { name: '設定', icon: Settings, page: 'AdminSettings' },
 ];
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 </div>
                 <div>
                   <h1 className="text-lg font-medium text-white">Bawi Hotel</h1>
-                  <p className="text-xs text-slate-400">Admin Panel</p>
+                  <p className="text-xs text-slate-400">管理パネル</p>
                 </div>
               </Link>
               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
@@ -99,7 +99,7 @@ export default function Sidebar({ isOpen, onClose }) {
               className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all"
             >
               <LogOut className="w-5 h-5" />
-              <span className="font-medium">Logout</span>
+              <span className="font-medium">ログアウト</span>
             </button>
           </div>
         </div>

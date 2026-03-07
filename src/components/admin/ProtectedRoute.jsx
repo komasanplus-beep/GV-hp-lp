@@ -43,7 +43,7 @@ export default function ProtectedRoute({ children }) {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-amber-600 mx-auto mb-4" />
-          <p className="text-slate-600">Checking authentication...</p>
+          <p className="text-slate-600">認証確認中...</p>
         </div>
       </div>
     );
