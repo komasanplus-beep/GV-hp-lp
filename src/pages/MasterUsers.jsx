@@ -15,6 +15,21 @@ export default function MasterUsers() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [editUser, setEditUser] = useState(null);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('user');
+  const [inviting, setInviting] = useState(false);
+
+  const handleInvite = async () => {
+    if (!inviteEmail) return;
+    setInviting(true);
+    await base44.users.inviteUser(inviteEmail, inviteRole);
+    setInviting(false);
+    setInviteOpen(false);
+    setInviteEmail('');
+    setInviteRole('user');
+    queryClient.invalidateQueries({ queryKey: ['masterUsers'] });
+  };
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['masterUsers'],
