@@ -22,28 +22,67 @@ import {
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 
-const userMenuItems = [
-  { name: 'ダッシュボード', icon: LayoutDashboard, page: 'UserDashboard' },
-  { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
-  { name: 'LP分析', icon: BarChart3, page: 'AdminLPAnalytics' },
-  { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
-  { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
-  { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
-  { name: 'サービス管理', icon: Briefcase, page: 'AdminRooms' },
-  { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
-  { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
-  { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
-  { name: '設定', icon: Settings, page: 'AdminSettings' },
+const userMenuGroups = [
+  {
+    label: 'ユーザーダッシュボード',
+    items: [
+      { name: 'ダッシュボード', icon: LayoutDashboard, page: 'UserDashboard' },
+    ],
+  },
+  {
+    label: 'LP・コンテンツ',
+    items: [
+      { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
+      { name: 'LP分析', icon: BarChart3, page: 'AdminLPAnalytics' },
+      { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
+      { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
+      { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
+    ],
+  },
+  {
+    label: 'ホテル管理',
+    items: [
+      { name: 'サービス管理', icon: Briefcase, page: 'AdminRooms' },
+      { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
+      { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
+      { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
+    ],
+  },
+  {
+    label: 'アカウント',
+    items: [
+      { name: '設定', icon: Settings, page: 'AdminSettings' },
+    ],
+  },
 ];
 
-const masterMenuItems = [
-  { name: 'ダッシュボード', icon: LayoutDashboard, page: 'MasterDashboard' },
-  { name: 'Users', icon: Users, page: 'MasterUsers' },
-  { name: 'UserFeatures', icon: ToggleLeft, page: 'MasterFeatureControl' },
-  { name: 'UserLimits', icon: BarChart3, page: 'MasterFeatureControl' },
-  { name: 'AISettings', icon: Settings, page: 'MasterAISettings' },
-  { name: 'AIKnowledge', icon: BookOpen, page: 'MasterAIKnowledge' },
-  { name: 'SystemLogs', icon: FileText, page: 'MasterSystemLogs' },
+const masterMenuGroups = [
+  {
+    label: 'マスターダッシュボード',
+    items: [
+      { name: 'ダッシュボード', icon: Shield, page: 'MasterDashboard' },
+    ],
+  },
+  {
+    label: 'ユーザー管理',
+    items: [
+      { name: 'ユーザー一覧', icon: Users, page: 'MasterUsers' },
+      { name: '機能制御', icon: ToggleLeft, page: 'MasterFeatureControl' },
+    ],
+  },
+  {
+    label: 'AI設定',
+    items: [
+      { name: 'AI設定', icon: Settings, page: 'MasterAISettings' },
+      { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
+    ],
+  },
+  {
+    label: 'システム',
+    items: [
+      { name: 'システムログ', icon: FileText, page: 'MasterSystemLogs' },
+    ],
+  },
 ];
 
 export default function UserSidebar({ isOpen, onClose }) {
