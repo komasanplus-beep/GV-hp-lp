@@ -8,13 +8,33 @@ import {
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 
-const menuItems = [
-  { name: 'Users', icon: Users, page: 'MasterUsers' },
-  { name: 'UserFeatures', icon: ToggleLeft, page: 'MasterFeatureControl' },
-  { name: 'UserLimits', icon: BarChart2, page: 'MasterFeatureControl' },
-  { name: 'AISettings', icon: Settings, page: 'MasterAISettings' },
-  { name: 'AIKnowledge', icon: BookOpen, page: 'MasterAIKnowledge' },
-  { name: 'SystemLogs', icon: FileText, page: 'MasterSystemLogs' },
+const menuGroups = [
+  {
+    label: 'マスターダッシュボード',
+    items: [
+      { name: 'ダッシュボード', icon: Shield, page: 'MasterDashboard' },
+    ],
+  },
+  {
+    label: 'ユーザー管理',
+    items: [
+      { name: 'ユーザー一覧', icon: Users, page: 'MasterUsers' },
+      { name: '機能制御', icon: ToggleLeft, page: 'MasterFeatureControl' },
+    ],
+  },
+  {
+    label: 'AI設定',
+    items: [
+      { name: 'AI設定', icon: Settings, page: 'MasterAISettings' },
+      { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
+    ],
+  },
+  {
+    label: 'システム',
+    items: [
+      { name: 'システムログ', icon: FileText, page: 'MasterSystemLogs' },
+    ],
+  },
 ];
 
 export default function MasterSidebar({ isOpen, onClose }) {
