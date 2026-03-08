@@ -13,6 +13,7 @@ import {
   BookOpen,
   Sparkles,
   FlaskConical,
+  BarChart3,
   X,
   Store,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
 const menuItems = [
   { name: 'ダッシュボード', icon: LayoutDashboard, page: 'UserDashboard' },
   { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
+  { name: 'LP分析', icon: BarChart3, page: 'AdminLPAnalytics' },
   { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
   { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
   { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
