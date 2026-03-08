@@ -94,7 +94,7 @@ export default function UserSidebar({ isOpen, onClose }) {
   }, []);
 
   const isMaster = role === 'master';
-  const menuItems = isMaster ? masterMenuItems : userMenuItems;
+  const menuGroups = isMaster ? masterMenuGroups : userMenuGroups;
 
   return (
     <>
