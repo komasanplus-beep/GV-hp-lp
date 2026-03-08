@@ -37,8 +37,31 @@ const menuGroups = [
   },
 ];
 
+// ユーザー切り替えコンテキスト
+export const MasterUserContext = React.createContext({ selectedUserId: null, selectedUser: null });
+
 export default function MasterSidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    base44.entities.User.list().then(setUsers).catch(() => {});
+  }, []);
+
+  const selectedUser = users.find(u => u.id === selectedUserId) || null;
+
+  // グローバルに選択ユーザーを保存
+  useEffect(() => {
+    if (selectedUserId) {
+      window.__masterSelectedUserId = selectedUserId;
+      window.__masterSelectedUser = selectedUser;
+    } else {
+      window.__masterSelectedUserId = null;
+      window.__masterSelectedUser = null;
+    }
+  }, [selectedUserId, selectedUser]);
 
   return (
     <>
