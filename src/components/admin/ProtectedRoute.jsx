@@ -34,12 +34,12 @@ export default function ProtectedRoute({ children, requiredRole = 'any' }) {
             setStatus('ok');
           } else {
             // admin/editor -> /dashboard
-            window.location.href = '/dashboard';
+            window.location.href = createPageUrl('UserDashboard');
           }
         } else if (requiredRole === 'admin') {
           if (role === 'master') {
-            // master -> /master
-            window.location.href = '/master';
+            // master -> /master-dashboard
+            window.location.href = createPageUrl('MasterDashboard');
           } else {
             setStatus('ok');
           }
