@@ -71,8 +71,8 @@ export default function AdminABTest() {
   const getLPName = (id) => lps.find(l => l.id === id)?.title || id;
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="ABテスト">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="ABテスト">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-slate-800">ABテスト管理</h2>
           <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => setShowCreate(true)}>
@@ -175,7 +175,7 @@ export default function AdminABTest() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </AdminLayout>
+      </UserLayout>
     </ProtectedRoute>
   );
 }

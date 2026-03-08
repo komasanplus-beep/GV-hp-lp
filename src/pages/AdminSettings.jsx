@@ -117,18 +117,18 @@ export default function AdminSettings() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <AdminLayout title="Settings">
+        <UserLayout title="設定">
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
         </div>
-      </AdminLayout>
+      </UserLayout>
       </ProtectedRoute>
     );
   }
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="Settings">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="設定">
       <form onSubmit={handleSubmit} className="max-w-4xl space-y-6">
         {/* Hotel Profile */}
         <Card>
@@ -504,7 +504,7 @@ export default function AdminSettings() {
           </Button>
         </div>
       </form>
-    </AdminLayout>
+    </UserLayout>
     </ProtectedRoute>
   );
 }

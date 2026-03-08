@@ -152,8 +152,8 @@ export default function AdminContent() {
   };
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="Content Management">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="コンテンツ管理">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <TabsList className="bg-slate-100">
@@ -488,7 +488,7 @@ export default function AdminContent() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </UserLayout>
     </ProtectedRoute>
   );
 }
