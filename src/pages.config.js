@@ -48,9 +48,11 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminABTest from './pages/AdminABTest';
+import AdminBlog from './pages/AdminBlog';
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
 import AdminGuests from './pages/AdminGuests';
+import AdminLPAnalytics from './pages/AdminLPAnalytics';
 import AdminLPEditor from './pages/AdminLPEditor';
 import AdminLPGenerate from './pages/AdminLPGenerate';
 import AdminLPList from './pages/AdminLPList';
@@ -66,16 +68,17 @@ import MasterAISettings from './pages/MasterAISettings';
 import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
-import AdminBlog from './pages/AdminBlog';
 import UserDashboard from './pages/UserDashboard';
-import AdminLPAnalytics from './pages/AdminLPAnalytics';
+import MasterDashboard from './pages/MasterDashboard';
 
 
 export const PAGES = {
     "AdminABTest": AdminABTest,
+    "AdminBlog": AdminBlog,
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
     "AdminGuests": AdminGuests,
+    "AdminLPAnalytics": AdminLPAnalytics,
     "AdminLPEditor": AdminLPEditor,
     "AdminLPGenerate": AdminLPGenerate,
     "AdminLPList": AdminLPList,
@@ -91,9 +94,8 @@ export const PAGES = {
     "MasterFeatureControl": MasterFeatureControl,
     "MasterSystemLogs": MasterSystemLogs,
     "MasterUsers": MasterUsers,
-    "AdminBlog": AdminBlog,
     "UserDashboard": UserDashboard,
-    "AdminLPAnalytics": AdminLPAnalytics,
+    "MasterDashboard": MasterDashboard,
 }
 
 export const pagesConfig = {

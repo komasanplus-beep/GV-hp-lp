@@ -12,9 +12,9 @@ const menuItems = [
   { name: 'Users', icon: Users, page: 'MasterUsers' },
   { name: 'UserFeatures', icon: ToggleLeft, page: 'MasterFeatureControl' },
   { name: 'UserLimits', icon: BarChart2, page: 'MasterFeatureControl' },
-  { name: 'AI Settings', icon: Settings, page: 'MasterAISettings' },
-  { name: 'AI Knowledge', icon: BookOpen, page: 'MasterAIKnowledge' },
-  { name: 'System Logs', icon: FileText, page: 'MasterSystemLogs' },
+  { name: 'AISettings', icon: Settings, page: 'MasterAISettings' },
+  { name: 'AIKnowledge', icon: BookOpen, page: 'MasterAIKnowledge' },
+  { name: 'SystemLogs', icon: FileText, page: 'MasterSystemLogs' },
 ];
 
 export default function MasterSidebar({ isOpen, onClose }) {
@@ -38,8 +38,8 @@ export default function MasterSidebar({ isOpen, onClose }) {
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base font-semibold text-white">Master Panel</h1>
-                  <p className="text-xs text-violet-400">SaaS管理者</p>
+                  <h1 className="text-base font-semibold text-white">システム管理</h1>
+                  <p className="text-xs text-violet-400">Master管理</p>
                 </div>
               </div>
               <button onClick={onClose} className="lg:hidden text-violet-400 hover:text-white">

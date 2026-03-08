@@ -56,8 +56,8 @@ export default function UserSidebar({ isOpen, onClose }) {
                   <Store className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base font-semibold text-white">ダッシュボード</h1>
-                  <p className="text-xs text-slate-400">管理パネル</p>
+                  <h1 className="text-base font-semibold text-white">LP管理パネル</h1>
+                  <p className="text-xs text-slate-400">Userダッシュボード</p>
                 </div>
               </Link>
               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
