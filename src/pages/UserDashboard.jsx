@@ -5,10 +5,11 @@ import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Layout, BookOpen, Sparkles, Briefcase, FileText, Settings, FlaskConical, ArrowRight } from 'lucide-react';
+import { Layout, BookOpen, Sparkles, Briefcase, FileText, Settings, FlaskConical, BarChart3, ArrowRight } from 'lucide-react';
 
 const cards = [
   { name: 'LP管理', desc: 'ランディングページの作成・編集', icon: Layout, page: 'AdminLPList', color: 'bg-purple-50 border-purple-200 text-purple-700' },
+  { name: 'LP分析', desc: 'PV・CV・AI分析ダッシュボード', icon: BarChart3, page: 'AdminLPAnalytics', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { name: 'LP AI生成', desc: 'AIでLPを自動生成', icon: Sparkles, page: 'AdminLPGenerate', color: 'bg-amber-50 border-amber-200 text-amber-700' },
   { name: 'ABテスト', desc: 'LPのABテストを管理', icon: FlaskConical, page: 'AdminABTest', color: 'bg-rose-50 border-rose-200 text-rose-700' },
   { name: 'ブログ管理', desc: '記事の作成・カテゴリ管理', icon: BookOpen, page: 'AdminBlog', color: 'bg-blue-50 border-blue-200 text-blue-700' },
