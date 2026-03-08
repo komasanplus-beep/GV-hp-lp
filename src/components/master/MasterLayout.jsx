@@ -16,6 +16,11 @@ export default function MasterLayout({ children, title }) {
             <Menu className="w-5 h-5" />
           </button>
           <h1 className="font-semibold text-slate-800">{title}</h1>
+          {window.__masterSelectedUser && (
+            <span className="ml-2 text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">
+              編集中: {window.__masterSelectedUser.full_name || window.__masterSelectedUser.email}
+            </span>
+          )}
         </header>
         <main className="p-4 lg:p-8">{children}</main>
       </div>
