@@ -65,11 +65,11 @@ import Home from './pages/Home';
 import LPView from './pages/LPView';
 import MasterAIKnowledge from './pages/MasterAIKnowledge';
 import MasterAISettings from './pages/MasterAISettings';
+import MasterDashboard from './pages/MasterDashboard';
 import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
 import UserDashboard from './pages/UserDashboard';
-import MasterDashboard from './pages/MasterDashboard';
 
 
 export const PAGES = {
@@ -91,11 +91,11 @@ export const PAGES = {
     "LPView": LPView,
     "MasterAIKnowledge": MasterAIKnowledge,
     "MasterAISettings": MasterAISettings,
+    "MasterDashboard": MasterDashboard,
     "MasterFeatureControl": MasterFeatureControl,
     "MasterSystemLogs": MasterSystemLogs,
     "MasterUsers": MasterUsers,
     "UserDashboard": UserDashboard,
-    "MasterDashboard": MasterDashboard,
 }
 
 export const pagesConfig = {
