@@ -93,7 +93,7 @@ export default function UserSidebar({ isOpen, onClose }) {
     base44.auth.me().then(user => setRole(user?.role || 'user')).catch(() => setRole('user'));
   }, []);
 
-  const isMaster = role === 'master';
+  const isMaster = role === 'master' || role === 'admin';
   const menuGroups = isMaster ? masterMenuGroups : userMenuGroups;
 
   return (
