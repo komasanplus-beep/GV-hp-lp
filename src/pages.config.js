@@ -68,6 +68,7 @@ import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
 import AdminBlog from './pages/AdminBlog';
 import UserDashboard from './pages/UserDashboard';
+import AdminLPAnalytics from './pages/AdminLPAnalytics';
 
 
 export const PAGES = {
@@ -92,6 +93,7 @@ export const PAGES = {
     "MasterUsers": MasterUsers,
     "AdminBlog": AdminBlog,
     "UserDashboard": UserDashboard,
+    "AdminLPAnalytics": AdminLPAnalytics,
 }
 
 export const pagesConfig = {
