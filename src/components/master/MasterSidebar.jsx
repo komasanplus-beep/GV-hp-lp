@@ -91,6 +91,45 @@ export default function MasterSidebar({ isOpen, onClose }) {
             </div>
           </div>
 
+          {/* ユーザー切り替え */}
+          <div className="px-3 py-2 border-b border-violet-800">
+            <p className="text-xs text-violet-500 mb-1 font-semibold">編集対象ユーザー</p>
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(v => !v)}
+                className="w-full flex items-center justify-between bg-violet-900 hover:bg-violet-800 text-violet-100 text-xs rounded-lg px-3 py-2 transition-all"
+              >
+                <span className="truncate">
+                  {selectedUser ? selectedUser.full_name || selectedUser.email : '— 全体表示 —'}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 shrink-0 ml-1" />
+              </button>
+              {showDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-violet-900 border border-violet-700 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto">
+                  <button
+                    onClick={() => { setSelectedUserId(''); setShowDropdown(false); }}
+                    className="w-full text-left px-3 py-2 text-xs text-violet-300 hover:bg-violet-800"
+                  >
+                    — 全体表示 —
+                  </button>
+                  {users.map(u => (
+                    <button
+                      key={u.id}
+                      onClick={() => { setSelectedUserId(u.id); setShowDropdown(false); }}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-xs hover:bg-violet-800",
+                        selectedUserId === u.id ? "text-white bg-violet-700" : "text-violet-300"
+                      )}
+                    >
+                      <div className="font-medium">{u.full_name || u.email}</div>
+                      <div className="text-violet-500 text-[10px]">{u.email}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <nav className="flex-1 p-3 overflow-y-auto">
             <div className="space-y-4">
               {menuGroups.map((group) => (
