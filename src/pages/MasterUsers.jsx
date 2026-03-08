@@ -59,6 +59,9 @@ export default function MasterUsers() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="検索..." className="pl-9" />
           </div>
+          <Button className="bg-violet-600 hover:bg-violet-700 shrink-0" onClick={() => setInviteOpen(true)}>
+            <UserPlus className="w-4 h-4 mr-1" />招待
+          </Button>
         </div>
       </div>
 
