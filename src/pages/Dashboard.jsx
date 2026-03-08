@@ -17,7 +17,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import UserLayout from '@/components/user/UserLayout';
 import StatsCard from '@/components/admin/StatsCard';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
