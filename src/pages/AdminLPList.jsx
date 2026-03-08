@@ -65,8 +65,8 @@ export default function AdminLPList() {
   });
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="LP管理">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="LP管理">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">ランディングページ一覧</h2>
@@ -182,7 +182,7 @@ export default function AdminLPList() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </AdminLayout>
+      </UserLayout>
     </ProtectedRoute>
   );
 }

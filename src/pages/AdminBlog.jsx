@@ -69,8 +69,8 @@ export default function AdminBlog() {
   const onHome = posts.filter(p => p.show_on_home).length;
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="ブログ管理">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="ブログ管理">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">記事管理</h2>
@@ -229,7 +229,7 @@ export default function AdminBlog() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </AdminLayout>
+      </UserLayout>
     </ProtectedRoute>
   );
 }
