@@ -128,8 +128,8 @@ export default function AdminLPEditor() {
   if (!lpId) return <div className="p-8 text-red-500">LP IDが指定されていません</div>;
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title={lp?.title || 'LPエディタ'}>
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title={lp?.title || 'LPエディタ'}>
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -296,7 +296,7 @@ export default function AdminLPEditor() {
             </div>
           </DialogContent>
         </Dialog>
-      </AdminLayout>
+      </UserLayout>
     </ProtectedRoute>
   );
 }
