@@ -19,7 +19,7 @@ import {
   MessageSquare,
   Bed
 } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import UserLayout from '@/components/user/UserLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

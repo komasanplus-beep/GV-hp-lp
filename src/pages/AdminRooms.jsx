@@ -13,7 +13,7 @@ import {
   Upload,
   Loader2
 } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import UserLayout from '@/components/user/UserLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
