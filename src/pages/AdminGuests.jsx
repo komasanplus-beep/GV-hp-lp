@@ -136,8 +136,8 @@ export default function AdminGuests() {
   );
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="Guest Management">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="ゲスト管理">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div className="relative flex-1 w-full sm:max-w-md">
@@ -368,7 +368,7 @@ export default function AdminGuests() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </AdminLayout>
+    </UserLayout>
     </ProtectedRoute>
   );
 }

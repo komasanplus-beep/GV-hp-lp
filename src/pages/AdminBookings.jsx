@@ -89,8 +89,8 @@ export default function AdminBookings() {
   };
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="Booking Management">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="予約管理">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
@@ -323,7 +323,7 @@ export default function AdminBookings() {
           )}
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </UserLayout>
     </ProtectedRoute>
   );
 }
