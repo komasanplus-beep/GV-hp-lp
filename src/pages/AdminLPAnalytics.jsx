@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
@@ -293,7 +293,7 @@ function AnalyticsForm({ initialData, onSave, isSaving }) {
     conversions: initialData?.conversions ?? 0,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setForm({
       page_views: initialData?.page_views ?? 0,
       cta_clicks: initialData?.cta_clicks ?? 0,
