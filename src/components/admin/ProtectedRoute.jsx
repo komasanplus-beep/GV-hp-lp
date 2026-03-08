@@ -31,19 +31,13 @@ export default function ProtectedRoute({ children, requiredRole = 'any' }) {
         const role = user?.role || 'user';
 
         if (requiredRole === 'master') {
-          if (role === 'master') {
+          if (role === 'master' || role === 'admin') {
             setStatus('ok');
           } else {
-            // admin/editor -> /dashboard
             window.location.href = createPageUrl('UserDashboard');
           }
         } else if (requiredRole === 'admin') {
-          if (role === 'master') {
-            // master -> /master-dashboard
-            window.location.href = createPageUrl('MasterDashboard');
-          } else {
-            setStatus('ok');
-          }
+          setStatus('ok');
         }
       } catch {
         base44.auth.redirectToLogin(window.location.pathname);
