@@ -78,7 +78,7 @@ export default function MasterFeatureControl() {
   });
 
   return (
-    <MasterLayout title="機能制御">
+    <MasterLayout title="UserFeatures / UserLimits">
       <div className="max-w-2xl mx-auto space-y-6">
         {selectedUser && (
           <div className="bg-violet-50 rounded-xl border border-violet-200 p-4">

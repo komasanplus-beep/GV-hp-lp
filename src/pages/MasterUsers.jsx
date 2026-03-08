@@ -36,7 +36,7 @@ export default function MasterUsers() {
   );
 
   return (
-    <MasterLayout title="ユーザー管理">
+    <MasterLayout title="Users">
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-start sm:items-center mb-6">
         <h2 className="text-xl font-semibold text-slate-800">ユーザー一覧</h2>
         <div className="flex gap-2 w-full sm:w-auto">
