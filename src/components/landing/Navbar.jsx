@@ -89,57 +89,71 @@ export default function Navbar({ settings, onBookClick }) {
         </div>
       </motion.nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-slate-900"
+            className="fixed inset-0 z-50 bg-black/40"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Menu Drawer (右から) */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="fixed top-0 right-0 h-full w-4/5 max-w-sm z-50 bg-slate-900 flex flex-col"
           >
-            <div className="flex flex-col h-full p-6">
-              <div className="flex justify-between items-center">
-                <span className="text-2xl font-light text-white" style={{ fontFamily: 'serif' }}>
-                  {settings?.hotel_name || '店舗名'}
-                </span>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 text-white"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+            <div className="flex justify-between items-center p-6 border-b border-slate-700">
+              <span className="text-lg font-light text-white" style={{ fontFamily: 'serif' }}>
+                {settings?.hotel_name || '店舗名'}
+              </span>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-              <div className="flex-1 flex flex-col justify-center gap-8">
-                {navLinks.map((link, index) => (
-                  <motion.a
-                    key={link.name}
-                    href={link.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-3xl font-light text-white hover:text-amber-400 transition-colors"
-                  >
-                    {link.name}
-                  </motion.a>
-                ))}
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
+            <div className="flex-1 flex flex-col justify-center gap-8 px-8">
+              {navLinks.map((link, index) => (
+                <motion.a
+                  key={link.name}
+                  href={link.href}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: navLinks.length * 0.1 }}
+                  transition={{ delay: index * 0.07 }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-2xl font-light text-white hover:text-amber-400 transition-colors"
                 >
-                  <Link 
-                    to={createPageUrl('Dashboard')}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-3xl font-light text-white hover:text-amber-400 transition-colors"
-                  >
-                    Admin
-                  </Link>
-                </motion.div>
-              </div>
+                  {link.name}
+                </motion.a>
+              ))}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: navLinks.length * 0.07 }}
+              >
+                <Link
+                  to={createPageUrl('Dashboard')}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-2xl font-light text-white hover:text-amber-400 transition-colors"
+                >
+                  Admin
+                </Link>
+              </motion.div>
+            </div>
 
+            <div className="p-6">
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
