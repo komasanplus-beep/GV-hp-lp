@@ -69,28 +69,37 @@ export default function MasterSidebar({ isOpen, onClose }) {
           </div>
 
           <nav className="flex-1 p-3 overflow-y-auto">
-            <ul className="space-y-0.5">
-              {menuItems.map((item) => {
-                const isActive = location.pathname.includes(item.page);
-                return (
-                  <li key={item.name}>
-                    <Link
-                      to={createPageUrl(item.page)}
-                      onClick={onClose}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
-                        isActive
-                          ? "bg-violet-600 text-white"
-                          : "text-violet-300 hover:bg-violet-800 hover:text-white"
-                      )}
-                    >
-                      <item.icon className="w-4 h-4 shrink-0" />
-                      <span className="font-medium">{item.name}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="space-y-4">
+              {menuGroups.map((group) => (
+                <div key={group.label}>
+                  <p className="text-xs font-semibold text-violet-500 uppercase tracking-wider px-3 mb-1">
+                    {group.label}
+                  </p>
+                  <ul className="space-y-0.5">
+                    {group.items.map((item) => {
+                      const isActive = location.pathname.includes(item.page);
+                      return (
+                        <li key={item.name}>
+                          <Link
+                            to={createPageUrl(item.page)}
+                            onClick={onClose}
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
+                              isActive
+                                ? "bg-violet-600 text-white"
+                                : "text-violet-300 hover:bg-violet-800 hover:text-white"
+                            )}
+                          >
+                            <item.icon className="w-4 h-4 shrink-0" />
+                            <span className="font-medium">{item.name}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </nav>
 
           <div className="p-3 border-t border-violet-800 space-y-0.5">
