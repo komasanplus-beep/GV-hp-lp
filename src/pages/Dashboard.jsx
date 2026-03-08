@@ -56,8 +56,8 @@ export default function Dashboard() {
   };
 
   return (
-    <ProtectedRoute>
-      <AdminLayout title="Dashboard">
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="ダッシュボード">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard 
@@ -182,7 +182,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </UserLayout>
     </ProtectedRoute>
   );
 }
