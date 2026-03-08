@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import MasterLayout from '@/components/master/MasterLayout';
 import { Users, ToggleLeft, BarChart2, Settings, BookOpen, FileText, ArrowRight } from 'lucide-react';
 
@@ -16,8 +15,7 @@ const cards = [
 
 export default function MasterDashboard() {
   return (
-    <ProtectedRoute requiredRole="master">
-      <MasterLayout title="システム管理">
+    <MasterLayout title="システム管理">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header Banner */}
           <div className="bg-gradient-to-r from-violet-600 to-violet-700 rounded-2xl p-6 text-white">
@@ -47,6 +45,5 @@ export default function MasterDashboard() {
           </div>
         </div>
       </MasterLayout>
-    </ProtectedRoute>
   );
 }
