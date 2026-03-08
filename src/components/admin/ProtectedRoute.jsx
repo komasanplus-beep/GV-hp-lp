@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { createPageUrl } from '@/utils';
 import { Loader2 } from 'lucide-react';
 
 /**

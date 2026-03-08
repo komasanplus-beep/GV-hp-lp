@@ -80,7 +80,7 @@ export default function MasterSidebar({ isOpen, onClose }) {
               className="flex items-center gap-3 px-3 py-2.5 text-violet-400 hover:bg-violet-800 hover:text-white rounded-lg transition-all text-sm"
             >
               <Store className="w-4 h-4" />
-              <span className="font-medium">ユーザー画面へ</span>
+              <span className="font-medium">Userダッシュボードへ</span>
             </Link>
             <button
               onClick={() => base44.auth.logout()}
