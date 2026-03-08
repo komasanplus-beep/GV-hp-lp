@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import MasterSidebar from './MasterSidebar';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Menu } from 'lucide-react';
 
 export default function MasterLayout({ children, title }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
+    <ProtectedRoute requiredRole="master">
     <div className="min-h-screen bg-slate-50">
       <MasterSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="lg:ml-72">
@@ -18,5 +20,6 @@ export default function MasterLayout({ children, title }) {
         <main className="p-4 lg:p-8">{children}</main>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
