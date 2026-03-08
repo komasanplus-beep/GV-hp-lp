@@ -116,6 +116,44 @@ export default function MasterUsers() {
         </div>
       )}
 
+      {/* 招待ダイアログ */}
+      <Dialog open={inviteOpen} onOpenChange={open => { if (!open) { setInviteOpen(false); setInviteEmail(''); setInviteRole('user'); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>ユーザーを招待</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-xs text-slate-500">メールアドレス</Label>
+              <Input
+                className="mt-1"
+                type="email"
+                placeholder="example@email.com"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-500">ロール</Label>
+              <select
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm mt-1"
+                value={inviteRole}
+                onChange={e => setInviteRole(e.target.value)}
+              >
+                <option value="user">ユーザー</option>
+                <option value="admin">管理者</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)}>キャンセル</Button>
+            <Button className="bg-violet-600 hover:bg-violet-700" onClick={handleInvite} disabled={inviting || !inviteEmail}>
+              {inviting ? '送信中...' : '招待メールを送信'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!editUser} onOpenChange={open => !open && setEditUser(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
