@@ -70,6 +70,8 @@ import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterUsers from './pages/MasterUsers';
 import UserDashboard from './pages/UserDashboard';
+import AdminSiteList from './pages/AdminSiteList';
+import AdminDomainSettings from './pages/AdminDomainSettings';
 
 
 export const PAGES = {
@@ -96,6 +98,8 @@ export const PAGES = {
     "MasterSystemLogs": MasterSystemLogs,
     "MasterUsers": MasterUsers,
     "UserDashboard": UserDashboard,
+    "AdminSiteList": AdminSiteList,
+    "AdminDomainSettings": AdminDomainSettings,
 }
 
 export const pagesConfig = {

@@ -5,20 +5,24 @@ import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Layout, BookOpen, Sparkles, Briefcase, FileText, Settings, FlaskConical, BarChart3, ArrowRight } from 'lucide-react';
+import { Globe, Layout, BookOpen, Sparkles, FlaskConical, BarChart3, Settings, ArrowRight, Link2 } from 'lucide-react';
 
 const cards = [
+  { name: 'サイト管理', desc: 'ホームページの作成・編集', icon: Globe, page: 'AdminSiteList', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
   { name: 'LP管理', desc: 'ランディングページの作成・編集', icon: Layout, page: 'AdminLPList', color: 'bg-purple-50 border-purple-200 text-purple-700' },
   { name: 'LP分析', desc: 'PV・CV・AIスコア分析', icon: BarChart3, page: 'AdminLPAnalytics', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
   { name: 'LP AI生成', desc: 'AIでLPを自動生成', icon: Sparkles, page: 'AdminLPGenerate', color: 'bg-amber-50 border-amber-200 text-amber-700' },
   { name: 'ABテスト', desc: 'LPのABテストを管理', icon: FlaskConical, page: 'AdminABTest', color: 'bg-rose-50 border-rose-200 text-rose-700' },
   { name: 'ブログ管理', desc: '記事の作成・カテゴリ管理', icon: BookOpen, page: 'AdminBlog', color: 'bg-blue-50 border-blue-200 text-blue-700' },
-  { name: 'サービス管理', desc: 'サービス・客室の管理', icon: Briefcase, page: 'AdminRooms', color: 'bg-green-50 border-green-200 text-green-700' },
-  { name: 'コンテンツ', desc: '画像・テキストコンテンツ', icon: FileText, page: 'AdminContent', color: 'bg-slate-50 border-slate-200 text-slate-700' },
-  { name: '設定', desc: 'アカウント・サイト設定', icon: Settings, page: 'AdminSettings', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+  { name: 'ドメイン設定', desc: '独自ドメイン・サブドメイン管理', icon: Link2, page: 'AdminDomainSettings', color: 'bg-slate-50 border-slate-200 text-slate-700' },
+  { name: '設定', desc: 'サイト・店舗情報の設定', icon: Settings, page: 'AdminSettings', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
 ];
 
 export default function UserDashboard() {
+  const { data: sites = [] } = useQuery({
+    queryKey: ['sites'],
+    queryFn: () => base44.entities.Site.list('-created_date', 5),
+  });
   const { data: lps = [] } = useQuery({
     queryKey: ['landingPages'],
     queryFn: () => base44.entities.LandingPage.list('-created_date', 5),
@@ -28,6 +32,7 @@ export default function UserDashboard() {
     queryFn: () => base44.entities.BlogPost.list('-created_date', 5),
   });
 
+  const publishedSites = sites.filter(s => s.status === 'published').length;
   const publishedLPs = lps.filter(lp => lp.status === 'published').length;
   const publishedBlogs = blogs.filter(b => b.status === 'published').length;
 
@@ -36,27 +41,17 @@ export default function UserDashboard() {
       <UserLayout title="ダッシュボード">
         <div className="max-w-5xl mx-auto space-y-8">
 
-          {/* ようこそ */}
+          {/* Stats Banner */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">
             <h2 className="text-xl font-bold mb-1">ようこそ</h2>
-            <p className="text-amber-100 text-sm">管理パネルからサービスを管理できます</p>
-            <div className="flex gap-6 mt-4">
-              <div>
-                <p className="text-2xl font-bold">{lps.length}</p>
-                <p className="text-xs text-amber-200">LP総数</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{publishedLPs}</p>
-                <p className="text-xs text-amber-200">公開中LP</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{blogs.length}</p>
-                <p className="text-xs text-amber-200">記事総数</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{publishedBlogs}</p>
-                <p className="text-xs text-amber-200">公開中記事</p>
-              </div>
+            <p className="text-amber-100 text-sm mb-4">管理パネルからサービスを管理できます</p>
+            <div className="flex flex-wrap gap-6">
+              <div><p className="text-2xl font-bold">{sites.length}</p><p className="text-xs text-amber-200">サイト総数</p></div>
+              <div><p className="text-2xl font-bold">{publishedSites}</p><p className="text-xs text-amber-200">公開中サイト</p></div>
+              <div><p className="text-2xl font-bold">{lps.length}</p><p className="text-xs text-amber-200">LP総数</p></div>
+              <div><p className="text-2xl font-bold">{publishedLPs}</p><p className="text-xs text-amber-200">公開中LP</p></div>
+              <div><p className="text-2xl font-bold">{blogs.length}</p><p className="text-xs text-amber-200">記事総数</p></div>
+              <div><p className="text-2xl font-bold">{publishedBlogs}</p><p className="text-xs text-amber-200">公開中記事</p></div>
             </div>
           </div>
 
@@ -80,6 +75,31 @@ export default function UserDashboard() {
               ))}
             </div>
           </div>
+
+          {/* 最近のサイト */}
+          {sites.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">最近のサイト</h3>
+                <Link to={createPageUrl('AdminSiteList')} className="text-xs text-amber-600 hover:text-amber-700 flex items-center gap-1">
+                  すべて見る <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+                {sites.slice(0, 3).map(site => (
+                  <div key={site.id} className="flex items-center justify-between px-4 py-3">
+                    <div>
+                      <p className="text-sm font-medium text-slate-800">{site.site_name}</p>
+                      <p className="text-xs text-slate-400">{site.subdomain || site.domain || '未設定'}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${site.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                      {site.status === 'published' ? '公開中' : '下書き'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 最近のLP */}
           {lps.length > 0 && (
