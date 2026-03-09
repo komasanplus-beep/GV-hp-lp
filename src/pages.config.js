@@ -74,6 +74,10 @@ import MasterTemplates from './pages/MasterTemplates';
 import MasterUsers from './pages/MasterUsers';
 import UserDashboard from './pages/UserDashboard';
 import AdminAIGenerate from './pages/AdminAIGenerate';
+import MasterPlans from './pages/MasterPlans';
+import MasterSiteList from './pages/MasterSiteList';
+import MasterLPList from './pages/MasterLPList';
+import MasterDomainList from './pages/MasterDomainList';
 
 
 export const PAGES = {
@@ -104,6 +108,10 @@ export const PAGES = {
     "MasterUsers": MasterUsers,
     "UserDashboard": UserDashboard,
     "AdminAIGenerate": AdminAIGenerate,
+    "MasterPlans": MasterPlans,
+    "MasterSiteList": MasterSiteList,
+    "MasterLPList": MasterLPList,
+    "MasterDomainList": MasterDomainList,
 }
 
 export const pagesConfig = {
