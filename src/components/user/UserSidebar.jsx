@@ -2,46 +2,61 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
-  LayoutDashboard,
-  Settings,
-  LogOut,
-  Layout,
-  Sparkles,
-  X,
-  Store,
-  Link2,
-  Globe,
-  Shield,
-  FileText,
-  Search,
+  LayoutDashboard, Settings, LogOut, Layout, Sparkles, X, Store,
+  Link2, Globe, Shield, FileText, Search, ChevronDown,
+  Calendar, Users, Rss, Image, TrendingUp, BookOpen,
+  Layers, Building2, GitBranch, Eye
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
 
-const userMenuGroups = [
+const menuGroups = [
   {
-    label: 'メニュー',
-    items: [
-      { name: 'ダッシュボード', icon: LayoutDashboard, page: 'UserDashboard' },
+    label: 'ダッシュボード',
+    icon: LayoutDashboard,
+    page: 'UserDashboard',
+    single: true,
+  },
+  {
+    label: 'サイト運用',
+    icon: Store,
+    children: [
+      { name: '予約管理', icon: Calendar, page: 'AdminBookings' },
+      { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
+      { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
+      { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
+      { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
   },
   {
-    label: 'ホームページ',
-    items: [
-      { name: 'サイト管理', icon: Globe, page: 'AdminSiteList' },
-      { name: 'ページ管理', icon: FileText, page: 'SitePageManager' },
+    label: 'サイト構築',
+    icon: Globe,
+    children: [
+      { name: 'ページ管理', icon: Layout, page: 'SitePageManager' },
+      { name: 'サービス管理', icon: Building2, page: 'AdminRooms' },
     ],
   },
   {
-    label: 'LP',
-    items: [
-      { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
-      { name: 'AI生成', icon: Sparkles, page: 'AdminAIGenerate' },
+    label: 'LP構築',
+    icon: Layers,
+    children: [
+      { name: 'LP管理', icon: FileText, page: 'AdminLPList' },
+      { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
     ],
   },
   {
-    label: 'アカウント',
-    items: [
+    label: 'LP改善',
+    icon: TrendingUp,
+    children: [
+      { name: 'ABテスト', icon: GitBranch, page: 'AdminABTest' },
+      { name: 'CV分析', icon: TrendingUp, page: 'AdminLPAnalytics' },
+    ],
+  },
+  {
+    label: '基本設定',
+    icon: Settings,
+    children: [
+      { name: 'サイト設定', icon: Globe, page: 'AdminSiteList' },
       { name: 'ドメイン設定', icon: Link2, page: 'AdminDomainSettings' },
       { name: 'SEO設定', icon: Search, page: 'SeoSettings' },
       { name: 'アカウント設定', icon: Settings, page: 'AdminSettings' },
@@ -49,15 +64,36 @@ const userMenuGroups = [
   },
 ];
 
+function getInitialOpenGroups(pathname) {
+  const open = new Set();
+  menuGroups.forEach((group, idx) => {
+    if (!group.single && group.children) {
+      const hasActive = group.children.some(item => pathname.includes(item.page));
+      if (hasActive) open.add(idx);
+    }
+  });
+  return open;
+}
+
 export default function UserSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [openGroups, setOpenGroups] = useState(() => getInitialOpenGroups(location.pathname));
 
   useEffect(() => {
     base44.auth.me()
       .then(user => setIsAdmin(user?.role === 'admin' || user?.role === 'master'))
       .catch(() => setIsAdmin(false));
   }, []);
+
+  const toggleGroup = (idx) => {
+    setOpenGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
 
   return (
     <>
@@ -70,6 +106,7 @@ export default function UserSidebar({ isOpen, onClose }) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
+          {/* Header */}
           <div className="p-5 border-b border-slate-800">
             <div className="flex items-center justify-between">
               <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-3">
@@ -77,8 +114,8 @@ export default function UserSidebar({ isOpen, onClose }) {
                   <Store className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base font-semibold text-white">サイト管理</h1>
-                  <p className="text-xs text-slate-400">ダッシュボード</p>
+                  <h1 className="text-base font-semibold text-white">店舗管理</h1>
+                  <p className="text-xs text-slate-400">管理パネル</p>
                 </div>
               </Link>
               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
@@ -87,41 +124,95 @@ export default function UserSidebar({ isOpen, onClose }) {
             </div>
           </div>
 
+          {/* Nav */}
           <nav className="flex-1 p-3 overflow-y-auto">
-            <div className="space-y-4">
-              {userMenuGroups.map((group) => (
-                <div key={group.label}>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-1">
-                    {group.label}
-                  </p>
-                  <ul className="space-y-0.5">
-                    {group.items.map((item) => {
-                      const isActive = location.pathname.includes(item.page);
-                      return (
-                        <li key={item.name}>
-                          <Link
-                            to={createPageUrl(item.page)}
-                            onClick={onClose}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
-                              isActive
-                                ? "bg-amber-600 text-white"
-                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                            )}
-                          >
-                            <item.icon className="w-4 h-4 shrink-0" />
-                            <span className="font-medium">{item.name}</span>
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <ul className="space-y-1">
+              {menuGroups.map((group, idx) => {
+                if (group.single) {
+                  const isActive = location.pathname.includes(group.page);
+                  return (
+                    <li key={group.label}>
+                      <Link
+                        to={createPageUrl(group.page)}
+                        onClick={onClose}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium",
+                          isActive
+                            ? "bg-amber-600 text-white"
+                            : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        <group.icon className="w-4 h-4 shrink-0" />
+                        <span>{group.label}</span>
+                      </Link>
+                    </li>
+                  );
+                }
+
+                const isOpen = openGroups.has(idx);
+                const hasActive = group.children?.some(item => location.pathname.includes(item.page));
+
+                return (
+                  <li key={group.label}>
+                    <button
+                      onClick={() => toggleGroup(idx)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium",
+                        hasActive
+                          ? "text-amber-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      )}
+                    >
+                      <group.icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1 text-left">{group.label}</span>
+                      <ChevronDown className={cn(
+                        "w-4 h-4 transition-transform duration-200",
+                        isOpen ? "rotate-180" : ""
+                      )} />
+                    </button>
+
+                    {isOpen && (
+                      <ul className="mt-1 ml-3 pl-3 border-l border-slate-700 space-y-0.5">
+                        {group.children.map(item => {
+                          const isActive = location.pathname.includes(item.page);
+                          return (
+                            <li key={item.name}>
+                              <Link
+                                to={createPageUrl(item.page)}
+                                onClick={onClose}
+                                className={cn(
+                                  "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm",
+                                  isActive
+                                    ? "bg-amber-600 text-white"
+                                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                )}
+                              >
+                                <item.icon className="w-3.5 h-3.5 shrink-0" />
+                                <span>{item.name}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
 
+          {/* Footer */}
           <div className="p-3 border-t border-slate-800 space-y-0.5">
+            <Link
+              to={createPageUrl('Home')}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-2.5 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all text-sm"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="font-medium">サイトプレビュー</span>
+            </Link>
             {isAdmin && (
               <Link
                 to={createPageUrl('MasterDashboard')}
