@@ -115,7 +115,7 @@ export default function MasterTemplates() {
         ) : templates.length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center text-slate-400">
-              <LayoutTemplate className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <LayoutDashboard className="w-12 h-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium">テンプレートがありません</p>
               <p className="text-sm mt-1">「テンプレートを追加」から作成してください</p>
             </CardContent>
