@@ -94,9 +94,10 @@ export default function AdminLPList() {
         </div>
         {atLimit && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
-            LP作成数の上限（{limits.lp_create_limit}件）に達しています。管理者に上限引き上げを依頼してください。
+            LP作成数の上限（{limits?.lp_create_limit}件）に達しています。管理者に上限引き上げを依頼してください。
           </div>
         )}
+        <LimitGuard type="lp">
 
         {pages.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
