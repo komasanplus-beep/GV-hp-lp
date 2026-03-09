@@ -3,10 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   LayoutDashboard,
-  Briefcase,
-  CalendarCheck,
-  Users,
-  FileText,
   Settings,
   LogOut,
   Layout,
@@ -16,7 +12,8 @@ import {
   BarChart3,
   X,
   Store,
-  ToggleLeft,
+  Link2,
+  Globe,
   Shield,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -24,9 +21,15 @@ import { cn } from '@/lib/utils';
 
 const userMenuGroups = [
   {
-    label: 'ユーザーダッシュボード',
+    label: 'メニュー',
     items: [
       { name: 'ダッシュボード', icon: LayoutDashboard, page: 'UserDashboard' },
+    ],
+  },
+  {
+    label: 'ホームページ',
+    items: [
+      { name: 'サイト管理', icon: Globe, page: 'AdminSiteList' },
     ],
   },
   {
@@ -40,61 +43,29 @@ const userMenuGroups = [
     ],
   },
   {
-    label: 'ホテル管理',
+    label: 'AI',
     items: [
-      { name: 'サービス管理', icon: Briefcase, page: 'AdminRooms' },
-      { name: '予約管理', icon: CalendarCheck, page: 'AdminBookings' },
-      { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
-      { name: 'コンテンツ', icon: FileText, page: 'AdminContent' },
+      { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
   },
   {
     label: 'アカウント',
     items: [
+      { name: 'ドメイン設定', icon: Link2, page: 'AdminDomainSettings' },
       { name: '設定', icon: Settings, page: 'AdminSettings' },
-    ],
-  },
-];
-
-const masterMenuGroups = [
-  {
-    label: 'マスターダッシュボード',
-    items: [
-      { name: 'ダッシュボード', icon: Shield, page: 'MasterDashboard' },
-    ],
-  },
-  {
-    label: 'ユーザー管理',
-    items: [
-      { name: 'ユーザー一覧', icon: Users, page: 'MasterUsers' },
-      { name: '機能制御', icon: ToggleLeft, page: 'MasterFeatureControl' },
-    ],
-  },
-  {
-    label: 'AI設定',
-    items: [
-      { name: 'AI設定', icon: Settings, page: 'MasterAISettings' },
-      { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
-    ],
-  },
-  {
-    label: 'システム',
-    items: [
-      { name: 'システムログ', icon: FileText, page: 'MasterSystemLogs' },
     ],
   },
 ];
 
 export default function UserSidebar({ isOpen, onClose }) {
   const location = useLocation();
-  const [role, setRole] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    base44.auth.me().then(user => setRole(user?.role || 'user')).catch(() => setRole('user'));
+    base44.auth.me()
+      .then(user => setIsAdmin(user?.role === 'admin' || user?.role === 'master'))
+      .catch(() => setIsAdmin(false));
   }, []);
-
-  const isMaster = role === 'master' || role === 'admin';
-  const menuGroups = isMaster ? masterMenuGroups : userMenuGroups;
 
   return (
     <>
@@ -102,26 +73,21 @@ export default function UserSidebar({ isOpen, onClose }) {
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />
       )}
       <aside className={cn(
-        "fixed top-0 left-0 h-screen w-64 z-50 transition-transform duration-300",
-        isMaster ? "bg-violet-950" : "bg-slate-900",
+        "fixed top-0 left-0 h-screen w-64 bg-slate-900 z-50 transition-transform duration-300",
         "lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className={cn("p-5 border-b", isMaster ? "border-violet-800" : "border-slate-800")}>
+          <div className="p-5 border-b border-slate-800">
             <div className="flex items-center justify-between">
-              <Link to={createPageUrl(isMaster ? 'MasterDashboard' : 'UserDashboard')} className="flex items-center gap-3">
-                <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", isMaster ? "bg-violet-600" : "bg-amber-600")}>
-                  {isMaster ? <Shield className="w-5 h-5 text-white" /> : <Store className="w-5 h-5 text-white" />}
+              <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-amber-600 rounded-lg flex items-center justify-center">
+                  <Store className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base font-semibold text-white">
-                    {isMaster ? 'システム管理' : 'LP管理パネル'}
-                  </h1>
-                  <p className={cn("text-xs", isMaster ? "text-violet-400" : "text-slate-400")}>
-                    {isMaster ? 'Master管理' : 'Userダッシュボード'}
-                  </p>
+                  <h1 className="text-base font-semibold text-white">LP管理パネル</h1>
+                  <p className="text-xs text-slate-400">ユーザーダッシュボード</p>
                 </div>
               </Link>
               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
@@ -133,12 +99,9 @@ export default function UserSidebar({ isOpen, onClose }) {
           {/* Navigation */}
           <nav className="flex-1 p-3 overflow-y-auto">
             <div className="space-y-4">
-              {menuGroups.map((group) => (
+              {userMenuGroups.map((group) => (
                 <div key={group.label}>
-                  <p className={cn(
-                    "text-xs font-semibold uppercase tracking-wider px-3 mb-1",
-                    isMaster ? "text-violet-500" : "text-slate-500"
-                  )}>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-1">
                     {group.label}
                   </p>
                   <ul className="space-y-0.5">
@@ -152,8 +115,8 @@ export default function UserSidebar({ isOpen, onClose }) {
                             className={cn(
                               "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm",
                               isActive
-                                ? isMaster ? "bg-violet-600 text-white" : "bg-amber-600 text-white"
-                                : isMaster ? "text-violet-300 hover:bg-violet-800 hover:text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                                ? "bg-amber-600 text-white"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
                             )}
                           >
                             <item.icon className="w-4 h-4 shrink-0" />
@@ -169,13 +132,20 @@ export default function UserSidebar({ isOpen, onClose }) {
           </nav>
 
           {/* Footer */}
-          <div className={cn("p-3 border-t", isMaster ? "border-violet-800" : "border-slate-800")}>
+          <div className="p-3 border-t border-slate-800 space-y-0.5">
+            {isAdmin && (
+              <Link
+                to={createPageUrl('MasterDashboard')}
+                onClick={onClose}
+                className="flex items-center gap-3 px-3 py-2.5 w-full text-violet-400 hover:bg-slate-800 hover:text-violet-300 rounded-lg transition-all text-sm"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="font-medium">管理者パネルへ</span>
+              </Link>
+            )}
             <button
               onClick={() => base44.auth.logout()}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 w-full rounded-lg transition-all text-sm",
-                isMaster ? "text-violet-400 hover:bg-violet-800 hover:text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
-              )}
+              className="flex items-center gap-3 px-3 py-2.5 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all text-sm"
             >
               <LogOut className="w-4 h-4" />
               <span className="font-medium">ログアウト</span>

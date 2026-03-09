@@ -21,6 +21,7 @@ const menuGroups = [
     items: [
       { name: 'ユーザー一覧', icon: Users, page: 'MasterUsers' },
       { name: '機能制御', icon: ToggleLeft, page: 'MasterFeatureControl' },
+      { name: 'サブスクリプション', icon: CreditCard, page: 'MasterPlans' },
     ],
   },
   {
