@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AdminABTest from './pages/AdminABTest';
+import AdminAIGenerate from './pages/AdminAIGenerate';
 import AdminBlog from './pages/AdminBlog';
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
@@ -68,23 +69,23 @@ import LPView from './pages/LPView';
 import MasterAIKnowledge from './pages/MasterAIKnowledge';
 import MasterAISettings from './pages/MasterAISettings';
 import MasterDashboard from './pages/MasterDashboard';
+import MasterDomainList from './pages/MasterDomainList';
 import MasterFeatureControl from './pages/MasterFeatureControl';
+import MasterLPList from './pages/MasterLPList';
+import MasterPlans from './pages/MasterPlans';
+import MasterSiteList from './pages/MasterSiteList';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterTemplates from './pages/MasterTemplates';
 import MasterUsers from './pages/MasterUsers';
-import UserDashboard from './pages/UserDashboard';
-import AdminAIGenerate from './pages/AdminAIGenerate';
-import MasterPlans from './pages/MasterPlans';
-import MasterSiteList from './pages/MasterSiteList';
-import MasterLPList from './pages/MasterLPList';
-import MasterDomainList from './pages/MasterDomainList';
-import SitePageManager from './pages/SitePageManager';
-import SiteBlockEditor from './pages/SiteBlockEditor';
 import SeoSettings from './pages/SeoSettings';
+import SiteBlockEditor from './pages/SiteBlockEditor';
+import SitePageManager from './pages/SitePageManager';
+import UserDashboard from './pages/UserDashboard';
 
 
 export const PAGES = {
     "AdminABTest": AdminABTest,
+    "AdminAIGenerate": AdminAIGenerate,
     "AdminBlog": AdminBlog,
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
@@ -105,19 +106,18 @@ export const PAGES = {
     "MasterAIKnowledge": MasterAIKnowledge,
     "MasterAISettings": MasterAISettings,
     "MasterDashboard": MasterDashboard,
+    "MasterDomainList": MasterDomainList,
     "MasterFeatureControl": MasterFeatureControl,
+    "MasterLPList": MasterLPList,
+    "MasterPlans": MasterPlans,
+    "MasterSiteList": MasterSiteList,
     "MasterSystemLogs": MasterSystemLogs,
     "MasterTemplates": MasterTemplates,
     "MasterUsers": MasterUsers,
-    "UserDashboard": UserDashboard,
-    "AdminAIGenerate": AdminAIGenerate,
-    "MasterPlans": MasterPlans,
-    "MasterSiteList": MasterSiteList,
-    "MasterLPList": MasterLPList,
-    "MasterDomainList": MasterDomainList,
-    "SitePageManager": SitePageManager,
-    "SiteBlockEditor": SiteBlockEditor,
     "SeoSettings": SeoSettings,
+    "SiteBlockEditor": SiteBlockEditor,
+    "SitePageManager": SitePageManager,
+    "UserDashboard": UserDashboard,
 }
 
 export const pagesConfig = {
