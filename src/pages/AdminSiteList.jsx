@@ -3,37 +3,32 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SiteCreateWizard from '@/components/site/SiteCreateWizard';
 import { toast } from 'sonner';
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: '美容室・ヘアサロン' },
   { value: 'beauty_salon', label: 'エステサロン' },
   { value: 'nail_salon', label: 'ネイルサロン' },
-  { value: 'esthetic_salon', label: 'アイラッシュ・ブロウ' },
+  { value: 'esthetic', label: 'アイラッシュ・ブロウ' },
   { value: 'relaxation', label: 'リラクゼーション・整体' },
   { value: 'clinic', label: 'クリニック・医院' },
-  { value: 'gym', label: 'パーソナルジム・スクール' },
+  { value: 'gym', label: 'パーソナルジム' },
   { value: 'school', label: 'スクール・教室' },
   { value: 'other', label: 'その他' },
 ];
 
-const defaultForm = {
-  site_name: '',
-  business_type: 'hair_salon',
-  subdomain: '',
-  status: 'draft',
-};
-
 export default function AdminSiteList() {
-  const [showDialog, setShowDialog] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(defaultForm);
+  const [showWizard, setShowWizard] = useState(false);
+  const [editSite, setEditSite] = useState(null);
+  const [editForm, setEditForm] = useState({});
   const queryClient = useQueryClient();
 
   const { data: sites = [], isLoading } = useQuery({
@@ -41,25 +36,12 @@ export default function AdminSiteList() {
     queryFn: () => base44.entities.Site.list('-created_date'),
   });
 
-  const { data: templates = [] } = useQuery({
-    queryKey: ['siteTemplates'],
-    queryFn: () => base44.entities.SiteTemplate.list(),
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: async (data) => {
-      const user = await base44.auth.me();
-      const payload = { ...data, user_id: user.id };
-      return editing?.id
-        ? base44.entities.Site.update(editing.id, payload)
-        : base44.entities.Site.create(payload);
-    },
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Site.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
-      setShowDialog(false);
-      setEditing(null);
-      setForm(defaultForm);
-      toast.success(editing ? 'サイトを更新しました' : 'サイトを作成しました');
+      setEditSite(null);
+      toast.success('サイトを更新しました');
     },
   });
 
@@ -71,18 +53,6 @@ export default function AdminSiteList() {
     },
   });
 
-  const openEdit = (site) => {
-    setEditing(site);
-    setForm({ site_name: site.site_name, business_type: site.business_type || 'hair_salon', subdomain: site.subdomain || '', status: site.status || 'draft' });
-    setShowDialog(true);
-  };
-
-  const openNew = () => {
-    setEditing(null);
-    setForm(defaultForm);
-    setShowDialog(true);
-  };
-
   const businessLabel = (val) => BUSINESS_TYPES.find(t => t.value === val)?.label || val;
 
   return (
@@ -91,10 +61,10 @@ export default function AdminSiteList() {
         <div className="max-w-4xl space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">ホームページ一覧</h2>
-              <p className="text-sm text-slate-500 mt-0.5">ユーザーのホームページを管理します</p>
+              <h2 className="text-xl font-bold text-slate-800">サイト一覧</h2>
+              <p className="text-sm text-slate-500 mt-0.5">ホームページを管理します</p>
             </div>
-            <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+            <Button onClick={() => setShowWizard(true)} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
               <Plus className="w-4 h-4" />新規サイト作成
             </Button>
           </div>
@@ -104,39 +74,49 @@ export default function AdminSiteList() {
           ) : sites.length === 0 ? (
             <Card>
               <CardContent className="py-16 text-center text-slate-400">
-                <Globe className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="font-medium">サイトがまだありません</p>
-                <p className="text-sm mt-1">「新規サイト作成」から始めましょう</p>
+                <Globe className="w-14 h-14 mx-auto mb-4 opacity-20" />
+                <p className="font-semibold text-slate-600">サイトがまだありません</p>
+                <p className="text-sm mt-1 mb-6">「新規サイト作成」からウィザードで簡単に作成できます</p>
+                <Button onClick={() => setShowWizard(true)} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+                  <Plus className="w-4 h-4" />最初のサイトを作成
+                </Button>
               </CardContent>
             </Card>
           ) : (
             <div className="grid gap-4">
               {sites.map(site => (
                 <Card key={site.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="py-4 px-5 flex items-center gap-4">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Globe className="w-5 h-5 text-emerald-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-slate-800 truncate">{site.site_name}</h3>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${site.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
-                          {site.status === 'published' ? '公開中' : '下書き'}
-                        </span>
+                  <CardContent className="py-4 px-5">
+                    <div className="flex items-center gap-4">
+                      <div className="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <Globe className="w-5 h-5 text-emerald-600" />
                       </div>
-                      <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-400">
-                        <span>{businessLabel(site.business_type)}</span>
-                        {site.subdomain && <span className="flex items-center gap-1"><ExternalLink className="w-3 h-3" />{site.subdomain}</span>}
-                        {site.domain && <span className="flex items-center gap-1"><ExternalLink className="w-3 h-3" />{site.domain}</span>}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-800 truncate">{site.site_name}</h3>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 ${site.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
+                            {site.status === 'published' ? '公開中' : '下書き'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-400">
+                          <span>{businessLabel(site.business_type)}</span>
+                          {site.subdomain && <span className="flex items-center gap-1"><ExternalLink className="w-3 h-3" />{site.subdomain}</span>}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(site)}>
-                        <Pencil className="w-4 h-4 text-slate-400" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(site.id)}>
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </Button>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <Link to={`${createPageUrl('SitePageManager')}?site_id=${site.id}`}>
+                          <Button variant="outline" size="sm" className="gap-1 text-xs">
+                            <FileText className="w-3.5 h-3.5" />ページ管理
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Button>
+                        </Link>
+                        <Button variant="ghost" size="icon" onClick={() => { setEditSite(site); setEditForm({ site_name: site.site_name, business_type: site.business_type, status: site.status }); }}>
+                          <Pencil className="w-4 h-4 text-slate-400" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(site.id)}>
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -145,20 +125,40 @@ export default function AdminSiteList() {
           )}
         </div>
 
-        {/* Dialog */}
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        {/* Wizard Dialog */}
+        <Dialog open={showWizard} onOpenChange={setShowWizard}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>新規サイト作成</DialogTitle>
+            </DialogHeader>
+            <SiteCreateWizard
+              onComplete={(site) => {
+                queryClient.invalidateQueries({ queryKey: ['sites'] });
+                setShowWizard(false);
+              }}
+              onCancel={() => setShowWizard(false)}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Dialog */}
+        <Dialog open={!!editSite} onOpenChange={() => setEditSite(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>{editing ? 'サイトを編集' : '新規サイト作成'}</DialogTitle>
+              <DialogTitle>サイトを編集</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名 *</label>
-                <Input value={form.site_name} onChange={e => setForm(p => ({ ...p, site_name: e.target.value }))} placeholder="My Salon" />
+                <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名</label>
+                <input
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                  value={editForm.site_name || ''}
+                  onChange={e => setEditForm(p => ({ ...p, site_name: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">業種</label>
-                <Select value={form.business_type} onValueChange={val => setForm(p => ({ ...p, business_type: val }))}>
+                <Select value={editForm.business_type} onValueChange={val => setEditForm(p => ({ ...p, business_type: val }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {BUSINESS_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
@@ -166,15 +166,8 @@ export default function AdminSiteList() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">サブドメイン</label>
-                <div className="flex items-center gap-2">
-                  <Input value={form.subdomain} onChange={e => setForm(p => ({ ...p, subdomain: e.target.value }))} placeholder="my-salon" />
-                  <span className="text-sm text-slate-400 whitespace-nowrap">.service.com</span>
-                </div>
-              </div>
-              <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">ステータス</label>
-                <Select value={form.status} onValueChange={val => setForm(p => ({ ...p, status: val }))}>
+                <Select value={editForm.status} onValueChange={val => setEditForm(p => ({ ...p, status: val }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">下書き</SelectItem>
@@ -183,13 +176,13 @@ export default function AdminSiteList() {
                 </Select>
               </div>
               <div className="flex gap-3 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowDialog(false)}>キャンセル</Button>
+                <Button variant="outline" className="flex-1" onClick={() => setEditSite(null)}>キャンセル</Button>
                 <Button
                   className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => saveMutation.mutate(form)}
-                  disabled={!form.site_name || saveMutation.isPending}
+                  onClick={() => updateMutation.mutate({ id: editSite.id, data: editForm })}
+                  disabled={updateMutation.isPending}
                 >
-                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (editing ? '更新' : '作成')}
+                  {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : '更新'}
                 </Button>
               </div>
             </div>

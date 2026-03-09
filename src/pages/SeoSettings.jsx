@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Search, Save, Globe } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 
 export default function SeoSettings() {
