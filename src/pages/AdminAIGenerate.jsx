@@ -221,7 +221,7 @@ export default function AdminAIGenerate() {
           )}
         </div>
         </LimitGuard>
-      </AdminLayout>
+      </UserLayout>
     </ProtectedRoute>
   );
 }
