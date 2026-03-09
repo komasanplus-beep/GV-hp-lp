@@ -44,11 +44,12 @@ export default function MasterSiteList() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="grid grid-cols-4 bg-slate-50 border-b border-slate-200 px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+        <div className="grid grid-cols-5 bg-slate-50 border-b border-slate-200 px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
           <span>サイト名</span>
           <span>オーナー</span>
           <span>業種</span>
           <span>ステータス</span>
+          <span></span>
         </div>
         {isLoading ? (
           <div className="text-center py-16 text-slate-400">読み込み中...</div>
@@ -56,13 +57,20 @@ export default function MasterSiteList() {
           <div className="text-center py-16 text-slate-400">サイトが見つかりません</div>
         ) : (
           filtered.map(site => (
-            <div key={site.id} className="grid grid-cols-4 px-4 py-3 border-b border-slate-100 hover:bg-slate-50 text-sm items-center">
+            <div key={site.id} className="grid grid-cols-5 px-4 py-3 border-b border-slate-100 hover:bg-slate-50 text-sm items-center">
               <span className="font-medium text-slate-800">{site.site_name}</span>
               <span className="text-slate-500 text-xs truncate">{getUserEmail(site.user_id)}</span>
               <span className="text-slate-600">{BUSINESS_LABELS[site.business_type] || site.business_type}</span>
               <Badge className={site.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
                 {site.status === 'published' ? '公開' : '下書き'}
               </Badge>
+              <div className="flex justify-end">
+                <Button variant="outline" size="sm" asChild>
+                  <a href={`/preview/${site.id}`} target="_blank" rel="noreferrer">
+                    <ExternalLink className="w-3.5 h-3.5 mr-1" />プレビュー
+                  </a>
+                </Button>
+              </div>
             </div>
           ))
         )}
