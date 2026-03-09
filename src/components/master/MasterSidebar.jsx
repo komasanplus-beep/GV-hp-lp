@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
-  Users, ToggleLeft, BarChart2, Settings, BookOpen, FileText,
-  Shield, X, LogOut, Store, ChevronDown, LayoutTemplate
+  Users, ToggleLeft, Settings, BookOpen, FileText,
+  Shield, X, LogOut, Store, ChevronDown, LayoutTemplate,
+  CreditCard, Globe, Layout, Layers
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';

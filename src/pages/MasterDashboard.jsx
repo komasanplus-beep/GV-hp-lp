@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import MasterLayout from '@/components/master/MasterLayout';
-import { Users, ToggleLeft, BarChart2, Settings, BookOpen, FileText, ArrowRight } from 'lucide-react';
+import { Users, ToggleLeft, Settings, BookOpen, FileText, ArrowRight, CreditCard, Globe, Layout, Layers } from 'lucide-react';
 
 const cards = [
   { name: 'Users', desc: 'ユーザーアカウント管理', icon: Users, page: 'MasterUsers', color: 'bg-violet-50 border-violet-200 text-violet-700' },
