@@ -51,6 +51,7 @@ import AdminABTest from './pages/AdminABTest';
 import AdminBlog from './pages/AdminBlog';
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
+import AdminDomainSettings from './pages/AdminDomainSettings';
 import AdminGuests from './pages/AdminGuests';
 import AdminLPAnalytics from './pages/AdminLPAnalytics';
 import AdminLPEditor from './pages/AdminLPEditor';
@@ -58,6 +59,7 @@ import AdminLPGenerate from './pages/AdminLPGenerate';
 import AdminLPList from './pages/AdminLPList';
 import AdminRooms from './pages/AdminRooms';
 import AdminSettings from './pages/AdminSettings';
+import AdminSiteList from './pages/AdminSiteList';
 import BlogPage from './pages/BlogPage';
 import BlogPost from './pages/BlogPost';
 import Dashboard from './pages/Dashboard';
@@ -68,11 +70,10 @@ import MasterAISettings from './pages/MasterAISettings';
 import MasterDashboard from './pages/MasterDashboard';
 import MasterFeatureControl from './pages/MasterFeatureControl';
 import MasterSystemLogs from './pages/MasterSystemLogs';
+import MasterTemplates from './pages/MasterTemplates';
 import MasterUsers from './pages/MasterUsers';
 import UserDashboard from './pages/UserDashboard';
-import AdminSiteList from './pages/AdminSiteList';
-import AdminDomainSettings from './pages/AdminDomainSettings';
-import MasterTemplates from './pages/MasterTemplates';
+import AdminAIGenerate from './pages/AdminAIGenerate';
 
 
 export const PAGES = {
@@ -80,6 +81,7 @@ export const PAGES = {
     "AdminBlog": AdminBlog,
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
+    "AdminDomainSettings": AdminDomainSettings,
     "AdminGuests": AdminGuests,
     "AdminLPAnalytics": AdminLPAnalytics,
     "AdminLPEditor": AdminLPEditor,
@@ -87,6 +89,7 @@ export const PAGES = {
     "AdminLPList": AdminLPList,
     "AdminRooms": AdminRooms,
     "AdminSettings": AdminSettings,
+    "AdminSiteList": AdminSiteList,
     "BlogPage": BlogPage,
     "BlogPost": BlogPost,
     "Dashboard": Dashboard,
@@ -97,11 +100,10 @@ export const PAGES = {
     "MasterDashboard": MasterDashboard,
     "MasterFeatureControl": MasterFeatureControl,
     "MasterSystemLogs": MasterSystemLogs,
+    "MasterTemplates": MasterTemplates,
     "MasterUsers": MasterUsers,
     "UserDashboard": UserDashboard,
-    "AdminSiteList": AdminSiteList,
-    "AdminDomainSettings": AdminDomainSettings,
-    "MasterTemplates": MasterTemplates,
+    "AdminAIGenerate": AdminAIGenerate,
 }
 
 export const pagesConfig = {
