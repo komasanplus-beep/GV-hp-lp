@@ -44,6 +44,7 @@ const menuGroups = [
       { name: 'LP一覧', icon: Layers, page: 'MasterLPList' },
       { name: 'ドメイン一覧', icon: Globe, page: 'MasterDomainList' },
       { name: 'テンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates' },
+      { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
     ],
   },
   {
