@@ -79,6 +79,8 @@ import MasterSiteList from './pages/MasterSiteList';
 import MasterLPList from './pages/MasterLPList';
 import MasterDomainList from './pages/MasterDomainList';
 import SitePageManager from './pages/SitePageManager';
+import SiteBlockEditor from './pages/SiteBlockEditor';
+import SeoSettings from './pages/SeoSettings';
 
 
 export const PAGES = {
@@ -114,6 +116,8 @@ export const PAGES = {
     "MasterLPList": MasterLPList,
     "MasterDomainList": MasterDomainList,
     "SitePageManager": SitePageManager,
+    "SiteBlockEditor": SiteBlockEditor,
+    "SeoSettings": SeoSettings,
 }
 
 export const pagesConfig = {
