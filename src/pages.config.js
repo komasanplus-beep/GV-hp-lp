@@ -78,6 +78,7 @@ import MasterPlans from './pages/MasterPlans';
 import MasterSiteList from './pages/MasterSiteList';
 import MasterLPList from './pages/MasterLPList';
 import MasterDomainList from './pages/MasterDomainList';
+import SitePageManager from './pages/SitePageManager';
 
 
 export const PAGES = {
@@ -112,6 +113,7 @@ export const PAGES = {
     "MasterSiteList": MasterSiteList,
     "MasterLPList": MasterLPList,
     "MasterDomainList": MasterDomainList,
+    "SitePageManager": SitePageManager,
 }
 
 export const pagesConfig = {

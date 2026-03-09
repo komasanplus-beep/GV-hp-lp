@@ -6,15 +6,14 @@ import {
   Settings,
   LogOut,
   Layout,
-  BookOpen,
   Sparkles,
-  FlaskConical,
-  BarChart3,
   X,
   Store,
   Link2,
   Globe,
   Shield,
+  FileText,
+  Search,
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -30,29 +29,22 @@ const userMenuGroups = [
     label: 'ホームページ',
     items: [
       { name: 'サイト管理', icon: Globe, page: 'AdminSiteList' },
+      { name: 'ページ管理', icon: FileText, page: 'SitePageManager' },
     ],
   },
   {
-    label: 'LP・コンテンツ',
+    label: 'LP',
     items: [
       { name: 'LP管理', icon: Layout, page: 'AdminLPList' },
-      { name: 'LP分析', icon: BarChart3, page: 'AdminLPAnalytics' },
-      { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
-      { name: 'ABテスト', icon: FlaskConical, page: 'AdminABTest' },
-      { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
-    ],
-  },
-  {
-    label: 'AI',
-    items: [
-      { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
+      { name: 'AI生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
   },
   {
     label: 'アカウント',
     items: [
       { name: 'ドメイン設定', icon: Link2, page: 'AdminDomainSettings' },
-      { name: '設定', icon: Settings, page: 'AdminSettings' },
+      { name: 'SEO設定', icon: Search, page: 'SeoSettings' },
+      { name: 'アカウント設定', icon: Settings, page: 'AdminSettings' },
     ],
   },
 ];
@@ -78,7 +70,6 @@ export default function UserSidebar({ isOpen, onClose }) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
-          {/* Header */}
           <div className="p-5 border-b border-slate-800">
             <div className="flex items-center justify-between">
               <Link to={createPageUrl('UserDashboard')} className="flex items-center gap-3">
@@ -86,8 +77,8 @@ export default function UserSidebar({ isOpen, onClose }) {
                   <Store className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base font-semibold text-white">LP管理パネル</h1>
-                  <p className="text-xs text-slate-400">ユーザーダッシュボード</p>
+                  <h1 className="text-base font-semibold text-white">サイト管理</h1>
+                  <p className="text-xs text-slate-400">ダッシュボード</p>
                 </div>
               </Link>
               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
@@ -96,7 +87,6 @@ export default function UserSidebar({ isOpen, onClose }) {
             </div>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 p-3 overflow-y-auto">
             <div className="space-y-4">
               {userMenuGroups.map((group) => (
@@ -131,7 +121,6 @@ export default function UserSidebar({ isOpen, onClose }) {
             </div>
           </nav>
 
-          {/* Footer */}
           <div className="p-3 border-t border-slate-800 space-y-0.5">
             {isAdmin && (
               <Link
