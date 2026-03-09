@@ -101,8 +101,8 @@ export default function AdminAIGenerate() {
   return (
     <ProtectedRoute requiredRole="admin">
       <AdminLayout title="AIコンテンツ生成">
-        <div className="max-w-4xl mx-auto space-y-6">
         <LimitGuard type="ai">
+        <div className="max-w-4xl mx-auto space-y-6">
 
           {/* ビジネス情報入力 */}
           <Card>
