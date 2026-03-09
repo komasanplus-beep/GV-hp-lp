@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import MasterLayout from '@/components/master/MasterLayout';
-import { Plus, LayoutTemplate, Pencil, Trash2, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Plus, LayoutDashboard, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
