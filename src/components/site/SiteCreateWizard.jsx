@@ -153,9 +153,19 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
                         ))}
                       </div>
                     </div>
-                    {selectedTemplate?.id === t.id && (
-                      <Check className="w-4 h-4 text-amber-600 flex-shrink-0 mt-1" />
-                    )}
+                    <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+                      <a
+                        href={createPageUrl(`TemplatePreview?key=${t.template_key}`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="p-1 rounded hover:bg-pink-100 text-pink-400 hover:text-pink-600 transition-colors"
+                        title="プレビュー"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </a>
+                      {selectedTemplate?.id === t.id && <Check className="w-4 h-4 text-amber-600" />}
+                    </div>
                   </div>
                 </button>
               ))}
