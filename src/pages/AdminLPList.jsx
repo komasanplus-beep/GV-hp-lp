@@ -7,7 +7,7 @@ import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, ExternalLink, Sparkles } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, Sparkles, Eye } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';

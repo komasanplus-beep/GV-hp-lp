@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
