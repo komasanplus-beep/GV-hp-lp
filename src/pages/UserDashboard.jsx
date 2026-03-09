@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
+import PlanBanner from '@/components/plan/PlanBanner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText } from 'lucide-react';

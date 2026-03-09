@@ -81,6 +81,7 @@ import SeoSettings from './pages/SeoSettings';
 import SiteBlockEditor from './pages/SiteBlockEditor';
 import SitePageManager from './pages/SitePageManager';
 import UserDashboard from './pages/UserDashboard';
+import MasterUserPlans from './pages/MasterUserPlans';
 
 
 export const PAGES = {
@@ -118,6 +119,7 @@ export const PAGES = {
     "SiteBlockEditor": SiteBlockEditor,
     "SitePageManager": SitePageManager,
     "UserDashboard": UserDashboard,
+    "MasterUserPlans": MasterUserPlans,
 }
 
 export const pagesConfig = {
