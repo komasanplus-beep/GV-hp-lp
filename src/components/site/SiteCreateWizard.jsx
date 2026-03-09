@@ -1,17 +1,11 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader2, Check, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const TEMPLATES = [
-  { key: 'beauty', label: 'ビューティー', desc: '美容室・エステ・ネイル向け', color: 'bg-pink-50 border-pink-200', icon: '💅' },
-  { key: 'health', label: 'ヘルス・ボディ', desc: 'ジム・整体・クリニック向け', color: 'bg-green-50 border-green-200', icon: '💪' },
-  { key: 'school', label: 'スクール', desc: '教室・スクール・習い事向け', color: 'bg-blue-50 border-blue-200', icon: '📚' },
-  { key: 'general', label: 'ビジネス汎用', desc: 'どの業種にも対応', color: 'bg-slate-50 border-slate-200', icon: '🏢' },
-];
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: '美容室・ヘアサロン', icon: '✂️' },
@@ -25,35 +19,48 @@ const BUSINESS_TYPES = [
   { value: 'other', label: 'その他', icon: '🏢' },
 ];
 
-const DEFAULT_PAGES = [
-  { title: 'HOME', slug: 'home', page_type: 'home', sort_order: 0 },
-  { title: 'MENU', slug: 'menu', page_type: 'menu', sort_order: 1 },
-  { title: 'STAFF', slug: 'staff', page_type: 'staff', sort_order: 2 },
-  { title: 'GALLERY', slug: 'gallery', page_type: 'gallery', sort_order: 3 },
-  { title: 'CONTACT', slug: 'contact', page_type: 'contact', sort_order: 4 },
-];
-
-const DEFAULT_BLOCKS = {
-  home: ['Hero', 'About', 'Feature', 'Voice', 'CTA'],
-  menu: ['Hero', 'Menu'],
-  staff: ['Hero', 'Staff'],
-  gallery: ['Hero', 'Gallery'],
-  contact: ['Hero', 'Contact', 'Access'],
+const CATEGORY_ICON = {
+  salon: '💅',
+  beauty: '✨',
+  clinic: '🏥',
+  fitness: '💪',
+  school: '📚',
+  general: '🏢',
 };
 
-const STEPS = ['テンプレート選択', '業種選択', 'サイト名入力', 'ページ生成'];
+const STEPS = ['テンプレート選択', '業種選択', 'サイト名入力', '確認・生成'];
 
 export default function SiteCreateWizard({ onComplete, onCancel }) {
   const [step, setStep] = useState(0);
-  const [template, setTemplate] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [businessType, setBusinessType] = useState('');
   const [siteName, setSiteName] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
+  // DBからテンプレート一覧を取得
+  const { data: templates = [], isLoading: templatesLoading } = useQuery({
+    queryKey: ['siteTemplates'],
+    queryFn: () => base44.entities.SiteTemplate.filter({ is_active: true }),
+  });
+
+  // テンプレートのページ・ブロックをプレビュー表示用に整形
+  const previewPages = selectedTemplate?.default_pages || [];
+  const previewBlocks = selectedTemplate?.default_blocks || [];
+
+  const getBlocksForPage = (slug) =>
+    previewBlocks
+      .filter(b => b.page_slug === slug)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(b => b.block_type);
+
   const handleCreate = async () => {
+    if (!selectedTemplate || !siteName.trim()) return;
     setLoading(true);
+
     const user = await base44.auth.me();
+
+    // 1. Site作成
     const site = await base44.entities.Site.create({
       site_name: siteName,
       business_type: businessType,
@@ -61,28 +68,37 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       status: 'draft',
     });
 
-    for (const pageDef of DEFAULT_PAGES) {
+    // 2. default_pages から SitePage 作成、slug→idのマップを保存
+    const pageMap = {}; // slug → page.id
+    for (const pageDef of (selectedTemplate.default_pages || [])) {
       const page = await base44.entities.SitePage.create({
         site_id: site.id,
-        ...pageDef,
+        title: pageDef.title,
+        slug: pageDef.slug,
+        page_type: pageDef.page_type,
+        sort_order: pageDef.sort_order ?? 0,
         status: 'draft',
       });
-      const blocks = DEFAULT_BLOCKS[pageDef.page_type] || ['Hero'];
-      for (let i = 0; i < blocks.length; i++) {
-        await base44.entities.SiteBlock.create({
-          site_id: site.id,
-          page_id: page.id,
-          block_type: blocks[i],
-          sort_order: i,
-          data: {},
-          user_id: user.id,
-        });
-      }
+      pageMap[pageDef.slug] = page.id;
+    }
+
+    // 3. default_blocks から SiteBlock 作成
+    for (const blockDef of (selectedTemplate.default_blocks || [])) {
+      const pageId = pageMap[blockDef.page_slug];
+      if (!pageId) continue;
+      await base44.entities.SiteBlock.create({
+        site_id: site.id,
+        page_id: pageId,
+        block_type: blockDef.block_type,
+        sort_order: blockDef.sort_order ?? 0,
+        data: {},
+        user_id: user.id,
+      });
     }
 
     setLoading(false);
     setDone(true);
-    toast.success('サイトを作成しました！');
+    toast.success(`「${site.site_name}」を作成しました！`);
     setTimeout(() => onComplete(site), 1000);
   };
 
@@ -105,35 +121,53 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         ))}
       </div>
 
-      {/* Step 0: Template */}
+      {/* Step 0: テンプレート選択 */}
       {step === 0 && (
         <div className="space-y-3">
           <p className="text-sm font-medium text-slate-700">テンプレートを選んでください</p>
-          <div className="grid grid-cols-2 gap-3">
-            {TEMPLATES.map(t => (
-              <button
-                key={t.key}
-                onClick={() => setTemplate(t.key)}
-                className={cn(
-                  "border-2 rounded-xl p-4 text-left transition-all hover:shadow-md",
-                  t.color,
-                  template === t.key ? "ring-2 ring-amber-500 ring-offset-1" : ""
-                )}
-              >
-                <div className="text-2xl mb-2">{t.icon}</div>
-                <p className="font-semibold text-sm text-slate-800">{t.label}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{t.desc}</p>
-              </button>
-            ))}
-          </div>
+          {templatesLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+          ) : templates.length === 0 ? (
+            <div className="text-center py-8 text-slate-400 text-sm">テンプレートがありません</div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3">
+              {templates.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTemplate(t)}
+                  className={cn(
+                    "border-2 rounded-xl p-4 text-left transition-all hover:shadow-md w-full",
+                    "bg-pink-50 border-pink-200",
+                    selectedTemplate?.id === t.id ? "ring-2 ring-amber-500 ring-offset-1" : ""
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-2xl">{CATEGORY_ICON[t.category] || '🏢'}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-slate-800">{t.name}</p>
+                      {t.description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{t.description}</p>}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {(t.default_pages || []).map(p => (
+                          <span key={p.slug} className="text-xs bg-white/70 border border-pink-200 rounded px-1.5 py-0.5 text-pink-700">{p.title}</span>
+                        ))}
+                      </div>
+                    </div>
+                    {selectedTemplate?.id === t.id && (
+                      <Check className="w-4 h-4 text-amber-600 flex-shrink-0 mt-1" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={onCancel}>キャンセル</Button>
-            <Button className="flex-1 bg-amber-600 hover:bg-amber-700" disabled={!template} onClick={() => setStep(1)}>次へ</Button>
+            <Button className="flex-1 bg-amber-600 hover:bg-amber-700" disabled={!selectedTemplate} onClick={() => setStep(1)}>次へ</Button>
           </div>
         </div>
       )}
 
-      {/* Step 1: Business type */}
+      {/* Step 1: 業種選択 */}
       {step === 1 && (
         <div className="space-y-3">
           <p className="text-sm font-medium text-slate-700">業種を選んでください</p>
@@ -158,7 +192,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         </div>
       )}
 
-      {/* Step 2: Site name */}
+      {/* Step 2: サイト名 */}
       {step === 2 && (
         <div className="space-y-4">
           <p className="text-sm font-medium text-slate-700">サイト名を入力してください</p>
@@ -176,34 +210,41 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         </div>
       )}
 
-      {/* Step 3: Auto page generation */}
+      {/* Step 3: 確認・生成 */}
       {step === 3 && (
         <div className="space-y-4">
-          <p className="text-sm font-medium text-slate-700">以下のページが自動生成されます</p>
-          <div className="bg-slate-50 rounded-xl p-4 space-y-2">
-            {DEFAULT_PAGES.map(p => (
-              <div key={p.slug} className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Check className="w-3 h-3 text-emerald-600" />
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-slate-700">{p.title}</span>
-                  <span className="text-xs text-slate-400 ml-2">
-                    ({(DEFAULT_BLOCKS[p.page_type] || []).join(', ')})
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="border rounded-xl p-4 bg-amber-50 border-amber-200">
+          <div className="border rounded-xl p-4 bg-amber-50 border-amber-200 space-y-1">
             <p className="text-xs text-amber-700"><strong>サイト名:</strong> {siteName}</p>
-            <p className="text-xs text-amber-700 mt-0.5"><strong>業種:</strong> {BUSINESS_TYPES.find(t => t.value === businessType)?.label}</p>
+            <p className="text-xs text-amber-700"><strong>テンプレート:</strong> {selectedTemplate?.name}</p>
+            <p className="text-xs text-amber-700"><strong>業種:</strong> {BUSINESS_TYPES.find(t => t.value === businessType)?.label}</p>
           </div>
+
+          <p className="text-sm font-medium text-slate-700">生成されるページ構成</p>
+          <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+            {previewPages.map(p => {
+              const blocks = getBlocksForPage(p.slug);
+              return (
+                <div key={p.slug} className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-slate-700">{p.title}</span>
+                    {blocks.length > 0 && (
+                      <span className="text-xs text-slate-400 ml-2">({blocks.join(' → ')})</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {done && (
             <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
               <Check className="w-4 h-4" /> 作成完了！
             </div>
           )}
+
           <div className="flex gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => setStep(2)} disabled={loading}>戻る</Button>
             <Button
