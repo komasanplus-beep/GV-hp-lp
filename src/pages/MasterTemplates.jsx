@@ -142,13 +142,11 @@ export default function MasterTemplates() {
                       <span className="text-xs text-slate-500">{t.is_active !== false ? '有効' : '無効'}</span>
                     </div>
                     <div className="flex gap-1">
-                      {t.preview_image && (
-                        <Button variant="ghost" size="icon" asChild title="プレビュー">
-                          <a href={t.preview_image} target="_blank" rel="noreferrer">
-                            <ExternalLink className="w-4 h-4 text-slate-400" />
-                          </a>
-                        </Button>
-                      )}
+                      <Button variant="ghost" size="icon" asChild title="プレビュー">
+                        <a href={createPageUrl(`TemplatePreview?key=${t.template_key}`)} target="_blank" rel="noreferrer">
+                          <Eye className="w-4 h-4 text-indigo-400" />
+                        </a>
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => openEdit(t)}>
                         <Pencil className="w-4 h-4 text-slate-400" />
                       </Button>
