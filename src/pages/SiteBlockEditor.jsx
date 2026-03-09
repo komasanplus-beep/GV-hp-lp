@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import BlockEditor from '@/components/lp/BlockEditor';
+import SiteBlockEditForm from '@/components/site/SiteBlockEditForm';
 import { Plus, Grip, Trash2, Pencil, Loader2, ChevronLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
