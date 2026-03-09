@@ -11,7 +11,7 @@ const cards = [
   { name: 'サイト一覧', desc: '全ユーザーのサイト管理', icon: Layout, page: 'MasterSiteList', color: 'bg-orange-50 border-orange-200 text-orange-700' },
   { name: 'LP一覧', desc: '全ユーザーのLP管理', icon: Layers, page: 'MasterLPList', color: 'bg-amber-50 border-amber-200 text-amber-700' },
   { name: 'ドメイン一覧', desc: 'ドメイン設定・検証管理', icon: Globe, page: 'MasterDomainList', color: 'bg-teal-50 border-teal-200 text-teal-700' },
-  { name: 'テンプレート', desc: 'サイトテンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+  { name: 'テンプレート', desc: 'サイトテンプレート管理', icon: LayoutDashboard, page: 'MasterTemplates', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
   { name: 'AI設定', desc: 'AIモデル・プロンプト設定', icon: Settings, page: 'MasterAISettings', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { name: 'AIナレッジ', desc: 'ナレッジ登録・管理', icon: BookOpen, page: 'MasterAIKnowledge', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
   { name: 'システムログ', desc: 'システムログの確認', icon: FileText, page: 'MasterSystemLogs', color: 'bg-slate-50 border-slate-200 text-slate-700' },
