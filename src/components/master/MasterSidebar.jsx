@@ -31,8 +31,17 @@ const menuGroups = [
     ],
   },
   {
+    label: 'プラン・課金',
+    items: [
+      { name: 'プラン管理', icon: CreditCard, page: 'MasterPlans' },
+    ],
+  },
+  {
     label: 'コンテンツ管理',
     items: [
+      { name: 'サイト一覧', icon: Layout, page: 'MasterSiteList' },
+      { name: 'LP一覧', icon: Layers, page: 'MasterLPList' },
+      { name: 'ドメイン一覧', icon: Globe, page: 'MasterDomainList' },
       { name: 'テンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates' },
     ],
   },

@@ -5,12 +5,16 @@ import MasterLayout from '@/components/master/MasterLayout';
 import { Users, ToggleLeft, Settings, BookOpen, FileText, ArrowRight, CreditCard, Globe, Layout, Layers } from 'lucide-react';
 
 const cards = [
-  { name: 'Users', desc: 'ユーザーアカウント管理', icon: Users, page: 'MasterUsers', color: 'bg-violet-50 border-violet-200 text-violet-700' },
-  { name: 'UserFeatures', desc: '機能のON/OFF管理', icon: ToggleLeft, page: 'MasterFeatureControl', color: 'bg-purple-50 border-purple-200 text-purple-700' },
-  { name: 'UserLimits', desc: '使用制限の設定', icon: BarChart2, page: 'MasterFeatureControl', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
-  { name: 'AISettings', desc: 'AIモデル・プロンプト設定', icon: Settings, page: 'MasterAISettings', color: 'bg-blue-50 border-blue-200 text-blue-700' },
-  { name: 'AIKnowledge', desc: 'ナレッジ登録・管理', icon: BookOpen, page: 'MasterAIKnowledge', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
-  { name: 'SystemLogs', desc: 'システムログの確認', icon: FileText, page: 'MasterSystemLogs', color: 'bg-slate-50 border-slate-200 text-slate-700' },
+  { name: 'ユーザー管理', desc: 'ユーザーアカウント・停止', icon: Users, page: 'MasterUsers', color: 'bg-violet-50 border-violet-200 text-violet-700' },
+  { name: '機能制御', desc: '機能ON/OFF・使用制限設定', icon: ToggleLeft, page: 'MasterFeatureControl', color: 'bg-purple-50 border-purple-200 text-purple-700' },
+  { name: 'プラン管理', desc: 'サブスクリプションプラン', icon: CreditCard, page: 'MasterPlans', color: 'bg-pink-50 border-pink-200 text-pink-700' },
+  { name: 'サイト一覧', desc: '全ユーザーのサイト管理', icon: Layout, page: 'MasterSiteList', color: 'bg-orange-50 border-orange-200 text-orange-700' },
+  { name: 'LP一覧', desc: '全ユーザーのLP管理', icon: Layers, page: 'MasterLPList', color: 'bg-amber-50 border-amber-200 text-amber-700' },
+  { name: 'ドメイン一覧', desc: 'ドメイン設定・検証管理', icon: Globe, page: 'MasterDomainList', color: 'bg-teal-50 border-teal-200 text-teal-700' },
+  { name: 'テンプレート', desc: 'サイトテンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+  { name: 'AI設定', desc: 'AIモデル・プロンプト設定', icon: Settings, page: 'MasterAISettings', color: 'bg-blue-50 border-blue-200 text-blue-700' },
+  { name: 'AIナレッジ', desc: 'ナレッジ登録・管理', icon: BookOpen, page: 'MasterAIKnowledge', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
+  { name: 'システムログ', desc: 'システムログの確認', icon: FileText, page: 'MasterSystemLogs', color: 'bg-slate-50 border-slate-200 text-slate-700' },
 ];
 
 export default function MasterDashboard() {
