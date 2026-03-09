@@ -99,6 +99,8 @@ export default function AdminLPList() {
         )}
         <LimitGuard type="lp">
 
+        {/* LimitGuardの閉じタグ */}
+        </LimitGuard>
         {pages.length === 0 ? (
           <div className="text-center py-20 text-slate-400">
             <p className="text-lg mb-2">LPがまだありません</p>
