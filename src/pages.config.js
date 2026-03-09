@@ -76,12 +76,13 @@ import MasterPlans from './pages/MasterPlans';
 import MasterSiteList from './pages/MasterSiteList';
 import MasterSystemLogs from './pages/MasterSystemLogs';
 import MasterTemplates from './pages/MasterTemplates';
+import MasterUserPlans from './pages/MasterUserPlans';
 import MasterUsers from './pages/MasterUsers';
 import SeoSettings from './pages/SeoSettings';
 import SiteBlockEditor from './pages/SiteBlockEditor';
 import SitePageManager from './pages/SitePageManager';
 import UserDashboard from './pages/UserDashboard';
-import MasterUserPlans from './pages/MasterUserPlans';
+import TemplatePreview from './pages/TemplatePreview';
 
 
 export const PAGES = {
@@ -114,12 +115,13 @@ export const PAGES = {
     "MasterSiteList": MasterSiteList,
     "MasterSystemLogs": MasterSystemLogs,
     "MasterTemplates": MasterTemplates,
+    "MasterUserPlans": MasterUserPlans,
     "MasterUsers": MasterUsers,
     "SeoSettings": SeoSettings,
     "SiteBlockEditor": SiteBlockEditor,
     "SitePageManager": SitePageManager,
     "UserDashboard": UserDashboard,
-    "MasterUserPlans": MasterUserPlans,
+    "TemplatePreview": TemplatePreview,
 }
 
 export const pagesConfig = {
