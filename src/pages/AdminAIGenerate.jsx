@@ -219,8 +219,8 @@ export default function AdminAIGenerate() {
               </CardContent>
             </Card>
           )}
-        </LimitGuard>
         </div>
+        </LimitGuard>
       </AdminLayout>
     </ProtectedRoute>
   );
