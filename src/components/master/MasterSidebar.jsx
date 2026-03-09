@@ -30,6 +30,12 @@ const menuGroups = [
     ],
   },
   {
+    label: 'コンテンツ管理',
+    items: [
+      { name: 'テンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates' },
+    ],
+  },
+  {
     label: 'システム',
     items: [
       { name: 'システムログ', icon: FileText, page: 'MasterSystemLogs' },
