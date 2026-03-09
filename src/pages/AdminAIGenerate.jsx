@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Copy, Check, Loader2 } from 'lucide-react';
+import LimitGuard from '@/components/plan/LimitGuard';
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: 'ヘアサロン' },
