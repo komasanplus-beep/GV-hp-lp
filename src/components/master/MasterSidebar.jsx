@@ -35,7 +35,6 @@ const menuGroups = [
     label: 'プラン・課金',
     items: [
       { name: 'プラン管理', icon: CreditCard, page: 'MasterPlans' },
-      { name: 'ユーザープラン', icon: Users, page: 'MasterUserPlans' },
     ],
   },
   {
@@ -45,7 +44,6 @@ const menuGroups = [
       { name: 'LP一覧', icon: Layers, page: 'MasterLPList' },
       { name: 'ドメイン一覧', icon: Globe, page: 'MasterDomainList' },
       { name: 'テンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates' },
-      { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
     ],
   },
   {

@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import MasterLayout from '@/components/master/MasterLayout';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, ExternalLink } from 'lucide-react';
 
 const BUSINESS_LABELS = {
   hair_salon: 'ヘアサロン', beauty_salon: '美容サロン', nail_salon: 'ネイルサロン',

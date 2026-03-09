@@ -4,7 +4,9 @@ import { base44 } from '@/api/base44Client';
 import MasterLayout from '@/components/master/MasterLayout';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { createPageUrl } from '@/utils';
+import { Search, ExternalLink } from 'lucide-react';
 
 export default function MasterLPList() {
   const [search, setSearch] = useState('');
