@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
+import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
