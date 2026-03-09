@@ -36,6 +36,9 @@ export default function UserDashboard() {
       <UserLayout title="ダッシュボード">
         <div className="max-w-5xl mx-auto space-y-8">
 
+          {/* Plan Banner */}
+          <PlanBanner />
+
           {/* Stats Banner */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">
             <h2 className="text-xl font-bold mb-1">ようこそ</h2>
