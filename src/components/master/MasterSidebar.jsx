@@ -35,6 +35,7 @@ const menuGroups = [
     label: 'プラン・課金',
     items: [
       { name: 'プラン管理', icon: CreditCard, page: 'MasterPlans' },
+      { name: 'ユーザープラン', icon: Users, page: 'MasterUserPlans' },
     ],
   },
   {
