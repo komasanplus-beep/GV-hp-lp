@@ -114,9 +114,16 @@ export default function SitePageManager() {
                 </Select>
               )}
               {selectedSiteId && (
-                <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
-                  <Plus className="w-4 h-4" />ページ追加
-                </Button>
+                <>
+                  <a href={createPageUrl('Home')} target="_blank" rel="noreferrer">
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Eye className="w-3.5 h-3.5" />プレビュー
+                    </Button>
+                  </a>
+                  <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+                    <Plus className="w-4 h-4" />ページ追加
+                  </Button>
+                </>
               )}
             </div>
           </div>

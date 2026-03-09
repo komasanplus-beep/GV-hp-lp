@@ -80,6 +80,11 @@ export default function AdminLPList() {
                 <Sparkles className="w-4 h-4 mr-1" />AI生成
               </Link>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href={createPageUrl('Home')} target="_blank" rel="noreferrer">
+                <Eye className="w-4 h-4 mr-1" />プレビュー
+              </a>
+            </Button>
             <Button onClick={() => setShowCreate(true)} className="bg-amber-600 hover:bg-amber-700" disabled={atLimit}
               title={atLimit ? 'LP作成数の上限に達しています' : ''}>
               <Plus className="w-4 h-4 mr-2" />新規作成
