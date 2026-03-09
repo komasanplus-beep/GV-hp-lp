@@ -234,7 +234,7 @@ export default function SiteBlockEditor() {
         {editingBlock && (
           <Dialog open={!!editingBlock} onOpenChange={() => setEditingBlock(null)}>
             <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-              <BlockEditor
+              <SiteBlockEditForm
                 block={editingBlock}
                 onSave={(data) => updateMutation.mutate({ id: editingBlock.id, data })}
                 onCancel={() => setEditingBlock(null)}
