@@ -72,6 +72,7 @@ import MasterUsers from './pages/MasterUsers';
 import UserDashboard from './pages/UserDashboard';
 import AdminSiteList from './pages/AdminSiteList';
 import AdminDomainSettings from './pages/AdminDomainSettings';
+import MasterTemplates from './pages/MasterTemplates';
 
 
 export const PAGES = {
@@ -100,6 +101,7 @@ export const PAGES = {
     "UserDashboard": UserDashboard,
     "AdminSiteList": AdminSiteList,
     "AdminDomainSettings": AdminDomainSettings,
+    "MasterTemplates": MasterTemplates,
 }
 
 export const pagesConfig = {
