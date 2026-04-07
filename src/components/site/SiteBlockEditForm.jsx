@@ -4,8 +4,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
-import { Loader2, ImageIcon } from 'lucide-react';
+import { Loader2, ImageIcon, GripVertical } from 'lucide-react';
 import SiteBlockAnimationForm from './SiteBlockAnimationForm';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const SITE_BLOCK_FIELDS = {
   Hero: [
@@ -192,20 +193,58 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
           {field.type === 'image_list' && (
             <div className="space-y-3">
               {Array.isArray(data[field.key]) && data[field.key].length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {data[field.key].map((url, i) => (
-                    <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full h-20 object-cover rounded-lg" />
-                      <button
-                        type="button"
-                        onClick={() => setData(d => ({ ...d, [field.key]: d[field.key].filter((_, idx) => idx !== i) }))}
-                        className="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                <DragDropContext
+                  onDragEnd={(result) => {
+                    const { source, destination } = result;
+                    if (!destination) return;
+                    if (source.index === destination.index) return;
+
+                    const items = Array.from(data[field.key]);
+                    const [movedItem] = items.splice(source.index, 1);
+                    items.splice(destination.index, 0, movedItem);
+                    setData(d => ({ ...d, [field.key]: items }));
+                  }}
+                >
+                  <Droppable droppableId="gallery-images" direction="horizontal">
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="grid grid-cols-3 gap-2 p-2 rounded-lg bg-slate-50"
                       >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                        {data[field.key].map((url, i) => (
+                          <Draggable key={`image-${i}`} draggableId={`image-${i}`} index={i}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`relative group rounded-lg overflow-hidden cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'shadow-lg ring-2 ring-amber-400' : ''}`}
+                              >
+                                <img src={url} alt="" className="w-full h-20 object-cover" />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-between px-2">
+                                  <div {...provided.dragHandleProps} className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <GripVertical className="w-4 h-4 text-white" />
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setData(d => ({ ...d, [field.key]: d[field.key].filter((_, idx) => idx !== i) }))}
+                                    className="bg-red-500 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                                <div className="absolute bottom-1 left-1 bg-slate-800/70 text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                  #{i + 1}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
               )}
               <label className="cursor-pointer block">
                 <Button variant="outline" size="sm" asChild>
