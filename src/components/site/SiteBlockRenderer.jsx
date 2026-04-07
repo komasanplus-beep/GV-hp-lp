@@ -284,26 +284,29 @@ export default function SiteBlockRenderer({ block }) {
     </section>
   );
 
-  if (type === 'Gallery') return (
-    <section className="py-20 bg-slate-50">
-      <div className="max-w-5xl mx-auto px-6">
-        {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
-        {parseLines(d.image_urls).length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {parseLines(d.image_urls).map((url, i) => (
-              <img key={i} src={url} alt="" className="w-full h-48 object-cover rounded-xl" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-slate-200 rounded-xl flex items-center justify-center text-slate-300 text-4xl">🖼</div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
+  if (type === 'Gallery') {
+    const imageUrls = (d.image_urls || '').split('\n').map(s => s.trim()).filter(Boolean);
+    return (
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-5xl mx-auto px-6">
+          {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+          {imageUrls.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {imageUrls.map((url, i) => (
+                <img key={i} src={url} alt="" className="w-full h-48 object-cover rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-48 bg-slate-200 rounded-xl flex items-center justify-center text-slate-300 text-4xl">🖼</div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   if (type === 'Voice') return (
     <section className="py-20 bg-white">

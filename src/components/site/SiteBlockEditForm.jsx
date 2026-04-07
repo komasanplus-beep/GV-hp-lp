@@ -35,10 +35,7 @@ const SITE_BLOCK_FIELDS = {
   ],
   Gallery: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: ギャラリー' },
-    { key: 'image_url_1', label: '画像1', type: 'image' },
-    { key: 'image_url_2', label: '画像2', type: 'image' },
-    { key: 'image_url_3', label: '画像3', type: 'image' },
-    { key: 'image_url_4', label: '画像4', type: 'image' },
+    { key: 'image_urls', label: '画像URL（1行: 1URL）', type: 'textarea', placeholder: 'https://example.com/img1.jpg\nhttps://example.com/img2.jpg\nhttps://example.com/img3.jpg' },
   ],
   Voice: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: お客様の声' },
