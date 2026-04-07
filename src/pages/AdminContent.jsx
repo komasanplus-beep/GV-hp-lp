@@ -74,30 +74,30 @@ export default function AdminContent() {
   const queryClient = useQueryClient();
 
   const { data: content = [], isLoading } = useQuery({
-    queryKey: ['hotelContent'],
-    queryFn: () => base44.entities.HotelContent.list('order'),
+    queryKey: ['salonContent'],
+    queryFn: () => base44.entities.SalonContent.list('order'),
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.HotelContent.create(data),
+    mutationFn: (data) => base44.entities.SalonContent.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotelContent'] });
+      queryClient.invalidateQueries({ queryKey: ['salonContent'] });
       handleCloseModal();
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.HotelContent.update(id, data),
+    mutationFn: ({ id, data }) => base44.entities.SalonContent.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotelContent'] });
+      queryClient.invalidateQueries({ queryKey: ['salonContent'] });
       handleCloseModal();
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.HotelContent.delete(id),
+    mutationFn: (id) => base44.entities.SalonContent.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hotelContent'] });
+      queryClient.invalidateQueries({ queryKey: ['salonContent'] });
       setDeleteContent(null);
     },
   });
@@ -146,9 +146,11 @@ export default function AdminContent() {
 
   const sectionConfig = {
     about: { icon: FileText, label: 'About（紹介）', fields: ['title', 'content'] },
-    facility: { icon: Sparkles, label: '施設', fields: ['title', 'content', 'icon'] },
+    menu: { icon: Sparkles, label: 'メニュー', fields: ['title', 'content', 'price', 'image_url'] },
+    staff: { icon: MessageSquare, label: 'スタッフ', fields: ['staff_name', 'content', 'image_url'] },
     gallery: { icon: Image, label: 'ギャラリー', fields: ['title', 'image_url'] },
-    testimonial: { icon: MessageSquare, label: '口コミ', fields: ['author', 'content', 'rating'] },
+    voice: { icon: Star, label: 'お客様の声', fields: ['title', 'content'] },
+    campaign: { icon: Sparkles, label: 'キャンペーン', fields: ['title', 'content'] },
   };
 
   return (
@@ -308,7 +310,7 @@ export default function AdminContent() {
               </Select>
             </div>
 
-            {(formData.section === 'about' || formData.section === 'facility' || formData.section === 'gallery') && (
+            {formData.section !== 'staff' && (
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">タイトル</label>
                 <Input
@@ -318,17 +320,17 @@ export default function AdminContent() {
               </div>
             )}
 
-            {formData.section === 'testimonial' && (
+            {formData.section === 'staff' && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">投稿者名</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">スタッフ名</label>
                 <Input
-                  value={formData.author}
-                  onChange={(e) => handleChange('author', e.target.value)}
+                  value={formData.staff_name || ''}
+                  onChange={(e) => handleChange('staff_name', e.target.value)}
                 />
               </div>
             )}
 
-            {(formData.section === 'about' || formData.section === 'facility' || formData.section === 'testimonial') && (
+            {['about', 'menu', 'staff', 'voice', 'campaign'].includes(formData.section) && (
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">本文</label>
                 <ReactQuill
@@ -353,45 +355,18 @@ export default function AdminContent() {
               </div>
             )}
 
-            {formData.section === 'facility' && (
+            {formData.section === 'menu' && (
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">アイコン</label>
-                <Select 
-                  value={formData.icon} 
-                  onValueChange={(val) => handleChange('icon', val)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="アイコンを選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {iconOptions.map((icon) => (
-                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">価格</label>
+                <Input
+                  value={formData.price || ''}
+                  onChange={(e) => handleChange('price', e.target.value)}
+                  placeholder="¥5,000"
+                />
               </div>
             )}
 
-            {formData.section === 'testimonial' && (
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">評価</label>
-                <Select 
-                  value={String(formData.rating)} 
-                  onValueChange={(val) => handleChange('rating', parseInt(val))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5].map((r) => (
-                      <SelectItem key={r} value={String(r)}>{r} 星</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {(formData.section === 'gallery' || formData.section === 'about') && (
+            {['gallery', 'about', 'menu', 'staff'].includes(formData.section) && (
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-2 block">画像</label>
                 {formData.image_url ? (

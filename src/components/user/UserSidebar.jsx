@@ -75,16 +75,49 @@ function getInitialOpenGroups(pathname) {
   return open;
 }
 
+// ページ名 → UserFeaturesのキー対応
+const PAGE_FEATURE_MAP = {
+  AdminBookings: 'reservation_manage',
+  AdminGuests: 'guest_manage',
+  AdminContent: null, // コンテンツ管理は常時表示
+  AdminBlog: 'blog_manage',
+  AdminAIGenerate: 'ai_generate',
+  SitePageManager: 'site_manage',
+  AdminRooms: 'site_manage',
+  AdminLPList: 'lp_manage',
+  AdminLPGenerate: 'lp_manage',
+  AdminABTest: 'lp_manage',
+  AdminLPAnalytics: 'lp_manage',
+  AdminDomainSettings: 'domain_manage',
+};
+
 export default function UserSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [features, setFeatures] = useState({});
   const [openGroups, setOpenGroups] = useState(() => getInitialOpenGroups(location.pathname));
 
   useEffect(() => {
-    base44.auth.me()
-      .then(user => setIsAdmin(user?.role === 'admin' || user?.role === 'master'))
-      .catch(() => setIsAdmin(false));
+    base44.auth.me().then(async (user) => {
+      if (!user) return;
+      setIsAdmin(user.role === 'admin' || user.role === 'master');
+      // adminは全機能表示
+      if (user.role === 'admin' || user.role === 'master') {
+        setFeatures({ __all: true });
+        return;
+      }
+      const featuresList = await base44.entities.UserFeatures.filter({ user_id: user.id }).catch(() => []);
+      setFeatures(featuresList[0] || {});
+    }).catch(() => {});
   }, []);
+
+  const isFeatureEnabled = (pageName) => {
+    if (features.__all) return true;
+    const key = PAGE_FEATURE_MAP[pageName];
+    if (key === null) return true; // 常時表示
+    if (!key) return true; // マッピングなし=表示
+    return !!features[key];
+  };
 
   const toggleGroup = (idx) => {
     setOpenGroups(prev => {
@@ -173,7 +206,7 @@ export default function UserSidebar({ isOpen, onClose }) {
 
                     {isOpen && (
                       <ul className="mt-1 ml-3 pl-3 border-l border-slate-700 space-y-0.5">
-                        {group.children.map(item => {
+                        {group.children.filter(item => isFeatureEnabled(item.page)).map(item => {
                           const isActive = location.pathname.includes(item.page);
                           return (
                             <li key={item.name}>
