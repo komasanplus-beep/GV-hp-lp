@@ -5,7 +5,7 @@ import BlockRenderer from '@/components/lp/BlockRenderer';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 
-function LPViewInner({ slug }) {
+function LPViewInner({ slug, preview, token }) {
   const { data: pages = [], isLoading: lpLoading } = useQuery({
     queryKey: ['lpBySlug', slug],
     queryFn: () => base44.entities.LandingPage.filter({ slug }),
@@ -15,10 +15,16 @@ function LPViewInner({ slug }) {
   const lp = pages[0];
   const siteId = lp?.site_id;
 
+  // source_type が pasted_code の場合用の処理
+  const isCodeLP = lp?.source_type === 'pasted_code';
+
+  // 公開状態チェック（下書きで preview=true の場合は表示可）
+  const canView = !lp || lp.status === 'published' || (preview === 'true');
+
   const { data: blocks = [], isLoading: blocksLoading } = useQuery({
     queryKey: ['lpBlocksView', lp?.id],
     queryFn: () => base44.entities.LPBlock.filter({ lp_id: lp.id }, 'sort_order'),
-    enabled: !!lp?.id,
+    enabled: !!lp?.id && !isCodeLP,
   });
 
   // LP固有のSEOデータ (lp_id = lp.id)
@@ -58,7 +64,7 @@ function LPViewInner({ slug }) {
     );
   }
 
-  if (lp.status !== 'published') {
+  if (!canView) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
         <div className="text-center">
@@ -69,6 +75,31 @@ function LPViewInner({ slug }) {
     );
   }
 
+  // コード貼り付けLP の表示
+  if (isCodeLP) {
+    const htmlToDisplay = lp.sanitized_html || lp.html_code || '';
+    const cssToDisplay = lp.css_code || '';
+
+    if (!htmlToDisplay) {
+      return (
+        <div className="min-h-screen flex items-center justify-center text-slate-400">
+          <div className="text-center">
+            <p className="text-xl mb-2">コンテンツが見つかりません</p>
+            <p className="text-sm">{lp.title}</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <style>{cssToDisplay}</style>
+        <div dangerouslySetInnerHTML={{ __html: htmlToDisplay }} />
+      </div>
+    );
+  }
+
+  // ブロック型LP の表示
   return (
     <div className="min-h-screen">
       {blocks.map((block) => (
@@ -82,6 +113,8 @@ export default function LPView() {
   const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
   const slug = urlParams.get('slug') || pathParts[pathParts.indexOf('lp') + 1] || '';
+  const preview = urlParams.get('preview');
+  const token = urlParams.get('token');
 
   if (!slug) {
     return (
@@ -91,5 +124,5 @@ export default function LPView() {
     );
   }
 
-  return <LPViewInner slug={slug} />;
+  return <LPViewInner slug={slug} preview={preview} token={token} />;
 }

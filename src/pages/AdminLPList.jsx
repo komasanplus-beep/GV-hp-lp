@@ -105,10 +105,15 @@ export default function AdminLPList() {
               {usage.lp_count} / {plan.max_lp === -1 ? '∞' : plan.max_lp} 件使用中
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" size="sm" asChild>
               <Link to={createPageUrl('AdminLPGenerate')}>
                 <Sparkles className="w-4 h-4 mr-1" />AI生成
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to={createPageUrl('AdminLPCodeCreator')}>
+                <Plus className="w-4 h-4 mr-1" />コード貼り付け
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
@@ -137,11 +142,16 @@ export default function AdminLPList() {
             {pages.map((lp) => (
               <div key={lp.id} className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3 mb-1 flex-wrap">
                     <span className="font-semibold text-slate-800">{lp.title}</span>
                     <Badge variant={lp.status === 'published' ? 'default' : 'secondary'}>
                       {lp.status === 'published' ? '公開中' : '下書き'}
                     </Badge>
+                    {lp.source_type === 'pasted_code' && (
+                      <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                        コード貼り付け
+                      </Badge>
+                    )}
                     <Badge variant="outline" className="text-xs">
                       {BUILTIN_TEMPLATES.find(t => t.value === lp.template_type)?.label || lp.template_type}
                     </Badge>

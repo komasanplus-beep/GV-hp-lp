@@ -1,0 +1,68 @@
+{
+  "name": "LandingPageAsset",
+  "type": "object",
+  "properties": {
+    "landing_page_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u3059\u308bLandingPage\u306eID"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u30d5\u30a1\u30a4\u30eb\u540d"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u5f8c\u306e\u30d5\u30a1\u30a4\u30ebURL"
+    },
+    "original_url": {
+      "type": "string",
+      "description": "HTML\u5185\u306e\u5143\u306eURL\uff08\u7f6e\u63db\u5bfe\u8c61\uff09"
+    },
+    "alt_text": {
+      "type": "string",
+      "description": "\u753b\u50cf\u306ealt\u30c6\u30ad\u30b9\u30c8"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "\u8868\u793a\u9806\u5e8f"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "document",
+        "video"
+      ],
+      "default": "image",
+      "description": "\u30a2\u30bb\u30c3\u30c8\u30bf\u30a4\u30d7"
+    }
+  },
+  "required": [
+    "landing_page_id",
+    "file_name",
+    "file_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

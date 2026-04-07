@@ -1,0 +1,116 @@
+{
+  "name": "LandingPage",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "LP \u30bf\u30a4\u30c8\u30eb"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL \u30b9\u30e9\u30c3\u30b0 (\u4f8b: my-lp)"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u8aac\u660e\u30e1\u30e2"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft",
+      "description": "\u516c\u958b\u72b6\u614b"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "ai",
+        "pasted_code",
+        "template"
+      ],
+      "default": "template",
+      "description": "\u4f5c\u6210\u65b9\u6cd5\uff08AI\u751f\u6210 / \u30b3\u30fc\u30c9\u8cbc\u308a\u4ed8\u3051 / \u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\uff09"
+    },
+    "template_type": {
+      "type": "string",
+      "enum": [
+        "new_service",
+        "proven_service",
+        "default",
+        "salon",
+        "beauty",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u7a2e\u5225"
+    },
+    "html_code": {
+      "type": "string",
+      "description": "HTML\u30b3\u30fc\u30c9\uff08\u30b3\u30fc\u30c9\u8cbc\u308a\u4ed8\u3051\u6642\uff09"
+    },
+    "css_code": {
+      "type": "string",
+      "description": "CSS\u30b3\u30fc\u30c9"
+    },
+    "js_code": {
+      "type": "string",
+      "description": "\u30ab\u30b9\u30bf\u30e0JS\u30b3\u30fc\u30c9\uff08\u5c06\u6765\u5bfe\u5fdc\uff09"
+    },
+    "sanitized_html": {
+      "type": "string",
+      "description": "\u30b5\u30cb\u30bf\u30a4\u30ba\u6e08\u307fHTML\uff08\u8868\u793a\u7528\uff09"
+    },
+    "extracted_image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "HTML\u304b\u3089\u62bd\u51fa\u3055\u308c\u305f\u753b\u50cfURL\u4e00\u89a7"
+    },
+    "preview_token": {
+      "type": "string",
+      "description": "\u30d7\u30ec\u30d3\u30e5\u30fc\u7528\u30c8\u30fc\u30af\u30f3"
+    },
+    "cover_image_url": {
+      "type": "string",
+      "description": "\u30ab\u30d0\u30fc\u753b\u50cfURL"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u7528\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "site_id": {
+      "type": "string",
+      "description": "\u7d10\u4ed8\u3051\u30b5\u30a4\u30c8ID\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u516c\u958b\u65e5\u6642"
+    }
+  },
+  "required": [
+    "title",
+    "slug"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
