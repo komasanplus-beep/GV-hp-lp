@@ -6,16 +6,11 @@ import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { Loader2, ImageIcon, GripVertical } from 'lucide-react';
 import SiteBlockAnimationForm from './SiteBlockAnimationForm';
+import HeroEditForm from './HeroEditForm';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const SITE_BLOCK_FIELDS = {
-  Hero: [
-    { key: 'headline', label: 'メインキャッチコピー', type: 'text', placeholder: '例: あなたの美しさを引き出す' },
-    { key: 'subheadline', label: 'サブテキスト', type: 'textarea', placeholder: '例: 渋谷のヘアサロン' },
-    { key: 'cta_text', label: 'ボタンテキスト', type: 'text', placeholder: '例: 予約する' },
-    { key: 'cta_url', label: 'ボタンURL', type: 'text', placeholder: 'https://...' },
-    { key: 'image_url', label: '背景画像', type: 'image' },
-  ],
+  Hero: [],
   About: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: 私たちについて' },
     { key: 'body', label: '本文', type: 'textarea', placeholder: 'サロンの紹介文...' },
@@ -128,6 +123,15 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
           </p>
         )}
       </div>
+
+      {block.block_type === 'Hero' && (
+        <HeroEditForm
+          data={data}
+          onDataChange={setData}
+          uploading={uploading}
+          onUpload={handleUpload}
+        />
+      )}
 
       {fields.map(field => (
         <div key={field.key}>

@@ -7,6 +7,7 @@ import { Star, CheckCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import AnimatedBlock from './AnimatedBlock';
+import ImageSlider from './ImageSlider';
 
 const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
 const parsePairs = (text) => parseLines(text).map(line => {
@@ -221,23 +222,127 @@ export default function SiteBlockRenderer({ block }) {
   let content;
 
   if (type === 'Hero') {
+    const heroMode = d.hero_mode || 'single';
+    const isSlider = heroMode === 'slider' && Array.isArray(d.image_urls) && d.image_urls.length > 0;
+    const bgImage = isSlider ? null : (d.image_url || null);
+
+    // Image filters
+    const imageFilters = {
+      opacity: d.image_opacity ?? 1,
+      brightness: d.image_brightness ?? 100,
+      contrast: d.image_contrast ?? 100,
+      blur: d.image_blur ?? 0,
+      scale: d.image_scale ?? 1,
+      position: d.image_position || 'center',
+    };
+
+    // Overlay styles
+    const overlayType = d.overlay_type || 'none';
+    let overlayStyle = {};
+    if (overlayType === 'color') {
+      const color = d.overlay_color || '#000000';
+      const opacity = d.overlay_opacity ?? 0.5;
+      overlayStyle = {
+        backgroundColor: color,
+        opacity: opacity,
+      };
+    } else if (overlayType === 'gradient') {
+      const from = d.gradient_from || '#000000';
+      const to = d.gradient_to || '#ffffff';
+      const dir = d.gradient_direction || 'to-bottom';
+      const dirs = {
+        'to-bottom': '180deg',
+        'to-right': '90deg',
+        'to-bottom-right': '135deg',
+        'to-top': '0deg',
+      };
+      overlayStyle = {
+        background: `linear-gradient(${dirs[dir]}, ${from}, ${to})`,
+      };
+    } else if (overlayType === 'mesh') {
+      overlayStyle = {
+        background: `
+          repeating-linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.1) 2px, transparent 2px, transparent 4px),
+          repeating-linear-gradient(-45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 2px, transparent 2px, transparent 4px)
+        `,
+      };
+    }
+
+    // Text styles
+    const textAlign = d.text_align || 'center';
+    const textColor = d.text_color || '#ffffff';
+    const textShadow = d.text_shadow ? '0 2px 8px rgba(0,0,0,0.5)' : 'none';
+
     content = (
       <section
         className="relative min-h-screen flex items-center justify-center text-white"
         style={{
-          background: d.image_url
-            ? `linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)) center/cover, url(${d.image_url}) center/cover no-repeat`
-            : 'linear-gradient(135deg,#1a1a2e 0%,#16213e 100%)'
+          backgroundColor: '#1a1a2e',
+          textAlign: textAlign,
         }}
       >
-        <div className="max-w-3xl mx-auto px-6 text-center">
+        {/* Background Image / Slider */}
+        <div className="absolute inset-0 overflow-hidden">
+          {isSlider ? (
+            <ImageSlider
+              images={d.image_urls}
+              interval={d.slide_interval || 3000}
+              transitionType={d.transition_type || 'fade'}
+              autoplay={d.autoplay !== false}
+              loop={d.loop !== false}
+              filters={imageFilters}
+            />
+          ) : bgImage ? (
+            <img
+              src={bgImage}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                filter: `opacity(${imageFilters.opacity}) brightness(${imageFilters.brightness}%) contrast(${imageFilters.contrast}%) blur(${imageFilters.blur}px)`,
+                transform: `scale(${imageFilters.scale})`,
+                objectPosition: imageFilters.position,
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800" />
+          )}
+
+          {/* Overlay */}
+          {overlayType !== 'none' && (
+            <div className="absolute inset-0" style={overlayStyle} />
+          )}
+        </div>
+
+        {/* Text Content */}
+        <div className="relative max-w-3xl mx-auto px-6 z-10">
           {d.eyebrow && <p className="text-amber-400 tracking-widest text-sm uppercase mb-4">{d.eyebrow}</p>}
-          <h1 className="text-4xl md:text-6xl font-light mb-6 leading-tight" style={{ fontFamily: 'serif' }}>
+          <h1
+            className="text-4xl md:text-6xl font-light mb-6 leading-tight"
+            style={{
+              fontFamily: 'serif',
+              color: textColor,
+              textShadow: textShadow,
+            }}
+          >
             {d.headline || d.title || block.site_name || 'Welcome'}
           </h1>
-          {d.subheadline && <p className="text-lg text-white/80 mb-10 font-light">{d.subheadline}</p>}
+          {d.subheadline && (
+            <p
+              className="text-lg mb-10 font-light"
+              style={{
+                color: textColor,
+                opacity: 0.9,
+                textShadow: textShadow,
+              }}
+            >
+              {d.subheadline}
+            </p>
+          )}
           {d.cta_text && (
-            <a href={d.cta_url || '#contact'} className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-10 py-4 text-lg font-light tracking-wide transition-colors">
+            <a
+              href={d.cta_url || '#contact'}
+              className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-10 py-4 text-lg font-light tracking-wide transition-colors"
+            >
               {d.cta_text}
             </a>
           )}
