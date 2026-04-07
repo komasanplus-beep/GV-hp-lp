@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SiteBlockEditForm from '@/components/site/SiteBlockEditForm';
-import { Plus, Grip, Trash2, Pencil, Loader2, ChevronLeft } from 'lucide-react';
+import { Plus, Trash2, Pencil, Loader2, ChevronLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -175,15 +175,17 @@ export default function SiteBlockEditor() {
                       variant="ghost" size="icon"
                       className="w-7 h-7 text-current opacity-60 hover:opacity-100"
                       onClick={() => moveBlock(block, -1)} disabled={idx === 0}
+                      title="上に移動"
                     >
-                      <Grip className="w-4 h-4 rotate-90 scale-x-[-1]" />
+                      <ChevronUp className="w-5 h-5 font-bold" />
                     </Button>
                     <Button
                       variant="ghost" size="icon"
                       className="w-7 h-7 text-current opacity-60 hover:opacity-100"
                       onClick={() => moveBlock(block, 1)} disabled={idx === blocks.length - 1}
+                      title="下に移動"
                     >
-                      <Grip className="w-4 h-4 rotate-90" />
+                      <ChevronDown className="w-5 h-5 font-bold" />
                     </Button>
                     <Button
                       variant="ghost" size="icon"
