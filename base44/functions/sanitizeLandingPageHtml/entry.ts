@@ -12,6 +12,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'html_code is required' }, { status: 400 });
     }
 
+    // サイズバリデーション
+    const MAX_HTML = 10 * 1024 * 1024; // 10MB
+    const MAX_CSS = 2 * 1024 * 1024;   // 2MB
+
+    if (html_code.length > MAX_HTML) {
+      return Response.json({
+        error: `HTMLコードが大きすぎます (${(html_code.length / 1024 / 1024).toFixed(2)}MB > 10MB)`,
+        code: 'SIZE_LIMIT_EXCEEDED'
+      }, { status: 413 });
+    }
+
+    if (css_code && css_code.length > MAX_CSS) {
+      return Response.json({
+        error: `CSSコードが大きすぎます (${(css_code.length / 1024 / 1024).toFixed(2)}MB > 2MB)`,
+        code: 'SIZE_LIMIT_EXCEEDED'
+      }, { status: 413 });
+    }
+
     // サニタイズ処理
     let sanitized = html_code;
 

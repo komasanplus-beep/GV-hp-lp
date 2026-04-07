@@ -164,7 +164,18 @@ export default function AdminLPCodeCreator() {
     },
     onError: (err) => {
       console.error('Save error details:', err);
-      const errorMsg = err.response?.data?.error || err.message || '保存に失敗しました';
+      let errorMsg = '保存に失敗しました';
+      const status = err.response?.status;
+      const data = err.response?.data;
+
+      if (status === 413) {
+        errorMsg = data?.error || 'ファイルサイズが大きすぎます（10MBまで）';
+      } else if (status === 400) {
+        errorMsg = data?.error || '入力データが無効です';
+      } else {
+        errorMsg = data?.error || err.message || errorMsg;
+      }
+
       toast({
         title: '保存エラー',
         description: errorMsg,

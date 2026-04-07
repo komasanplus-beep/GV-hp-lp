@@ -30,6 +30,32 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'title, slug, html_code are required' }, { status: 400 });
   }
 
+  // サイズバリデーション
+  const MAX_HTML = 10 * 1024 * 1024; // 10MB
+  const MAX_CSS = 2 * 1024 * 1024;   // 2MB
+  const MAX_JS = 1 * 1024 * 1024;    // 1MB
+
+  if (html_code.length > MAX_HTML) {
+    return Response.json({
+      error: `HTMLコードが大きすぎます (${(html_code.length / 1024 / 1024).toFixed(2)}MB > 10MB)`,
+      code: 'SIZE_LIMIT_EXCEEDED'
+    }, { status: 413 });
+  }
+
+  if (css_code && css_code.length > MAX_CSS) {
+    return Response.json({
+      error: `CSSコードが大きすぎます (${(css_code.length / 1024 / 1024).toFixed(2)}MB > 2MB)`,
+      code: 'SIZE_LIMIT_EXCEEDED'
+    }, { status: 413 });
+  }
+
+  if (typeof sanitized_html === 'string' && sanitized_html.length > MAX_HTML) {
+    return Response.json({
+      error: `サニタイズ済みHTMLが大きすぎます (${(sanitized_html.length / 1024 / 1024).toFixed(2)}MB > 10MB)`,
+      code: 'SIZE_LIMIT_EXCEEDED'
+    }, { status: 413 });
+  }
+
   // preview_token を生成
   const preview_token = crypto.getRandomValues(new Uint8Array(16))
     .reduce((a, b) => a + b.toString(16), '');

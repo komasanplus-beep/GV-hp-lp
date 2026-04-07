@@ -48,19 +48,23 @@
     },
     "html_code": {
       "type": "string",
-      "description": "HTML\u30b3\u30fc\u30c9\uff08\u30b3\u30fc\u30c9\u8cbc\u308a\u4ed8\u3051\u6642\uff09"
+      "maxLength": 10485760,
+      "description": "HTML\u30b3\u30fc\u30c9\uff08\u30b3\u30fc\u30c9\u8cbc\u308a\u4ed8\u3051\u6642\u3001\u6700\u592710MB\uff09"
     },
     "css_code": {
       "type": "string",
-      "description": "CSS\u30b3\u30fc\u30c9"
+      "maxLength": 2097152,
+      "description": "CSS\u30b3\u30fc\u30c9\uff08\u6700\u59272MB\uff09"
     },
     "js_code": {
       "type": "string",
-      "description": "\u30ab\u30b9\u30bf\u30e0JS\u30b3\u30fc\u30c9\uff08\u5c06\u6765\u5bfe\u5fdc\uff09"
+      "maxLength": 1048576,
+      "description": "\u30ab\u30b9\u30bf\u30e0JS\u30b3\u30fc\u30c9\uff08\u5c06\u6765\u5bfe\u5fdc\u3001\u6700\u59271MB\uff09"
     },
     "sanitized_html": {
       "type": "string",
-      "description": "\u30b5\u30cb\u30bf\u30a4\u30ba\u6e08\u307fHTML\uff08\u8868\u793a\u7528\uff09"
+      "maxLength": 10485760,
+      "description": "\u30b5\u30cb\u30bf\u30a4\u30ba\u6e08\u307fHTML\uff08\u8868\u793a\u7528\u3001\u6700\u592710MB\uff09"
     },
     "extracted_image_urls": {
       "type": "array",
@@ -83,7 +87,7 @@
     },
     "site_id": {
       "type": "string",
-      "description": "\u7d10\u4ed8\u3051\u30b5\u30a4\u30c8ID\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+      "description": "\u7d10\u4ed8\u3051\u5148\u30b5\u30a4\u30c8ID\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
     },
     "published_at": {
       "type": "string",
