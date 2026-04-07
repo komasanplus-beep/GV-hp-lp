@@ -99,6 +99,9 @@ function ServiceBlock({ d, siteId }) {
       : Promise.resolve([]),
   });
 
+  const [searchParams] = React.useState(new URLSearchParams(window.location.search));
+  const isPreview = searchParams.get('preview') === 'true';
+
   return (
     <section className="py-20 bg-slate-50">
       <div className="max-w-4xl mx-auto px-6">
@@ -107,16 +110,23 @@ function ServiceBlock({ d, siteId }) {
         {services.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map(svc => (
-              <div key={svc.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <a
+                key={svc.id}
+                href={`/service/${svc.id}?site_id=${siteId}${isPreview ? '&preview=true' : ''}`}
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow hover:scale-105 transform transition-transform duration-200 cursor-pointer"
+              >
                 {svc.image_url && (
                   <img src={svc.image_url} alt={svc.name} className="w-full h-40 object-cover" />
                 )}
                 <div className="p-5">
                   <h3 className="font-semibold text-slate-800 mb-1">{svc.name}</h3>
                   {svc.description && <p className="text-sm text-slate-500 mb-3 line-clamp-2">{svc.description}</p>}
-                  {svc.price > 0 && <span className="text-amber-600 font-medium">¥{svc.price.toLocaleString()}</span>}
+                  <div className="flex items-center justify-between">
+                    {svc.price > 0 && <span className="text-amber-600 font-medium">¥{svc.price.toLocaleString()}</span>}
+                    <span className="text-xs text-emerald-600 font-medium">詳しく見る →</span>
+                  </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         ) : (
