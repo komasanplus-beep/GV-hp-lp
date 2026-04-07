@@ -16,7 +16,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // 公開ルートの場合は認証チェックをスキップ
     const location = window.location.pathname;
-    const isPublicRoute = ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p));
+    const search = window.location.search;
+    const isPublicRoute = 
+      ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) ||
+      search.includes('site_id=') || // SiteView
+      search.includes('slug=');      // LPView
     
     if (isPublicRoute) {
       setIsLoadingPublicSettings(false);

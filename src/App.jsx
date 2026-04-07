@@ -26,7 +26,11 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const location = window.location.pathname;
-  const isPublicRoute = ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) || location === '/*';
+  const search = window.location.search;
+  const isPublicRoute = 
+    ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) ||
+    search.includes('site_id=') || // SiteView query
+    search.includes('slug=');       // LPView query
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
   // Show loading spinner while checking app public settings (only for protected routes)
