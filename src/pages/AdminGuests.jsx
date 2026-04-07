@@ -60,10 +60,16 @@ export default function AdminGuests() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const queryClient = useQueryClient();
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  const siteId = urlParams.get('site_id');
 
   const { data: guests = [], isLoading } = useQuery({
-    queryKey: ['guests'],
-    queryFn: () => base44.entities.Guest.list('-created_date'),
+    queryKey: ['guests', siteId],
+    queryFn: () => (siteId
+      ? base44.entities.Guest.filter({ site_id: siteId }, '-created_date')
+      : []),
+    enabled: !!siteId,
   });
 
   const { data: bookings = [] } = useQuery({
@@ -72,9 +78,9 @@ export default function AdminGuests() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Guest.create(data),
+    mutationFn: (data) => base44.entities.Guest.create({ ...data, site_id: siteId }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests'] });
+      queryClient.invalidateQueries({ queryKey: ['guests', siteId] });
       handleCloseModal();
     },
   });
@@ -82,7 +88,7 @@ export default function AdminGuests() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Guest.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests'] });
+      queryClient.invalidateQueries({ queryKey: ['guests', siteId] });
       handleCloseModal();
     },
   });
@@ -90,7 +96,7 @@ export default function AdminGuests() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Guest.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests'] });
+      queryClient.invalidateQueries({ queryKey: ['guests', siteId] });
       setDeleteGuest(null);
     },
   });

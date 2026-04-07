@@ -10,12 +10,16 @@ import { Calendar, Tag, ChevronRight } from 'lucide-react';
 export default function BlogPage() {
   const urlParams = new URLSearchParams(window.location.search);
   const categoryId = urlParams.get('category');
+  const siteId = urlParams.get('site_id');
   const [selectedCategory, setSelectedCategory] = useState(categoryId || '');
   const [selectedMonth, setSelectedMonth] = useState('');
 
   const { data: posts = [] } = useQuery({
-    queryKey: ['blogPosts'],
-    queryFn: () => base44.entities.BlogPost.list('-created_date', 100),
+    queryKey: ['blogPosts', siteId],
+    queryFn: () => (siteId
+      ? base44.entities.BlogPost.filter({ site_id: siteId }, '-created_date', 100)
+      : []),
+    enabled: !!siteId,
   });
   const { data: categories = [] } = useQuery({
     queryKey: ['blogCategories'],
