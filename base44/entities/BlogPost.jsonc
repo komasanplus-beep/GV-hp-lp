@@ -50,6 +50,7 @@
     }
   },
   "required": [
+    "site_id",
     "title"
   ],
   "rls": {

@@ -27,6 +27,14 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Site not found' }, { status: 404 });
   }
 
+  // enabled_features 互換処理（旧サイトは全機能有効を想定）
+  site.enabled_features = site.enabled_features ?? {
+    booking: true,
+    blog: true,
+    customer: true,
+    inquiry: true,
+  };
+
   // 公開判定
   if (site.status !== 'published') {
     if (!preview) {

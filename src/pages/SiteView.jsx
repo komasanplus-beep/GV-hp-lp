@@ -28,6 +28,16 @@ function SiteViewInner({ siteId, isPreview }) {
   const blocks = data?.blocks || [];
   const seo = data?.seo || null;
 
+  // enabled_features 互換処理（旧サイトは全機能有効を想定）
+  if (site) {
+    site.enabled_features = site.enabled_features ?? {
+      booking: true,
+      blog: true,
+      customer: true,
+      inquiry: true,
+    };
+  }
+
   // section パラメータで booking/contact にスクロール遷移（Hook の呼び出しルール遵守）
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

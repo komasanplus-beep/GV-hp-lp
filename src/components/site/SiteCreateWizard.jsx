@@ -123,25 +123,40 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
     if (features.blog && initialData.blog_posts?.length > 0) {
       for (const post of initialData.blog_posts) {
         await base44.entities.BlogPost.create({
-          ...post,
           site_id: site.id,
           user_id: user.id,
-          status: post.status || 'published',
+          status: 'published',
+          ...post,
         });
       }
     }
 
-    // 6. 初期予約サンプルを生成
+    // 6. 初期予約サンプルを生成（Reservation）
     if (features.booking && initialData.bookings?.length > 0) {
       for (const booking of initialData.bookings) {
-        await base44.entities.Booking.create({
-          ...booking,
+        await base44.entities.Reservation.create({
           site_id: site.id,
+          status: 'pending',
+          ...booking,
         });
       }
     }
 
-    // 7. usage increment
+    // 7. 初期予約サンプルを生成（Booking レガシー対応）
+    if (features.booking && initialData.bookings?.length > 0) {
+      try {
+        for (const booking of initialData.bookings) {
+          await base44.entities.Booking.create({
+            site_id: site.id,
+            ...booking,
+          });
+        }
+      } catch {
+        // Booking エンティティがない場合はスキップ
+      }
+    }
+
+    // 8. usage increment
     await incrementUsage('site_count');
 
     setLoading(false);
