@@ -1,0 +1,82 @@
+{
+  "name": "Site",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "site_name": {
+      "type": "string"
+    },
+    "business_type": {
+      "type": "string",
+      "enum": [
+        "hair_salon",
+        "beauty_salon",
+        "nail_salon",
+        "esthetic",
+        "relaxation",
+        "gym",
+        "clinic",
+        "school",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "enabled_features": {
+      "type": "object",
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u304b\u3089\u5f15\u304d\u7d99\u3044\u3060\u6709\u52b9\u6a5f\u80fd\u30d5\u30e9\u30b0\u3002\u4f8b: { booking: true, blog: true, inquiry: true, customer: true }",
+      "properties": {
+        "booking": {
+          "type": "boolean",
+          "default": false
+        },
+        "blog": {
+          "type": "boolean",
+          "default": false
+        },
+        "inquiry": {
+          "type": "boolean",
+          "default": true
+        },
+        "customer": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "site_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -3,11 +3,19 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Check, ChevronRight, Eye } from 'lucide-react';
+import { Loader2, Check, ChevronRight, Eye, Calendar, BookOpen, MessageSquare, Users } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { incrementUsage } from '@/lib/planUsage';
+
+// 機能フラグの表示設定
+const FEATURE_CONFIG = {
+  booking:  { label: '予約管理',     icon: Calendar,      color: 'text-blue-600',   bg: 'bg-blue-50',   border: 'border-blue-200' },
+  blog:     { label: 'ブログ・お知らせ', icon: BookOpen,   color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
+  inquiry:  { label: '問い合わせ管理', icon: MessageSquare, color: 'text-amber-600',  bg: 'bg-amber-50',  border: 'border-amber-200' },
+  customer: { label: '顧客管理',     icon: Users,          color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200' },
+};
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: '美容室・ヘアサロン', icon: '✂️' },
@@ -61,17 +69,20 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
     setLoading(true);
 
     const user = await base44.auth.me();
+    const features = selectedTemplate.enabled_features || {};
+    const initialData = selectedTemplate.initial_data || {};
 
-    // 1. Site作成
+    // 1. Site作成（有効機能フラグを保存）
     const site = await base44.entities.Site.create({
       site_name: siteName,
       business_type: businessType,
       user_id: user.id,
       status: 'draft',
+      enabled_features: features,
     });
 
-    // 2. default_pages から SitePage 作成、slug→idのマップを保存
-    const pageMap = {}; // slug → page.id
+    // 2. default_pages から SitePage 作成
+    const pageMap = {};
     for (const pageDef of (selectedTemplate.default_pages || [])) {
       const page = await base44.entities.SitePage.create({
         site_id: site.id,
@@ -84,7 +95,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       pageMap[pageDef.slug] = page.id;
     }
 
-    // 3. default_blocks から SiteBlock 作成 (テンプレートのdataも引き継ぐ)
+    // 3. default_blocks から SiteBlock 作成
     for (const blockDef of (selectedTemplate.default_blocks || [])) {
       const pageId = pageMap[blockDef.page_slug];
       if (!pageId) continue;
@@ -98,7 +109,25 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       });
     }
 
-    // サイト作成成功後にusage incrementする
+    // 4. 初期ブログ記事を生成
+    if (features.blog && initialData.blog_posts?.length > 0) {
+      for (const post of initialData.blog_posts) {
+        await base44.entities.BlogPost.create({
+          ...post,
+          user_id: user.id,
+          status: post.status || 'published',
+        });
+      }
+    }
+
+    // 5. 初期予約サンプルを生成
+    if (features.booking && initialData.bookings?.length > 0) {
+      for (const booking of initialData.bookings) {
+        await base44.entities.Booking.create(booking);
+      }
+    }
+
+    // 6. usage increment
     await incrementUsage('site_count');
 
     setLoading(false);
@@ -253,6 +282,40 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
               );
             })}
           </div>
+
+          {/* 有効になる機能 */}
+          {(() => {
+            const features = selectedTemplate?.enabled_features || {};
+            const active = Object.entries(features).filter(([, v]) => v);
+            if (active.length === 0) return null;
+            return (
+              <div>
+                <p className="text-sm font-medium text-slate-700 mb-2">即時有効化される機能</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {active.map(([key]) => {
+                    const cfg = FEATURE_CONFIG[key];
+                    if (!cfg) return null;
+                    const Icon = cfg.icon;
+                    return (
+                      <div key={key} className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${cfg.bg} ${cfg.border}`}>
+                        <Icon className={`w-4 h-4 ${cfg.color} flex-shrink-0`} />
+                        <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* 初期データがあればその旨を表示 */}
+                {(() => {
+                  const iData = selectedTemplate?.initial_data || {};
+                  const msgs = [];
+                  if (features.blog && iData.blog_posts?.length > 0) msgs.push(`ブログ ${iData.blog_posts.length}件`);
+                  if (features.booking && iData.bookings?.length > 0) msgs.push(`予約サンプル ${iData.bookings.length}件`);
+                  if (msgs.length === 0) return null;
+                  return <p className="text-xs text-slate-400 mt-2">初期データを自動投入: {msgs.join('、')}</p>;
+                })()}
+              </div>
+            );
+          })()}
 
           {done && (
             <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
