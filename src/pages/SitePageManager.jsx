@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye } from 'lucide-react';
-import { toast } from 'sonner';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap } from 'lucide-react';
+import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const PAGE_TYPES = [
@@ -65,7 +65,7 @@ export default function SitePageManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sitePages'] });
       setShowDialog(false);
-      toast.success(editing ? 'ページを更新しました' : 'ページを追加しました');
+      sonnerToast.success(editing ? 'ページを更新しました' : 'ページを追加しました');
     },
   });
 
@@ -73,7 +73,7 @@ export default function SitePageManager() {
     mutationFn: (id) => base44.entities.SitePage.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sitePages'] });
-      toast.success('削除しました');
+      sonnerToast.success('削除しました');
     },
   });
 
@@ -120,6 +120,22 @@ export default function SitePageManager() {
                       <Eye className="w-3.5 h-3.5" />プレビュー
                     </Button>
                   </a>
+                  <Button 
+                    onClick={async () => {
+                      try {
+                        const res = await base44.functions.invoke('migrateHomeToSiteBlocks', { site_id: selectedSiteId });
+                        sonnerToast.success(`${res.data.blocks_created}個のブロックを移植しました`);
+                        queryClient.invalidateQueries({ queryKey: ['sitePages'] });
+                      } catch (err) {
+                        sonnerToast.error('移植に失敗しました: ' + err.message);
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                  >
+                    <Zap className="w-3.5 h-3.5" />データを初期化
+                  </Button>
                   <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
                     <Plus className="w-4 h-4" />ページ追加
                   </Button>

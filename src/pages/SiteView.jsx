@@ -138,12 +138,39 @@ function SiteViewInner({ siteId, isPreview }) {
   }
 
   return (
-    <div className="min-h-screen">
-      {blocks.map((block) => (
-        <div key={block.id} id={block.block_type === 'Booking' || block.block_type === 'Contact' ? `section-${block.block_type.toLowerCase()}` : undefined}>
-          <SiteBlockRenderer block={block} />
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-stone-100">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {site?.logo_url
+              ? <img src={site.logo_url} alt={site?.site_name} className="h-8 w-auto" />
+              : <span className="text-lg font-bold text-stone-800">{site?.site_name || 'Site'}</span>
+            }
+          </div>
+          <div className="hidden md:flex items-center gap-6 text-sm text-stone-600">
+            <a href="#about" className="hover:text-stone-900 transition-colors">About</a>
+            <a href="#menu" className="hover:text-stone-900 transition-colors">Menu</a>
+            <a href="#staff" className="hover:text-stone-900 transition-colors">Staff</a>
+            <a href="#gallery" className="hover:text-stone-900 transition-colors">Gallery</a>
+            <a href="#contact" className="hover:text-stone-900 transition-colors">Contact</a>
+          </div>
         </div>
-      ))}
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 pt-16">
+        {blocks.map((block) => (
+          <div key={block.id} id={block.block_type === 'Booking' || block.block_type === 'Contact' ? `section-${block.block_type.toLowerCase()}` : undefined}>
+            <SiteBlockRenderer block={block} />
+          </div>
+        ))}
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-stone-900 text-stone-500 text-center py-6 text-xs mt-auto">
+        © {new Date().getFullYear()} {site?.site_name || 'Site'}. All rights reserved.
+      </footer>
     </div>
   );
 }
