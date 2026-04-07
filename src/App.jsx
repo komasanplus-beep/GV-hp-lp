@@ -1,6 +1,8 @@
 import './App.css'
 import MasterLPTemplates from './pages/MasterLPTemplates'
 import SiteView from './pages/SiteView'
+import LPView from './pages/LPView'
+import BlogPage from './pages/BlogPage'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminServices from './pages/AdminServices'
 import { Toaster } from "@/components/ui/toaster"
@@ -23,10 +25,12 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
+  const location = window.location.pathname;
+  const isPublicRoute = ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) || location === '/*';
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  // Show loading spinner while checking app public settings (only for protected routes)
+  if (!isPublicRoute && isLoadingPublicSettings) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -34,12 +38,11 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
+  // Handle authentication errors (only for protected routes)
+  if (!isPublicRoute && authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
@@ -48,6 +51,14 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      {/* Public Routes - no authentication required */}
+      <Route path="/SiteView" element={<SiteView />} />
+      <Route path="/site/:siteId" element={<SiteView />} />
+      <Route path="/lp/:slug" element={<LPView />} />
+      <Route path="/BlogPage" element={<BlogPage />} />
+      <Route path="*" element={<PageNotFound />} />
+      
+      {/* Protected Routes */}
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
@@ -65,11 +76,8 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
-      <Route path="/SiteView" element={<SiteView />} />
-      <Route path="/site/:siteId" element={<SiteView />} />
       <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="/AdminServices" element={<AdminServices />} />
-      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };

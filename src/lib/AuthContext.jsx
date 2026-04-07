@@ -14,6 +14,16 @@ export const AuthProvider = ({ children }) => {
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
+    // 公開ルートの場合は認証チェックをスキップ
+    const location = window.location.pathname;
+    const isPublicRoute = ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p));
+    
+    if (isPublicRoute) {
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+      return;
+    }
+    
     checkAppState();
   }, []);
 
