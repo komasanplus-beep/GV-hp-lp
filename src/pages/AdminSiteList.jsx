@@ -125,8 +125,8 @@ export default function AdminSiteList() {
                             <ArrowRight className="w-3.5 h-3.5" />
                           </Button>
                         </Link>
-                        <a href={`${createPageUrl('SiteView')}?site_id=${site.id}`} target="_blank" rel="noreferrer">
-                          <Button variant="outline" size="sm" title="サイトをプレビュー">
+                        <a href={`${createPageUrl('SiteView')}?site_id=${site.id}&preview=true`} target="_blank" rel="noreferrer">
+                          <Button variant="outline" size="sm" title="サイトをプレビュー（下書き含む）">
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
                         </a>

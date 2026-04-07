@@ -7,7 +7,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import BlockRenderer from '@/components/lp/BlockRenderer';
+import SiteBlockRenderer from '@/components/site/SiteBlockRenderer';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 
@@ -72,7 +72,11 @@ function SiteViewInner({ siteId }) {
     );
   }
 
-  if (site.status !== 'published') {
+  // URLパラメータにpreview=trueがあれば下書きでも表示
+  const urlParams2 = new URLSearchParams(window.location.search);
+  const isPreview = urlParams2.get('preview') === 'true';
+
+  if (site.status !== 'published' && !isPreview) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
         <div className="text-center">
@@ -97,7 +101,7 @@ function SiteViewInner({ siteId }) {
   return (
     <div className="min-h-screen">
       {blocks.map((block) => (
-        <BlockRenderer key={block.id} block={block} />
+        <SiteBlockRenderer key={block.id} block={block} />
       ))}
     </div>
   );

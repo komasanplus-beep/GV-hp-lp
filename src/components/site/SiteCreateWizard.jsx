@@ -84,7 +84,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       pageMap[pageDef.slug] = page.id;
     }
 
-    // 3. default_blocks から SiteBlock 作成
+    // 3. default_blocks から SiteBlock 作成 (テンプレートのdataも引き継ぐ)
     for (const blockDef of (selectedTemplate.default_blocks || [])) {
       const pageId = pageMap[blockDef.page_slug];
       if (!pageId) continue;
@@ -93,7 +93,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         page_id: pageId,
         block_type: blockDef.block_type,
         sort_order: blockDef.sort_order ?? 0,
-        data: {},
+        data: blockDef.data || {},
         user_id: user.id,
       });
     }
