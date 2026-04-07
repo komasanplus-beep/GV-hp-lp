@@ -1,0 +1,70 @@
+{
+  "name": "LPTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u540d"
+    },
+    "slug": {
+      "type": "string",
+      "description": "\u4e00\u610f\u306e\u30b9\u30e9\u30c3\u30b0"
+    },
+    "description": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "\u30b5\u30e0\u30cd\u30a4\u30eb\u753b\u50cfURL"
+    },
+    "preview_url": {
+      "type": "string",
+      "description": "\u30d7\u30ec\u30d3\u30e5\u30fcURL"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "salon",
+        "beauty",
+        "clinic",
+        "fitness",
+        "school",
+        "general"
+      ],
+      "default": "general"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    },
+    "template_data": {
+      "type": "object",
+      "description": "\u521d\u671f\u30d6\u30ed\u30c3\u30af\u69cb\u6210\u30fb\u521d\u671f\u6587\u8a00\u30fb\u521d\u671f\u753b\u50cfURL\u3092\u4fdd\u6301\u3059\u308bJSON"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

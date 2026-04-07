@@ -42,6 +42,7 @@ const menuGroups = [
     items: [
       { name: 'サイト一覧', icon: Layout, page: 'MasterSiteList' },
       { name: 'LP一覧', icon: Layers, page: 'MasterLPList' },
+      { name: 'LPテンプレート', icon: LayoutTemplate, page: 'MasterLPTemplates' },
       { name: 'ドメイン一覧', icon: Globe, page: 'MasterDomainList' },
       { name: 'テンプレート管理', icon: LayoutTemplate, page: 'MasterTemplates' },
     ],

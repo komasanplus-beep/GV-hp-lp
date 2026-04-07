@@ -1,4 +1,5 @@
 import './App.css'
+import MasterLPTemplates from './pages/MasterLPTemplates'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
+      <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

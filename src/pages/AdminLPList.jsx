@@ -7,7 +7,7 @@ import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, ExternalLink, Sparkles, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, Sparkles, Eye, LayoutTemplate, Check } from 'lucide-react';
 import LimitGuard from '@/components/plan/LimitGuard';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
@@ -15,9 +15,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const TEMPLATES = [
-  { value: 'new_service', label: '新規サービス', description: 'Hero → Problem → Solution → Feature → Flow → Future → CTA' },
-  { value: 'proven_service', label: '実績ありサービス', description: 'Hero → Problem → Evidence → Feature → Voice → Flow → FAQ → CTA' },
+const BUILTIN_TEMPLATES = [
+  { value: 'new_service', label: '新規サービス', description: 'Hero → Problem → Solution → Feature → Flow → Future → CTA', blocks: ['Hero','Problem','Solution','Feature','Flow','Future','CTA'] },
+  { value: 'proven_service', label: '実績ありサービス', description: 'Hero → Problem → Evidence → Feature → Voice → Flow → FAQ → CTA', blocks: ['Hero','Problem','Evidence','Feature','Voice','Flow','FAQ','CTA'] },
 ];
 
 export default function AdminLPList() {
@@ -25,6 +25,8 @@ export default function AdminLPList() {
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ title: '', slug: '', template_type: 'new_service' });
+  const [selectedLPTemplate, setSelectedLPTemplate] = useState(null); // DBテンプレート
+  const [templateTab, setTemplateTab] = useState('builtin'); // 'builtin' | 'custom'
 
   const { data: pages = [] } = useQuery({
     queryKey: ['landingPages'],
@@ -38,24 +40,54 @@ export default function AdminLPList() {
       return base44.entities.UserLimits.filter({ user_id: user.id });
     },
   });
+
+  const { data: lpTemplates = [] } = useQuery({
+    queryKey: ['lpTemplates'],
+    queryFn: () => base44.entities.LPTemplate.filter({ is_active: true }, 'sort_order'),
+  });
+
   const limits = limitsList[0];
   const atLimit = limits && limits.lp_create_limit !== undefined && pages.length >= limits.lp_create_limit;
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const lp = await base44.entities.LandingPage.create(data);
-      // テンプレートに応じてデフォルトブロックを生成
-      const blockTypes = data.template_type === 'new_service'
-        ? ['Hero', 'Problem', 'Solution', 'Feature', 'Flow', 'Future', 'CTA']
-        : ['Hero', 'Problem', 'Evidence', 'Feature', 'Voice', 'Flow', 'FAQ', 'CTA'];
+      const lp = await base44.entities.LandingPage.create({
+        title: data.title,
+        slug: data.slug,
+        template_type: data.template_type,
+        status: 'draft',
+      });
+
+      let blockTypes = [];
+      let initialDataMap = {};
+
+      if (templateTab === 'custom' && selectedLPTemplate?.template_data?.blocks) {
+        // DBテンプレートのブロック構成を使用
+        const tplBlocks = selectedLPTemplate.template_data.blocks;
+        blockTypes = tplBlocks.map(b => b.type || b.block_type);
+        tplBlocks.forEach(b => {
+          initialDataMap[b.type || b.block_type] = b.data || {};
+        });
+      } else {
+        // 組み込みテンプレート
+        const builtin = BUILTIN_TEMPLATES.find(t => t.value === data.template_type);
+        blockTypes = builtin?.blocks || ['Hero', 'CTA'];
+      }
+
       await Promise.all(blockTypes.map((block_type, i) =>
-        base44.entities.LPBlock.create({ lp_id: lp.id, block_type, sort_order: i, data: {} })
+        base44.entities.LPBlock.create({
+          lp_id: lp.id,
+          block_type,
+          sort_order: i,
+          data: initialDataMap[block_type] || {},
+        })
       ));
       return lp;
     },
     onSuccess: (lp) => {
       queryClient.invalidateQueries({ queryKey: ['landingPages'] });
       setShowCreate(false);
+      setSelectedLPTemplate(null);
       navigate(createPageUrl(`AdminLPEditor?id=${lp.id}`));
     },
   });
@@ -113,7 +145,7 @@ export default function AdminLPList() {
                       {lp.status === 'published' ? '公開中' : '下書き'}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
-                      {TEMPLATES.find(t => t.value === lp.template_type)?.label}
+                      {BUILTIN_TEMPLATES.find(t => t.value === lp.template_type)?.label || lp.template_type}
                     </Badge>
                   </div>
                   <span className="text-sm text-slate-400">/lp/{lp.slug}</span>
@@ -143,8 +175,8 @@ export default function AdminLPList() {
         )}
 
         {/* 新規作成ダイアログ */}
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
-          <DialogContent className="max-w-lg">
+        <Dialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) { setSelectedLPTemplate(null); setTemplateTab('builtin'); } }}>
+          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>LP新規作成</DialogTitle>
             </DialogHeader>
@@ -160,26 +192,86 @@ export default function AdminLPList() {
                   <Input value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value.replace(/\s+/g, '-').toLowerCase() })} placeholder="campaign-2026" />
                 </div>
               </div>
+
+              {/* テンプレート選択タブ */}
               <div>
                 <Label>テンプレート</Label>
-                <div className="grid gap-3 mt-2">
-                  {TEMPLATES.map(t => (
-                    <label key={t.value} className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-colors ${form.template_type === t.value ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                      <input type="radio" name="template" value={t.value} checked={form.template_type === t.value} onChange={() => setForm({ ...form, template_type: t.value })} className="mt-1" />
-                      <div>
-                        <div className="font-medium text-slate-800">{t.label}</div>
-                        <div className="text-xs text-slate-500 mt-1">{t.description}</div>
-                      </div>
-                    </label>
-                  ))}
+                <div className="flex gap-1 mt-2 mb-3 bg-slate-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setTemplateTab('builtin')}
+                    className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${templateTab === 'builtin' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}
+                  >
+                    基本テンプレート
+                  </button>
+                  <button
+                    onClick={() => setTemplateTab('custom')}
+                    className={`flex-1 text-xs font-medium py-1.5 rounded-md transition-colors ${templateTab === 'custom' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}
+                  >
+                    カスタムテンプレート {lpTemplates.length > 0 && <span className="ml-1 bg-amber-100 text-amber-700 rounded-full px-1.5 py-0.5 text-[10px]">{lpTemplates.length}</span>}
+                  </button>
                 </div>
+
+                {templateTab === 'builtin' && (
+                  <div className="grid gap-2">
+                    {BUILTIN_TEMPLATES.map(t => (
+                      <label key={t.value} className={`flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-colors ${form.template_type === t.value ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-slate-300'}`}>
+                        <input type="radio" name="template" value={t.value} checked={form.template_type === t.value} onChange={() => setForm({ ...form, template_type: t.value })} className="mt-0.5" />
+                        <div>
+                          <div className="font-medium text-slate-800 text-sm">{t.label}</div>
+                          <div className="text-xs text-slate-500 mt-0.5">{t.description}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                {templateTab === 'custom' && (
+                  <div>
+                    {lpTemplates.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400 border-2 border-dashed border-slate-200 rounded-lg">
+                        <LayoutTemplate className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                        <p className="text-sm">カスタムテンプレートがありません</p>
+                        <p className="text-xs mt-1">マスター管理画面から追加できます</p>
+                      </div>
+                    ) : (
+                      <div className="grid gap-2 max-h-60 overflow-y-auto">
+                        {lpTemplates.map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => setSelectedLPTemplate(selectedLPTemplate?.id === t.id ? null : t)}
+                            className={`flex items-start gap-3 p-3 border-2 rounded-lg text-left transition-colors ${selectedLPTemplate?.id === t.id ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-slate-300'}`}
+                          >
+                            {t.thumbnail_url && (
+                              <img src={t.thumbnail_url} alt={t.name} className="w-16 h-12 object-cover rounded flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-slate-800 text-sm">{t.name}</span>
+                                {selectedLPTemplate?.id === t.id && <Check className="w-4 h-4 text-amber-600 flex-shrink-0" />}
+                              </div>
+                              {t.description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{t.description}</p>}
+                              {t.template_data?.blocks && (
+                                <p className="text-xs text-slate-400 mt-1">
+                                  {t.template_data.blocks.map(b => b.type || b.block_type).join(' → ')}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreate(false)}>キャンセル</Button>
               <Button
                 className="bg-amber-600 hover:bg-amber-700"
-                disabled={!form.title || !form.slug || createMutation.isPending}
+                disabled={
+                  !form.title || !form.slug || createMutation.isPending ||
+                  (templateTab === 'custom' && !selectedLPTemplate)
+                }
                 onClick={() => createMutation.mutate(form)}
               >
                 {createMutation.isPending ? '作成中...' : '作成してエディタへ'}
