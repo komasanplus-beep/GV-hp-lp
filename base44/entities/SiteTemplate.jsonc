@@ -30,16 +30,53 @@
     "default_pages": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "page_type": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "slug",
+          "title",
+          "page_type"
+        ]
       },
       "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u9069\u7528\u6642\u306b\u81ea\u52d5\u751f\u6210\u3059\u308bSitePage\u306e\u5b9a\u7fa9"
     },
     "default_blocks": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "page_slug": {
+            "type": "string"
+          },
+          "block_type": {
+            "type": "string"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "page_slug",
+          "block_type"
+        ]
       },
-      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u9069\u7528\u6642\u306b\u81ea\u52d5\u751f\u6210\u3059\u308bSiteBlock\u306e\u5b9a\u7fa9\uff08block_type, data, sort_order\u3092\u542b\u3080\uff09"
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u9069\u7528\u6642\u306b\u81ea\u52d5\u751f\u6210\u3059\u308bSiteBlock\u306e\u5b9a\u7fa9"
     },
     "enabled_features": {
       "type": "object",
@@ -69,19 +106,28 @@
     },
     "initial_data": {
       "type": "object",
-      "description": "\u30b5\u30a4\u30c8\u751f\u6210\u6642\u306b\u6295\u5165\u3059\u308b\u30b5\u30f3\u30d7\u30eb\u30c7\u30fc\u30bf\u3002\u4f8b: { blog_posts: [...], reservations: [] }",
+      "description": "\u30b5\u30a4\u30c8\u751f\u6210\u6642\u306b\u6295\u5165\u3059\u308b\u30b5\u30f3\u30d7\u30eb\u30c7\u30fc\u30bf",
       "properties": {
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "\u521d\u671f\u30b5\u30fc\u30d3\u30b9"
+        },
         "blog_posts": {
           "type": "array",
           "items": {
             "type": "object"
-          }
+          },
+          "description": "\u521d\u671f\u30d6\u30ed\u30b0\u8a18\u4e8b"
         },
-        "reservations": {
+        "bookings": {
           "type": "array",
           "items": {
             "type": "object"
-          }
+          },
+          "description": "\u521d\u671f\u4e88\u7d04\u30b5\u30f3\u30d7\u30eb"
         }
       }
     },

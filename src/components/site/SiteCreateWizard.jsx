@@ -109,25 +109,39 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       });
     }
 
-    // 4. 初期ブログ記事を生成
+    // 4. 初期サービスを生成
+    if (features.booking && initialData.services?.length > 0) {
+      for (const service of initialData.services) {
+        await base44.entities.Service.create({
+          ...service,
+          site_id: site.id,
+        });
+      }
+    }
+
+    // 5. 初期ブログ記事を生成
     if (features.blog && initialData.blog_posts?.length > 0) {
       for (const post of initialData.blog_posts) {
         await base44.entities.BlogPost.create({
           ...post,
+          site_id: site.id,
           user_id: user.id,
           status: post.status || 'published',
         });
       }
     }
 
-    // 5. 初期予約サンプルを生成
+    // 6. 初期予約サンプルを生成
     if (features.booking && initialData.bookings?.length > 0) {
       for (const booking of initialData.bookings) {
-        await base44.entities.Booking.create(booking);
+        await base44.entities.Booking.create({
+          ...booking,
+          site_id: site.id,
+        });
       }
     }
 
-    // 6. usage increment
+    // 7. usage increment
     await incrementUsage('site_count');
 
     setLoading(false);
@@ -306,12 +320,13 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
                 </div>
                 {/* 初期データがあればその旨を表示 */}
                 {(() => {
-                  const iData = selectedTemplate?.initial_data || {};
-                  const msgs = [];
-                  if (features.blog && iData.blog_posts?.length > 0) msgs.push(`ブログ ${iData.blog_posts.length}件`);
-                  if (features.booking && iData.bookings?.length > 0) msgs.push(`予約サンプル ${iData.bookings.length}件`);
-                  if (msgs.length === 0) return null;
-                  return <p className="text-xs text-slate-400 mt-2">初期データを自動投入: {msgs.join('、')}</p>;
+                   const iData = selectedTemplate?.initial_data || {};
+                   const msgs = [];
+                   if (features.booking && iData.services?.length > 0) msgs.push(`サービス ${iData.services.length}件`);
+                   if (features.blog && iData.blog_posts?.length > 0) msgs.push(`ブログ ${iData.blog_posts.length}件`);
+                   if (features.booking && iData.bookings?.length > 0) msgs.push(`予約サンプル ${iData.bookings.length}件`);
+                   if (msgs.length === 0) return null;
+                   return <p className="text-xs text-slate-400 mt-2">初期データを自動投入: {msgs.join('、')}</p>;
                 })()}
               </div>
             );
