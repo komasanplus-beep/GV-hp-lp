@@ -81,7 +81,10 @@ export default function SiteBlockEditor() {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.SiteBlock.update(id, { data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['siteBlocks', pageId] });
+      // 複数の query を無効化してキャッシュを確実にリフレッシュ
+      queryClient.invalidateQueries({ queryKey: ['siteBlocks'] });
+      queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
+      queryClient.invalidateQueries({ queryKey: ['sitePage'] });
       setEditingBlock(null);
       toast.success('保存しました');
     },
@@ -90,7 +93,8 @@ export default function SiteBlockEditor() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.SiteBlock.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['siteBlocks', pageId] });
+      queryClient.invalidateQueries({ queryKey: ['siteBlocks'] });
+      queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
       toast.success('削除しました');
     },
   });

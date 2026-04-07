@@ -137,23 +137,44 @@ function SiteViewInner({ siteId, isPreview }) {
     );
   }
 
+  const navConfig = site?.navigation_config || {};
+  const menuItems = navConfig.menu_items?.filter(m => m.is_visible) || [];
+  const logoUrl = navConfig.logo_url || site?.logo_url;
+  const siteName = navConfig.site_name_text || site?.site_name || 'Site';
+  const bookingText = navConfig.booking_button_text || 'ご予約';
+  const bookingUrl = navConfig.booking_button_url || '#booking';
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-stone-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {site?.logo_url
-              ? <img src={site.logo_url} alt={site?.site_name} className="h-8 w-auto" />
-              : <span className="text-lg font-bold text-stone-800">{site?.site_name || 'Site'}</span>
+            {logoUrl
+              ? <img src={logoUrl} alt={siteName} className="h-8 w-auto" />
+              : <span className="text-lg font-bold text-stone-800">{siteName}</span>
             }
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-stone-600">
-            <a href="#about" className="hover:text-stone-900 transition-colors">About</a>
-            <a href="#menu" className="hover:text-stone-900 transition-colors">Menu</a>
-            <a href="#staff" className="hover:text-stone-900 transition-colors">Staff</a>
-            <a href="#gallery" className="hover:text-stone-900 transition-colors">Gallery</a>
-            <a href="#contact" className="hover:text-stone-900 transition-colors">Contact</a>
+            {menuItems.length > 0
+              ? menuItems.map(item => (
+                  <a key={item.label} href={item.href} className="hover:text-stone-900 transition-colors">
+                    {item.label}
+                  </a>
+                ))
+              : (
+                  <>
+                    <a href="#about" className="hover:text-stone-900 transition-colors">About</a>
+                    <a href="#menu" className="hover:text-stone-900 transition-colors">Menu</a>
+                    <a href="#staff" className="hover:text-stone-900 transition-colors">Staff</a>
+                    <a href="#gallery" className="hover:text-stone-900 transition-colors">Gallery</a>
+                    <a href="#contact" className="hover:text-stone-900 transition-colors">Contact</a>
+                  </>
+                )
+            }
+            <a href={bookingUrl} className="ml-4 px-4 py-1.5 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors">
+              {bookingText}
+            </a>
           </div>
         </div>
       </nav>

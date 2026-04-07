@@ -6,6 +6,7 @@ import BlogPage from './pages/BlogPage'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminServices from './pages/AdminServices'
 import AdminLPCodeCreator from './pages/AdminLPCodeCreator'
+import SiteHeaderSettings from './pages/SiteHeaderSettings'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="/AdminServices" element={<AdminServices />} />
       <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />
+      <Route path="/SiteHeaderSettings" element={<SiteHeaderSettings />} />
     </Routes>
   );
 };

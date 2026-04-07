@@ -28,6 +28,9 @@ const SITE_BLOCK_FIELDS = {
   Service: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: サービス' },
     { key: 'subtitle', label: 'サブタイトル', type: 'text', placeholder: '当店で提供するサービスをご紹介します' },
+    { key: 'layout_type', label: 'レイアウト', type: 'text', placeholder: 'grid' },
+    { key: 'show_price', label: '価格表示', type: 'checkbox' },
+    { key: 'show_duration', label: '所要時間表示', type: 'checkbox' },
   ],
   Staff: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: スタッフ紹介' },
@@ -118,6 +121,11 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
       <div className="border-b pb-3 mb-4">
         <h3 className="font-semibold text-slate-800 text-lg">{block.block_type} ブロックを編集</h3>
         <p className="text-xs text-slate-400 mt-0.5">各フィールドを入力してください</p>
+        {block.block_type === 'Service' && (
+          <p className="text-xs text-amber-600 mt-2 bg-amber-50 p-2 rounded">
+            💡 サービス内容・価格・説明は「サービス管理」で編集してください。ここは見出しと表示設定のみです。
+          </p>
+        )}
       </div>
 
       {fields.map(field => (
@@ -168,6 +176,17 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
                 placeholder="またはURLを直接入力"
                 className="text-xs"
               />
+            </div>
+          )}
+          {field.type === 'checkbox' && (
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={data[field.key] ?? false}
+                onChange={e => setData(d => ({ ...d, [field.key]: e.target.checked }))}
+                className="w-4 h-4 rounded border-slate-300"
+              />
+              <label className="text-sm text-slate-600">{field.label}</label>
             </div>
           )}
           {field.type === 'image_list' && (

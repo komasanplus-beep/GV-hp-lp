@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3 } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -115,6 +115,11 @@ export default function SitePageManager() {
               )}
               {selectedSiteId && (
                 <>
+                  <Link to={`${createPageUrl('SiteHeaderSettings')}?site_id=${selectedSiteId}`}>
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Edit3 className="w-3.5 h-3.5" />ヘッダー設定
+                    </Button>
+                  </Link>
                   <a href={`/site/${selectedSiteId}?preview=true`} target="_blank" rel="noreferrer">
                     <Button variant="outline" size="sm" className="gap-1.5">
                       <Eye className="w-3.5 h-3.5" />プレビュー
