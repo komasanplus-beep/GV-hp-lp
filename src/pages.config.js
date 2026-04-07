@@ -64,7 +64,6 @@ import AdminSiteList from './pages/AdminSiteList';
 import BlogPage from './pages/BlogPage';
 import BlogPost from './pages/BlogPost';
 import Dashboard from './pages/Dashboard';
-import Home from './pages/Home';
 import LPView from './pages/LPView';
 import MasterAIKnowledge from './pages/MasterAIKnowledge';
 import MasterAISettings from './pages/MasterAISettings';
@@ -103,7 +102,6 @@ export const PAGES = {
     "BlogPage": BlogPage,
     "BlogPost": BlogPost,
     "Dashboard": Dashboard,
-    "Home": Home,
     "LPView": LPView,
     "MasterAIKnowledge": MasterAIKnowledge,
     "MasterAISettings": MasterAISettings,
