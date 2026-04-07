@@ -4,11 +4,10 @@
  * ドラッグ&ドロップで並び替え、追加・削除・編集機能
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus, Trash2, Pencil, GripVertical, ChevronDown } from 'lucide-react';
+import { Plus, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,17 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import BlockListDnd from './BlockListDnd';
 
 const BLOCK_TYPES = [
   'Hero', 'About', 'Menu', 'Service', 'Staff', 'Gallery', 'Voice', 'Feature',
@@ -86,22 +76,14 @@ export default function PageBlocksList({ pageId, siteId, onUpdate }) {
     });
   };
 
-  const handleDragEnd = (result) => {
-    const { source, destination, draggableId } = result;
-    if (!destination) return;
-    if (source.index === destination.index) return;
-
-    const newBlocks = Array.from(blocks);
-    const [movedBlock] = newBlocks.splice(source.index, 1);
-    newBlocks.splice(destination.index, 0, movedBlock);
-
-    // sort_order を再計算して更新
-    newBlocks.forEach((block, idx) => {
-      if (block.sort_order !== idx) {
-        updateMutation.mutate({ id: block.id, data: { sort_order: idx } });
-      }
-    });
-  };
+  // ブロック編集イベントリスナー
+  useEffect(() => {
+    const handleEditBlock = (e) => {
+      setEditingBlock(e.detail);
+    };
+    window.addEventListener('editBlock', handleEditBlock);
+    return () => window.removeEventListener('editBlock', handleEditBlock);
+  }, []);
 
   if (isLoading) {
     return <div className="text-sm text-slate-400 py-4 px-4">読み込み中...</div>;
@@ -127,75 +109,12 @@ export default function PageBlocksList({ pageId, siteId, onUpdate }) {
       </div>
 
       {/* Block List */}
-      {blocks.length === 0 ? (
-        <div className="text-center py-6 text-slate-400 text-sm">
-          <p>ブロックなし</p>
-        </div>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="blocks">
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={`space-y-2 ${snapshot.isDraggingOver ? 'bg-blue-50 rounded p-2' : ''}`}
-              >
-                {blocks.map((block, idx) => (
-                  <Draggable key={block.id} draggableId={block.id} index={idx}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        className={`flex items-center gap-2 p-3 bg-white rounded border transition-all ${
-                          snapshot.isDragging
-                            ? 'shadow-lg border-blue-300 bg-blue-50'
-                            : 'border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        {/* Drag Handle */}
-                        <div {...provided.dragHandleProps} className="cursor-grab">
-                          <GripVertical className="w-4 h-4 text-slate-300 hover:text-slate-500" />
-                        </div>
-
-                        {/* Block Info */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800">
-                            {block.block_type}
-                          </p>
-                          {block.data?.title && (
-                            <p className="text-xs text-slate-500 truncate">
-                              {block.data.title}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Actions */}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setEditingBlock(block)}
-                          className="h-7 w-7 p-0"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setDeleteBlock(block)}
-                          className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
+      <BlockListDnd
+        blocks={blocks}
+        pageId={pageId}
+        siteId={siteId}
+        onBlocksChange={onUpdate}
+      />
 
       {/* Add Block Dialog */}
       <Dialog open={isAddingBlock} onOpenChange={setIsAddingBlock}>
@@ -240,26 +159,7 @@ export default function PageBlocksList({ pageId, siteId, onUpdate }) {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteBlock} onOpenChange={() => setDeleteBlock(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>ブロック削除</AlertDialogTitle>
-            <AlertDialogDescription>
-              「{deleteBlock?.block_type}」ブロックを削除してもよろしいですか？
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>キャンセル</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteMutation.mutate(deleteBlock.id)}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              削除
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
     </div>
   );
 }
