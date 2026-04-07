@@ -75,20 +75,25 @@ function getInitialOpenGroups(pathname) {
   return open;
 }
 
-// ページ名 → UserFeaturesのキー対応
+// ページ名 → UserFeatures フィールド名（完全一致）
+// null = 常時表示, undefined = マッピングなし（表示）
 const PAGE_FEATURE_MAP = {
-  AdminBookings: 'reservation_manage',
-  AdminGuests: 'guest_manage',
-  AdminContent: null, // コンテンツ管理は常時表示
+  UserDashboard: null,       // ダッシュボードは常時
+  AdminContent: null,        // コンテンツ管理は常時
+  AdminSettings: null,       // アカウント設定は常時
   AdminBlog: 'blog_manage',
   AdminAIGenerate: 'ai_generate',
   SitePageManager: 'site_manage',
   AdminRooms: 'site_manage',
+  AdminSiteList: 'site_manage',
   AdminLPList: 'lp_manage',
   AdminLPGenerate: 'lp_manage',
   AdminABTest: 'lp_manage',
   AdminLPAnalytics: 'lp_manage',
   AdminDomainSettings: 'domain_manage',
+  SeoSettings: 'seo_manage',
+  AdminBookings: 'reservation_manage',
+  AdminGuests: 'reservation_manage',
 };
 
 export default function UserSidebar({ isOpen, onClose }) {
@@ -161,7 +166,14 @@ export default function UserSidebar({ isOpen, onClose }) {
           <nav className="flex-1 p-3 overflow-y-auto">
             <ul className="space-y-1">
               {menuGroups.map((group, idx) => {
+                // グループ内が全て非表示なら グループごと隠す
+                if (!group.single) {
+                  const visibleChildren = group.children.filter(item => isFeatureEnabled(item.page));
+                  if (visibleChildren.length === 0) return null;
+                }
+
                 if (group.single) {
+                  if (!isFeatureEnabled(group.page)) return null;
                   const isActive = location.pathname.includes(group.page);
                   return (
                     <li key={group.label}>

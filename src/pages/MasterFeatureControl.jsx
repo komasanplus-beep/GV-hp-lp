@@ -9,21 +9,27 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronDown } from 'lucide-react';
 
+// UserFeatures エンティティのフィールドと完全に一致させる
 const FEATURE_LABELS = {
   dashboard: 'ダッシュボード',
-  service_manage: 'サービス管理',
-  content_manage: 'コンテンツ管理',
-  settings: '設定',
-  reservation_manage: '予約管理',
-  guest_manage: 'ゲスト管理',
+  site_manage: 'ホームページ管理',
   lp_manage: 'LP管理',
   blog_manage: 'ブログ管理',
   ai_generate: 'AI生成',
+  seo_manage: 'SEO管理',
+  domain_manage: 'ドメイン設定',
+  reservation_manage: '予約管理（将来）',
+  ec_manage: 'EC管理（将来）',
+  member_manage: '会員管理（将来）',
+  analytics: 'アクセス解析（将来）',
+  settings: '設定',
 };
 
 const DEFAULT_FEATURES = {
-  dashboard: true, service_manage: true, content_manage: true, settings: true,
-  reservation_manage: false, guest_manage: false, lp_manage: false, blog_manage: false, ai_generate: false,
+  dashboard: true, site_manage: false, lp_manage: false, blog_manage: false,
+  ai_generate: false, seo_manage: false, domain_manage: false,
+  reservation_manage: false, ec_manage: false, member_manage: false,
+  analytics: false, settings: true,
 };
 
 const DEFAULT_LIMITS = { lp_create_limit: 1, ai_regenerate_limit: 3, blog_create_limit: 5, ab_test_limit: 1 };

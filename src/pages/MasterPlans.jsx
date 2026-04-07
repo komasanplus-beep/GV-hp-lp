@@ -82,11 +82,12 @@ export default function MasterPlans() {
               </div>
               <div className="space-y-1 text-sm text-slate-600 mb-4">
                 <div className="flex justify-between"><span>月額</span><span className="font-medium">¥{(plan.price_monthly || 0).toLocaleString()}</span></div>
-                <div className="flex justify-between"><span>年額</span><span className="font-medium">¥{(plan.price_yearly || 0).toLocaleString()}</span></div>
-                <div className="flex justify-between"><span>サイト数</span><span>{plan.site_limit}</span></div>
-                <div className="flex justify-between"><span>LP数</span><span>{plan.lp_limit}</span></div>
-                <div className="flex justify-between"><span>AI生成回数</span><span>{plan.ai_limit}</span></div>
-                <div className="flex justify-between"><span>独自ドメイン</span><span>{plan.custom_domain ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-slate-400" />}</span></div>
+                <div className="flex justify-between"><span>LP数上限</span><span>{plan.max_lp === -1 ? '無制限' : plan.max_lp}</span></div>
+                <div className="flex justify-between"><span>AI生成回数/月</span><span>{plan.ai_limit}</span></div>
+                <div className="flex justify-between"><span>ドメイン数</span><span>{plan.domain_limit === -1 ? '無制限' : plan.domain_limit === 0 ? 'サブのみ' : plan.domain_limit}</span></div>
+                <div className="flex justify-between"><span>メンバー数</span><span>{plan.member_limit}</span></div>
+                <div className="flex justify-between"><span>ストレージ</span><span>{plan.storage_limit}MB</span></div>
+                <div className="flex justify-between"><span>ABテスト</span><span>{plan.ab_test_enabled ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-slate-400" />}</span></div>
               </div>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(plan)}>
