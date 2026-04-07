@@ -161,23 +161,33 @@ function SiteViewInner({ siteId, isPreview }) {
           <div className="hidden md:flex items-center gap-6 text-sm text-stone-600">
             {menuItems.length > 0
               ? menuItems.map(item => (
-                  <a key={item.label} href={item.href} className="hover:text-stone-900 transition-colors">
+                  <a 
+                    key={item.label} 
+                    href={item.href}
+                    onClick={(e) => {
+                      if (item.href.startsWith('#')) {
+                        e.preventDefault();
+                        const target = document.getElementById(item.href.slice(1));
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="hover:text-stone-900 transition-colors cursor-pointer"
+                  >
                     {item.label}
                   </a>
                 ))
-              : (
-                  <>
-                    <a href="#about" className="hover:text-stone-900 transition-colors">About</a>
-                    <a href="#menu" className="hover:text-stone-900 transition-colors">Menu</a>
-                    <a href="#staff" className="hover:text-stone-900 transition-colors">Staff</a>
-                    <a href="#gallery" className="hover:text-stone-900 transition-colors">Gallery</a>
-                    <a href="#contact" className="hover:text-stone-900 transition-colors">Contact</a>
-                  </>
-                )
+              : null
             }
-            <a href={bookingUrl} className="ml-4 px-4 py-1.5 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                const target = document.getElementById('contact');
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="ml-4 px-4 py-1.5 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700 transition-colors cursor-pointer"
+            >
               {bookingText}
-            </a>
+            </button>
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -206,30 +216,32 @@ function SiteViewInner({ siteId, isPreview }) {
                       <a
                         key={item.label}
                         href={item.href}
-                        className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={(e) => {
+                          if (item.href.startsWith('#')) {
+                            e.preventDefault();
+                            const target = document.getElementById(item.href.slice(1));
+                            if (target) target.scrollIntoView({ behavior: 'smooth' });
+                          }
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors cursor-pointer"
                       >
                         {item.label}
                       </a>
                     ))
-                  : (
-                      <>
-                        <a href="#about" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>About</a>
-                        <a href="#menu" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Menu</a>
-                        <a href="#staff" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Staff</a>
-                        <a href="#gallery" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Gallery</a>
-                        <a href="#contact" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
-                      </>
-                    )
+                  : null
                 }
                 <div className="pt-2 border-t border-stone-100">
-                  <a
-                    href={bookingUrl}
-                    className="block w-full px-4 py-2.5 bg-amber-600 text-white rounded-lg text-center font-medium hover:bg-amber-700 transition-colors"
-                    onClick={() => setMobileMenuOpen(false)}
+                  <button
+                    onClick={() => {
+                      const target = document.getElementById('contact');
+                      if (target) target.scrollIntoView({ behavior: 'smooth' });
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full px-4 py-2.5 bg-amber-600 text-white rounded-lg text-center font-medium hover:bg-amber-700 transition-colors cursor-pointer"
                   >
                     {bookingText}
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

@@ -240,6 +240,25 @@ export default function SiteBlockRenderer({ block }) {
     trigger: block.animation_trigger || 'on-scroll',
   };
 
+  // ブロックタイプに応じたセクションIDを生成
+  const getSectionId = (blockType) => {
+    const idMap = {
+      'Hero': 'hero',
+      'About': 'about',
+      'Service': 'services',
+      'Menu': 'menu',
+      'Gallery': 'gallery',
+      'Staff': 'staff',
+      'Contact': 'contact',
+      'Booking': 'booking',
+      'Voice': 'testimonials',
+      'Feature': 'features',
+      'FAQ': 'faq',
+      'Access': 'access',
+    };
+    return idMap[blockType] || blockType.toLowerCase();
+  };
+
   let content;
 
   if (type === 'Hero') {
@@ -626,8 +645,10 @@ export default function SiteBlockRenderer({ block }) {
   }
 
   return (
-    <AnimatedBlock settings={animationSettings}>
-      {content}
-    </AnimatedBlock>
+    <div id={getSectionId(type)}>
+      <AnimatedBlock settings={animationSettings}>
+        {content}
+      </AnimatedBlock>
+    </div>
   );
 }
