@@ -23,6 +23,19 @@ const TEMPLATE_OPTIONS = [
   { value: 'custom', label: 'カスタム' },
 ];
 
+// HTML事前クレンジング（フロント側で危険な要素を除去）
+const preCleanHtml = (html = '') => {
+  let cleaned = String(html);
+  // script タグを完全除去
+  cleaned = cleaned.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  // on[a-z]+ 属性を除去（onclick, onload, onerror, onmouseover, onsubmit など）
+  cleaned = cleaned.replace(/\s+on[a-z]+\s*=\s*["']([^"']*)["']/gi, '');
+  cleaned = cleaned.replace(/\s+on[a-z]+\s*=\s*[^\s>]+/gi, '');
+  // javascript: スキームを除去
+  cleaned = cleaned.replace(/javascript:/gi, '');
+  return cleaned;
+};
+
 export default function AdminLPCodeCreator() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -73,40 +86,52 @@ export default function AdminLPCodeCreator() {
   // 保存ミューテーション
   const saveMutation = useMutation({
     mutationFn: async (data) => {
-      // 1. サニタイズ
-      const sanitizeRes = await base44.functions.invoke('sanitizeLandingPageHtml', {
-        html_code: form.html_code,
-        css_code: form.css_code,
-      });
+      try {
+        // 0. フロント側の事前クレンジング（危険属性を先制的に除去）
+        const preCleanedHtml = preCleanHtml(form.html_code);
 
-      // 2. 画像URL置換
-      let finalHtml = form.html_code;
-      if (imageReplacements.length > 0) {
-        const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
-          html_code: sanitizeRes.sanitized_html,
-          replacements: imageReplacements.map(r => ({
-            original_url: r.original_url,
-            file_url: r.file_url,
-          })),
+        // 1. バックエンド側でサニタイズ（多重防御）
+        const sanitizeRes = await base44.functions.invoke('sanitizeLandingPageHtml', {
+          html_code: preCleanedHtml,
+          css_code: form.css_code,
         });
-        finalHtml = replaceRes.replaced_html;
-      } else {
-        finalHtml = sanitizeRes.sanitized_html;
-      }
 
-      // 3. LP保存
-      return base44.functions.invoke('saveLandingPageFromCode', {
-        lp_id: lpId,
-        title: form.title,
-        slug: form.slug,
-        description: form.description,
-        status: form.status,
-        template_type: form.template_type,
-        html_code: form.html_code,
-        css_code: form.css_code,
-        sanitized_html: finalHtml,
-        extracted_image_urls: sanitizeRes.extracted_image_urls,
-      });
+        if (!sanitizeRes || !sanitizeRes.data) {
+          throw new Error('Sanitize response is invalid');
+        }
+
+        // 2. 画像URL置換
+        let finalHtml = sanitizeRes.data.sanitized_html || preCleanedHtml;
+        if (imageReplacements.length > 0) {
+          const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
+            html_code: finalHtml,
+            replacements: imageReplacements.map(r => ({
+              original_url: r.original_url,
+              file_url: r.file_url,
+            })),
+          });
+          finalHtml = replaceRes.data?.replaced_html || finalHtml;
+        }
+
+        // 3. LP保存
+        const saveRes = await base44.functions.invoke('saveLandingPageFromCode', {
+          lp_id: lpId,
+          title: form.title,
+          slug: form.slug,
+          description: form.description,
+          status: form.status,
+          template_type: form.template_type,
+          html_code: preCleanedHtml,
+          css_code: form.css_code,
+          sanitized_html: finalHtml,
+          extracted_image_urls: sanitizeRes.data?.extracted_image_urls || [],
+        });
+
+        return saveRes;
+      } catch (err) {
+        console.error('Save mutation error:', err);
+        throw err;
+      }
     },
     onSuccess: async (res) => {
       // PlanUsage の lp_count をインクリメント（新規作成の場合）
@@ -138,9 +163,11 @@ export default function AdminLPCodeCreator() {
       }
     },
     onError: (err) => {
+      console.error('Save error details:', err);
+      const errorMsg = err.response?.data?.error || err.message || '保存に失敗しました';
       toast({
-        title: 'エラー',
-        description: err.message || '保存に失敗しました',
+        title: '保存エラー',
+        description: errorMsg,
         variant: 'destructive',
       });
     },
@@ -199,14 +226,36 @@ export default function AdminLPCodeCreator() {
 
   // プレビュー
   const handlePreview = async () => {
-    const sanitizeRes = await base44.functions.invoke('sanitizeLandingPageHtml', {
-      html_code: form.html_code,
-      css_code: form.css_code,
-    });
-    setPreviewData({
-      sanitized_html: sanitizeRes.sanitized_html,
-      css_code: form.css_code,
-    });
+    try {
+      // フロント側の事前クレンジング
+      const preCleanedHtml = preCleanHtml(form.html_code);
+
+      const sanitizeRes = await base44.functions.invoke('sanitizeLandingPageHtml', {
+        html_code: preCleanedHtml,
+        css_code: form.css_code,
+      });
+
+      if (!sanitizeRes || !sanitizeRes.data) {
+        throw new Error('Sanitize response is invalid');
+      }
+
+      setPreviewData({
+        sanitized_html: sanitizeRes.data.sanitized_html || preCleanedHtml,
+        css_code: form.css_code,
+      });
+
+      toast({
+        title: 'プレビュー準備完了',
+        description: 'プレビューが表示されました',
+      });
+    } catch (err) {
+      console.error('Preview error:', err);
+      toast({
+        title: 'プレビューエラー',
+        description: err.message || 'プレビューの生成に失敗しました',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

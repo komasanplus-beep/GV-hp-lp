@@ -35,40 +35,33 @@ Deno.serve(async (req) => {
     .reduce((a, b) => a + b.toString(16), '');
 
   try {
+    // Ensure sanitized_html is provided and is a string
+    if (typeof sanitized_html !== 'string') {
+      console.warn('sanitized_html is not a string, using html_code as fallback');
+    }
+
     let savedLp;
+    const lpData = {
+      title,
+      slug,
+      description,
+      status: status || 'draft',
+      source_type: 'pasted_code',
+      template_type: template_type || 'custom',
+      html_code,
+      css_code,
+      sanitized_html: typeof sanitized_html === 'string' ? sanitized_html : html_code,
+      extracted_image_urls: Array.isArray(extracted_image_urls) ? extracted_image_urls : [],
+      preview_token,
+      user_id: user.id
+    };
 
     if (lp_id) {
       // 既存LP更新
-      savedLp = await base44.entities.LandingPage.update(lp_id, {
-        title,
-        slug,
-        description,
-        status: status || 'draft',
-        source_type: 'pasted_code',
-        template_type: template_type || 'custom',
-        html_code,
-        css_code,
-        sanitized_html,
-        extracted_image_urls: extracted_image_urls || [],
-        preview_token,
-        user_id: user.id
-      });
+      savedLp = await base44.entities.LandingPage.update(lp_id, lpData);
     } else {
       // 新規LP作成
-      savedLp = await base44.entities.LandingPage.create({
-        title,
-        slug,
-        description,
-        status: status || 'draft',
-        source_type: 'pasted_code',
-        template_type: template_type || 'custom',
-        html_code,
-        css_code,
-        sanitized_html,
-        extracted_image_urls: extracted_image_urls || [],
-        preview_token,
-        user_id: user.id
-      });
+      savedLp = await base44.entities.LandingPage.create(lpData);
     }
 
     return Response.json({
@@ -77,6 +70,10 @@ Deno.serve(async (req) => {
       preview_url: `/lp/${savedLp.slug}?preview=true&token=${preview_token}`
     });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('saveLandingPageFromCode error:', error);
+    return Response.json({
+      error: error.message || 'Failed to save landing page',
+      details: error.toString()
+    }, { status: 500 });
   }
 });
