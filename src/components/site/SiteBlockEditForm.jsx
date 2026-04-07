@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { Loader2, ImageIcon } from 'lucide-react';
+import SiteBlockAnimationForm from './SiteBlockAnimationForm';
 
 const SITE_BLOCK_FIELDS = {
   Hero: [
@@ -92,6 +93,13 @@ const SITE_BLOCK_FIELDS = {
 export default function SiteBlockEditForm({ block, onSave, onCancel }) {
   const [data, setData] = useState(block.data || {});
   const [uploading, setUploading] = useState({});
+  const [animationSettings, setAnimationSettings] = useState({
+    animation_type: block.animation_type || 'fade-up',
+    animation_trigger: block.animation_trigger || 'on-scroll',
+    animation_delay: block.animation_delay || 0,
+    animation_duration: block.animation_duration || 600,
+    animation_once: block.animation_once !== false,
+  });
 
   const fields = SITE_BLOCK_FIELDS[block.block_type] || [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '' },
@@ -213,8 +221,18 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
         </div>
       ))}
 
+      <SiteBlockAnimationForm data={animationSettings} onChange={setAnimationSettings} />
+
       <div className="flex gap-2 pt-3 border-t">
-        <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => onSave(data)}>保存</Button>
+        <Button
+          className="bg-amber-600 hover:bg-amber-700"
+          onClick={() => onSave({
+            ...data,
+            ...animationSettings,
+          })}
+        >
+          保存
+        </Button>
         <Button variant="outline" onClick={onCancel}>キャンセル</Button>
       </div>
     </div>

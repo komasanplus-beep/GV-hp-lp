@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import SiteBlockRenderer from '@/components/site/SiteBlockRenderer';
+import SiteBlockRenderer from '@/components/site/SiteBlockRenderer.jsx';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 
