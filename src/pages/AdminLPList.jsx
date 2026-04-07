@@ -8,7 +8,7 @@ import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Pencil, Trash2, ExternalLink, Sparkles, Eye, LayoutTemplate, Check } from 'lucide-react';
-import LimitGuard from '@/components/plan/LimitGuard';
+import { usePlan } from '@/components/plan/usePlan';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
 } from '@/components/ui/dialog';
@@ -28,17 +28,11 @@ export default function AdminLPList() {
   const [selectedLPTemplate, setSelectedLPTemplate] = useState(null); // DBテンプレート
   const [templateTab, setTemplateTab] = useState('builtin'); // 'builtin' | 'custom'
 
+  const { plan, usage, isAtLPLimit } = usePlan();
+
   const { data: pages = [] } = useQuery({
     queryKey: ['landingPages'],
     queryFn: () => base44.entities.LandingPage.list('-created_date'),
-  });
-
-  const { data: limitsList = [] } = useQuery({
-    queryKey: ['myLimits'],
-    queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.UserLimits.filter({ user_id: user.id });
-    },
   });
 
   const { data: lpTemplates = [] } = useQuery({
@@ -46,46 +40,50 @@ export default function AdminLPList() {
     queryFn: () => base44.entities.LPTemplate.filter({ is_active: true }, 'sort_order'),
   });
 
-  const limits = limitsList[0];
-  const atLimit = limits && limits.lp_create_limit !== undefined && pages.length >= limits.lp_create_limit;
+  const atLimit = isAtLPLimit;
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
+      const user = await base44.auth.me();
       const lp = await base44.entities.LandingPage.create({
         title: data.title,
         slug: data.slug,
         template_type: data.template_type,
         status: 'draft',
+        user_id: user.id,
       });
 
       let blockTypes = [];
       let initialDataMap = {};
 
       if (templateTab === 'custom' && selectedLPTemplate?.template_data?.blocks) {
-        // DBテンプレートのブロック構成を使用
         const tplBlocks = selectedLPTemplate.template_data.blocks;
         blockTypes = tplBlocks.map(b => b.type || b.block_type);
-        tplBlocks.forEach(b => {
-          initialDataMap[b.type || b.block_type] = b.data || {};
-        });
+        tplBlocks.forEach(b => { initialDataMap[b.type || b.block_type] = b.data || {}; });
       } else {
-        // 組み込みテンプレート
         const builtin = BUILTIN_TEMPLATES.find(t => t.value === data.template_type);
         blockTypes = builtin?.blocks || ['Hero', 'CTA'];
       }
 
       await Promise.all(blockTypes.map((block_type, i) =>
-        base44.entities.LPBlock.create({
-          lp_id: lp.id,
-          block_type,
-          sort_order: i,
-          data: initialDataMap[block_type] || {},
-        })
+        base44.entities.LPBlock.create({ lp_id: lp.id, block_type, sort_order: i, data: initialDataMap[block_type] || {} })
       ));
+
+      // PlanUsage の lp_count をインクリメント
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const usageList = await base44.entities.PlanUsage.filter({ user_id: user.id }).catch(() => []);
+      const monthUsage = usageList.find(u => u.month_year === currentMonth);
+      if (monthUsage) {
+        await base44.entities.PlanUsage.update(monthUsage.id, { lp_count: (monthUsage.lp_count || 0) + 1 });
+      } else {
+        await base44.entities.PlanUsage.create({ user_id: user.id, month_year: currentMonth, lp_count: 1, ai_used: 0, storage_used: 0 });
+      }
+
       return lp;
     },
     onSuccess: (lp) => {
       queryClient.invalidateQueries({ queryKey: ['landingPages'] });
+      queryClient.invalidateQueries({ queryKey: ['planUsage'] });
       setShowCreate(false);
       setSelectedLPTemplate(null);
       navigate(createPageUrl(`AdminLPEditor?id=${lp.id}`));
@@ -103,9 +101,9 @@ export default function AdminLPList() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">ランディングページ一覧</h2>
-            {limits && (
-              <p className="text-xs text-slate-400 mt-1">{pages.length} / {limits.lp_create_limit} 件使用中</p>
-            )}
+            <p className="text-xs text-slate-400 mt-1">
+              {usage.lp_count} / {plan.max_lp === -1 ? '∞' : plan.max_lp} 件使用中
+            </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
@@ -126,7 +124,7 @@ export default function AdminLPList() {
         </div>
         {atLimit && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
-            LP作成数の上限（{limits?.lp_create_limit}件）に達しています。管理者に上限引き上げを依頼してください。
+            LP作成数の上限（{plan.max_lp}件）に達しています。プランをアップグレードしてください。
           </div>
         )}
         {pages.length === 0 ? (
