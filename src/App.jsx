@@ -1,6 +1,7 @@
 import './App.css'
 import MasterLPTemplates from './pages/MasterLPTemplates'
 import SiteView from './pages/SiteView'
+import AdminInquiries from './pages/AdminInquiries'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
       <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
       <Route path="/SiteView" element={<SiteView />} />
       <Route path="/site/:siteId" element={<SiteView />} />
+      <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
