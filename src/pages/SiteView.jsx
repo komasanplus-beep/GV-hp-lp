@@ -5,14 +5,16 @@
  * データ取得は getSiteViewData backend function に一元化。
  * 公開判定・権限チェックはすべて function 側で行う。
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import SiteBlockRenderer from '@/components/site/SiteBlockRenderer.jsx';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu, X } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 
 function SiteViewInner({ siteId, isPreview }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['siteViewData', siteId, isPreview],
     queryFn: async () => {
@@ -149,12 +151,15 @@ function SiteViewInner({ siteId, isPreview }) {
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-stone-100">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo/Site Name */}
           <div className="flex items-center gap-2">
             {logoUrl
               ? <img src={logoUrl} alt={siteName} className="h-8 w-auto" />
               : <span className="text-lg font-bold text-stone-800">{siteName}</span>
             }
           </div>
+
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6 text-sm text-stone-600">
             {menuItems.length > 0
               ? menuItems.map(item => (
@@ -176,7 +181,62 @@ function SiteViewInner({ siteId, isPreview }) {
               {bookingText}
             </a>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-stone-600 hover:text-stone-900 transition-colors"
+            aria-label="メニューを開く"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
+
+        {/* Mobile Menu Drawer */}
+        {mobileMenuOpen && (
+          <>
+            {/* Overlay */}
+            <div
+              className="fixed inset-0 bg-black/30 z-40 md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            {/* Menu Panel */}
+            <div className="fixed top-16 left-0 right-0 bg-white border-b border-stone-100 z-40 md:hidden shadow-lg">
+              <div className="max-w-6xl mx-auto px-4 py-4 space-y-3">
+                {menuItems.length > 0
+                  ? menuItems.map(item => (
+                      <a
+                        key={item.label}
+                        href={item.href}
+                        className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.label}
+                      </a>
+                    ))
+                  : (
+                      <>
+                        <a href="#about" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>About</a>
+                        <a href="#menu" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Menu</a>
+                        <a href="#staff" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Staff</a>
+                        <a href="#gallery" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Gallery</a>
+                        <a href="#contact" className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
+                      </>
+                    )
+                }
+                <div className="pt-2 border-t border-stone-100">
+                  <a
+                    href={bookingUrl}
+                    className="block w-full px-4 py-2.5 bg-amber-600 text-white rounded-lg text-center font-medium hover:bg-amber-700 transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {bookingText}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </nav>
 
       {/* Main Content */}
