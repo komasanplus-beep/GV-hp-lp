@@ -1,0 +1,64 @@
+{
+  "name": "SiteBlock",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string"
+    },
+    "page_id": {
+      "type": "string"
+    },
+    "block_type": {
+      "type": "string",
+      "enum": [
+        "Hero",
+        "About",
+        "Menu",
+        "Service",
+        "Staff",
+        "Gallery",
+        "Voice",
+        "Feature",
+        "FAQ",
+        "Access",
+        "Contact",
+        "CTA",
+        "Campaign",
+        "Custom"
+      ]
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0
+    },
+    "data": {
+      "type": "object",
+      "description": "\u30d6\u30ed\u30c3\u30af\u306e\u30b3\u30f3\u30c6\u30f3\u30c4JSON"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "page_id",
+    "block_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
