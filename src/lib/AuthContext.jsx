@@ -20,7 +20,8 @@ export const AuthProvider = ({ children }) => {
     const isPublicRoute = 
       ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) ||
       search.includes('site_id=') || // SiteView
-      search.includes('slug=');      // LPView
+      search.includes('slug=') ||     // LPView
+      search.includes('preview=true'); // Preview mode
     
     if (isPublicRoute) {
       setIsLoadingPublicSettings(false);

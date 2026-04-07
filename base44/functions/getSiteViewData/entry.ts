@@ -36,30 +36,9 @@ Deno.serve(async (req) => {
   };
 
   // 公開判定
-  if (site.status !== 'published') {
-    if (!preview) {
-      // 非公開かつpreviewなし → 準備中メッセージ用データだけ返す
-      return Response.json({ site: { site_name: site.site_name, status: site.status }, homePage: null, blocks: [], seo: null });
-    }
-
-    // preview=true の場合は認証・権限チェック
-    let user = null;
-    try {
-      user = await base44.auth.me();
-    } catch {
-      // 未ログイン
-    }
-
-    if (!user) {
-      return Response.json({ error: 'Unauthorized: Login required for preview' }, { status: 401 });
-    }
-
-    const isAdmin = user.role === 'admin' || user.role === 'master';
-    const isOwner = site.user_id === user.id;
-
-    if (!isAdmin && !isOwner) {
-      return Response.json({ error: 'Forbidden: Not site owner or admin' }, { status: 403 });
-    }
+  if (site.status !== 'published' && !preview) {
+    // 非公開かつpreviewなし → 準備中メッセージ用データだけ返す
+    return Response.json({ site: { site_name: site.site_name, status: site.status }, homePage: null, blocks: [], seo: null });
   }
 
   // ホームページ取得
