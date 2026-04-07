@@ -8,6 +8,7 @@ import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { incrementUsage } from '@/lib/planUsage';
+import { hotelTemplate } from '@/lib/templates/hotelTemplate';
 
 // 機能フラグの表示設定
 const FEATURE_CONFIG = {
@@ -48,11 +49,33 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  // DBからテンプレート一覧を取得
-  const { data: templates = [], isLoading: templatesLoading } = useQuery({
+  // DBからテンプレート一覧を取得、ない場合はホテルテンプレートを使用
+  const { data: dbTemplates = [], isLoading: templatesLoading } = useQuery({
     queryKey: ['siteTemplates'],
-    queryFn: () => base44.entities.SiteTemplate.filter({ is_active: true }),
+    queryFn: async () => {
+      try {
+        return await base44.entities.SiteTemplate.filter({ is_active: true });
+      } catch {
+        return [];
+      }
+    },
   });
+
+  // ホテルテンプレートをBuiltinとして変換
+  const builtinHotelTemplate = {
+    id: '__builtin_hotel__',
+    name: hotelTemplate.name,
+    template_key: hotelTemplate.key,
+    description: hotelTemplate.description,
+    category: 'general',
+    enabled_features: { booking: true, blog: false, inquiry: true, customer: true },
+    default_pages: hotelTemplate.pages,
+    default_blocks: hotelTemplate.blocks,
+    initial_data: { services: hotelTemplate.services },
+  };
+
+  // テンプレート一覧（DB + builtin）
+  const templates = dbTemplates.length > 0 ? dbTemplates : [builtinHotelTemplate];
 
   // テンプレートのページ・ブロックをプレビュー表示用に整形
   const previewPages = selectedTemplate?.default_pages || [];
@@ -79,6 +102,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       user_id: user.id,
       status: 'draft',
       enabled_features: features,
+      navigation_config: selectedTemplate.navigation_config || {},
     });
 
     // 2. default_pages から SitePage 作成
@@ -106,11 +130,16 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         sort_order: blockDef.sort_order ?? 0,
         data: blockDef.data || {},
         user_id: user.id,
+        animation_type: blockDef.animation_type || 'fade-up',
+        animation_trigger: blockDef.animation_trigger || 'on-scroll',
+        animation_delay: blockDef.animation_delay ?? 0,
+        animation_duration: blockDef.animation_duration ?? 600,
+        animation_once: blockDef.animation_once ?? true,
       });
     }
 
     // 4. 初期サービスを生成
-    if (features.booking && initialData.services?.length > 0) {
+    if (initialData.services?.length > 0) {
       for (const service of initialData.services) {
         await base44.entities.Service.create({
           ...service,
@@ -142,21 +171,7 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       }
     }
 
-    // 7. 初期予約サンプルを生成（Booking レガシー対応）
-    if (features.booking && initialData.bookings?.length > 0) {
-      try {
-        for (const booking of initialData.bookings) {
-          await base44.entities.Booking.create({
-            site_id: site.id,
-            ...booking,
-          });
-        }
-      } catch {
-        // Booking エンティティがない場合はスキップ
-      }
-    }
-
-    // 8. usage increment
+    // 7. usage increment
     await incrementUsage('site_count');
 
     setLoading(false);
