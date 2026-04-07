@@ -5,7 +5,7 @@ import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight } from 'lucide-react';
+import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -125,6 +125,11 @@ export default function AdminSiteList() {
                             <ArrowRight className="w-3.5 h-3.5" />
                           </Button>
                         </Link>
+                        <a href={`${createPageUrl('SiteView')}?site_id=${site.id}`} target="_blank" rel="noreferrer">
+                          <Button variant="outline" size="sm" title="サイトをプレビュー">
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
+                        </a>
                         <Button variant="ghost" size="icon" onClick={() => { setEditSite(site); setEditForm({ site_name: site.site_name, business_type: site.business_type, status: site.status }); }}>
                           <Pencil className="w-4 h-4 text-slate-400" />
                         </Button>

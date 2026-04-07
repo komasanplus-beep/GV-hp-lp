@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, Save, Globe } from 'lucide-react';
+import { Loader2, Search, Save, Globe, ExternalLink, Info } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { toast } from 'sonner';
 
@@ -28,7 +28,7 @@ export default function SeoSettings() {
 
   const { data: seoData, isLoading } = useQuery({
     queryKey: ['lpSeoData', selectedSiteId],
-    queryFn: () => base44.entities.LPSeoData.filter({ lp_id: selectedSiteId }).then(r => r[0] || null),
+    queryFn: () => base44.entities.LPSeoData.filter({ lp_id: selectedSiteId, target_type: 'site' }).then(r => r[0] || null),
     enabled: !!selectedSiteId,
   });
 
@@ -58,6 +58,7 @@ export default function SeoSettings() {
     mutationFn: async () => {
       const payload = {
         lp_id: selectedSiteId,
+        target_type: 'site',
         seo_keywords: form.keywords.split(',').map(s => s.trim()).filter(Boolean),
         meta_title: form.meta_title,
         meta_description: form.meta_description,
@@ -97,6 +98,15 @@ export default function SeoSettings() {
                 </SelectContent>
               </Select>
             )}
+          </div>
+
+          {/* スコープ説明 */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex gap-2 text-sm text-blue-800">
+            <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-600" />
+            <div>
+              <span className="font-medium">SEO範囲：</span> ここで設定するSEOはサイト全体（ホームページ）に適用されます。
+              LP固有のSEOはLP管理 → 各LP編集画面から設定できます。
+            </div>
           </div>
 
           {!selectedSiteId ? (
@@ -193,14 +203,25 @@ export default function SeoSettings() {
                 </Card>
               )}
 
-              <Button
-                className="bg-amber-600 hover:bg-amber-700 gap-2 w-full"
-                onClick={() => saveMutation.mutate()}
-                disabled={saveMutation.isPending}
-              >
-                {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                SEO設定を保存
-              </Button>
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 bg-amber-600 hover:bg-amber-700 gap-2"
+                  onClick={() => saveMutation.mutate()}
+                  disabled={saveMutation.isPending}
+                >
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  SEO設定を保存
+                </Button>
+                <a
+                  href={`${createPageUrl('SiteView')}?site_id=${selectedSiteId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button variant="outline" className="gap-1">
+                    <ExternalLink className="w-4 h-4" />プレビュー
+                  </Button>
+                </a>
+              </div>
             </>
           )}
         </div>

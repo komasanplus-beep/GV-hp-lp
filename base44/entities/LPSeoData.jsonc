@@ -1,0 +1,86 @@
+{
+  "name": "LPSeoData",
+  "type": "object",
+  "properties": {
+    "lp_id": {
+      "type": "string",
+      "description": "LandingPage \u306e ID\uff08LP\u7528\uff09\u307e\u305f\u306f Site \u306e ID\uff08\u30b5\u30a4\u30c8\u7528\uff09"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "lp",
+        "site"
+      ],
+      "default": "lp",
+      "description": "SEO\u5bfe\u8c61\u7a2e\u5225"
+    },
+    "meta_title": {
+      "type": "string",
+      "description": "\u30e1\u30bf\u30bf\u30a4\u30c8\u30eb\uff0860\u6587\u5b57\u4ee5\u5185\uff09"
+    },
+    "meta_description": {
+      "type": "string",
+      "description": "\u30e1\u30bf\u30c7\u30a3\u30b9\u30af\u30ea\u30d7\u30b7\u30e7\u30f3\uff08160\u6587\u5b57\u4ee5\u5185\uff09"
+    },
+    "og_title": {
+      "type": "string",
+      "description": "OG\u30bf\u30a4\u30c8\u30eb"
+    },
+    "og_description": {
+      "type": "string",
+      "description": "OG\u8aac\u660e\u6587"
+    },
+    "og_image_url": {
+      "type": "string",
+      "description": "OG\u753b\u50cfURL"
+    },
+    "canonical_url": {
+      "type": "string",
+      "description": "\u30ab\u30ce\u30cb\u30ab\u30ebURL"
+    },
+    "seo_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "SEO\u30ad\u30fc\u30ef\u30fc\u30c9\u914d\u5217"
+    },
+    "search_intent": {
+      "type": "object",
+      "description": "\u691c\u7d22\u610f\u56f3JSON"
+    },
+    "lmo_summary": {
+      "type": "string",
+      "description": "LMO\u5411\u3051\u30b5\u30de\u30ea\u30fc"
+    },
+    "faq_data": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "FAQ JSON\u914d\u5217"
+    }
+  },
+  "required": [
+    "lp_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Plus, Link2, CheckCircle2, Clock, Trash2, Loader2, Info } from 'lucide-react';
+import { Plus, Link2, CheckCircle2, Clock, Trash2, Loader2, Info, Eye, AlertTriangle } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -51,9 +52,15 @@ export default function AdminDomainSettings() {
     mutationFn: (id) => base44.entities.DomainMapping.update(id, { verification_status: 'verified' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['domainMappings'] });
-      toast.success('確認済みにしました');
+      toast.success('DNS確認済みとしてマークしました（実際の接続はサーバー側設定が必要です）');
     },
   });
+
+  // ドメインの内部プレビューURL（サイトIDベース）
+  const getPreviewUrl = (d) => {
+    if (!d.site_id) return null;
+    return `${window.location.origin}${createPageUrl('SiteView')}?site_id=${d.site_id}`;
+  };
 
   const getSiteName = (id) => sites.find(s => s.id === id)?.site_name || id;
 
@@ -85,6 +92,20 @@ export default function AdminDomainSettings() {
             </CardContent>
           </Card>
 
+          {/* DNS自動化についての正直な説明 */}
+          <Card className="bg-amber-50 border-amber-200">
+            <CardContent className="py-3 px-5">
+              <div className="flex gap-2 text-sm text-amber-800">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
+                <div>
+                  <span className="font-medium">ご注意：</span> ドメインの実際のルーティングはサーバーインフラ設定が必要です。
+                  ここで登録したドメイン情報は記録・管理のみを行います。
+                  プレビューは常に内部URLで確認できます。
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {isLoading ? (
             <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>
           ) : domains.length === 0 ? (
@@ -99,30 +120,60 @@ export default function AdminDomainSettings() {
             <div className="space-y-3">
               {domains.map(d => (
                 <Card key={d.id}>
-                  <CardContent className="py-4 px-5 flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-slate-800">{d.domain}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${d.domain_type === 'custom' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
-                          {d.domain_type === 'custom' ? '独自ドメイン' : 'サブドメイン'}
-                        </span>
-                        {d.verification_status === 'verified' ? (
-                          <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle2 className="w-3.5 h-3.5" />確認済み</span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-amber-600"><Clock className="w-3.5 h-3.5" />確認待ち</span>
-                        )}
+                  <CardContent className="py-4 px-5">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-slate-800">{d.domain}{d.domain_type === 'subdomain' ? '.service.com' : ''}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${d.domain_type === 'custom_domain' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                            {d.domain_type === 'custom_domain' ? '独自ドメイン' : 'サブドメイン'}
+                          </span>
+                          {d.verification_status === 'verified' ? (
+                            <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle2 className="w-3.5 h-3.5" />DNS確認済み（手動）</span>
+                          ) : (
+                            <span className="flex items-center gap-1 text-xs text-amber-600"><Clock className="w-3.5 h-3.5" />設定待ち</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">サイト: {getSiteName(d.site_id)}</p>
+                        {/* URL種別を明示 */}
+                        <div className="mt-2 space-y-1">
+                          <p className="text-xs text-slate-400">
+                            <span className="font-medium text-slate-500">内部プレビュー：</span>{' '}
+                            <a href={getPreviewUrl(d)} target="_blank" rel="noreferrer" className="text-blue-600 underline break-all">
+                              {getPreviewUrl(d)}
+                            </a>
+                          </p>
+                          {d.domain_type === 'subdomain' && (
+                            <p className="text-xs text-slate-400">
+                              <span className="font-medium text-slate-500">サブドメイン（要インフラ設定）：</span>{' '}
+                              <span className="text-slate-500">{d.domain}.service.com</span>
+                            </p>
+                          )}
+                          {d.domain_type === 'custom_domain' && (
+                            <p className="text-xs text-slate-400">
+                              <span className="font-medium text-slate-500">独自ドメイン（CNAME要設定）：</span>{' '}
+                              <span className="text-slate-500">{d.domain}</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">サイト: {getSiteName(d.site_id)}</p>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      {d.verification_status !== 'verified' && (
-                        <Button variant="outline" size="sm" onClick={() => verifMutation.mutate(d.id)} disabled={verifMutation.isPending}>
-                          確認済みにする
+                      <div className="flex gap-2 flex-shrink-0">
+                        {getPreviewUrl(d) && (
+                          <a href={getPreviewUrl(d)} target="_blank" rel="noreferrer">
+                            <Button variant="outline" size="icon" title="内部プレビュー">
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </a>
+                        )}
+                        {d.verification_status !== 'verified' && (
+                          <Button variant="outline" size="sm" onClick={() => verifMutation.mutate(d.id)} disabled={verifMutation.isPending}>
+                            DNS確認済みにする
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(d.id)}>
+                          <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(d.id)}>
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
