@@ -249,14 +249,12 @@ export default function UserSidebar({ isOpen, onClose }) {
           {/* Footer */}
           <div className="p-3 border-t border-slate-800 space-y-0.5">
             <Link
-              to={createPageUrl('Home')}
-              target="_blank"
-              rel="noreferrer"
+              to={createPageUrl('AdminSiteList')}
               onClick={onClose}
               className="flex items-center gap-3 px-3 py-2.5 w-full text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all text-sm"
             >
               <Eye className="w-4 h-4" />
-              <span className="font-medium">サイトプレビュー</span>
+              <span className="font-medium">サイト一覧・プレビュー</span>
             </Link>
             {isAdmin && (
               <Link

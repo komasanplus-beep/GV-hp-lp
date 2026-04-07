@@ -6,7 +6,7 @@ import UserLayout from '@/components/user/UserLayout';
 import PlanBanner from '@/components/plan/PlanBanner';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText } from 'lucide-react';
+import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText, Eye } from 'lucide-react';
 
 const cards = [
   { name: 'サイト管理', desc: 'ホームページの作成・編集', icon: Globe, page: 'AdminSiteList', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
@@ -92,6 +92,9 @@ export default function UserDashboard() {
                       <span className={`text-xs px-2 py-0.5 rounded-full border ${site.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}>
                         {site.status === 'published' ? '公開中' : '下書き'}
                       </span>
+                      <a href={`${createPageUrl('SiteView')}?site_id=${site.id}&preview=true`} target="_blank" rel="noreferrer" className="text-xs text-slate-400 hover:text-emerald-600" title="プレビュー">
+                        <Eye className="w-4 h-4" />
+                      </a>
                       <Link to={`${createPageUrl('SitePageManager')}?site_id=${site.id}`} className="text-xs text-slate-400 hover:text-amber-600">
                         <ArrowRight className="w-4 h-4" />
                       </Link>
