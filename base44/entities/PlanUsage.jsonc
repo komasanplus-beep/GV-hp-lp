@@ -1,0 +1,58 @@
+{
+  "name": "PlanUsage",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "ai_used": {
+      "type": "number",
+      "default": 0,
+      "description": "\u5f53\u6708AI\u751f\u6210\u4f7f\u7528\u56de\u6570"
+    },
+    "lp_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u4f5c\u6210\u6e08\u307fLP\u6570"
+    },
+    "site_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u4f5c\u6210\u6e08\u307f\u30b5\u30a4\u30c8\u6570"
+    },
+    "storage_used": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30b9\u30c8\u30ec\u30fc\u30b8\u4f7f\u7528\u91cf (MB)"
+    },
+    "month_year": {
+      "type": "string",
+      "description": "\u96c6\u8a08\u6708 (\u4f8b: 2026-03)"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

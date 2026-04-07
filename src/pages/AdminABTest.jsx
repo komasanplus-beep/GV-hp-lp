@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Copy, Play, Pause, ExternalLink, Trash2 } from 'lucide-react';
+import { Plus, Copy, Play, Pause, ExternalLink, Trash2, Lock } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
+import { usePlan } from '@/components/plan/usePlan';
 
 const STATUS_COLORS = {
   draft: 'bg-slate-100 text-slate-600',
@@ -22,6 +23,8 @@ const STATUS_LABELS = { draft: '下書き', running: '実行中', stopped: '停�
 
 export default function AdminABTest() {
   const queryClient = useQueryClient();
+  const { plan } = usePlan();
+  const abTestEnabled = plan.ab_test_enabled;
   const [showCreate, setShowCreate] = useState(false);
   const [selectedLP, setSelectedLP] = useState('');
 
@@ -75,10 +78,25 @@ export default function AdminABTest() {
       <UserLayout title="ABテスト">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-slate-800">ABテスト管理</h2>
-          <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => setShowCreate(true)}>
+          <Button
+            className="bg-amber-600 hover:bg-amber-700"
+            onClick={() => setShowCreate(true)}
+            disabled={!abTestEnabled}
+            title={!abTestEnabled ? 'ABテストはこのプランでは利用できません' : ''}
+          >
             <Plus className="w-4 h-4 mr-2" />新規ABテスト
           </Button>
         </div>
+
+        {!abTestEnabled && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6 flex items-start gap-3">
+            <Lock className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">ABテストはこのプランでは利用できません</p>
+              <p className="text-xs text-amber-600 mt-0.5">上位プランにアップグレードするとABテスト機能が利用できます。</p>
+            </div>
+          </div>
+        )}
 
         {experiments.length === 0 ? (
           <div className="text-center py-20 text-slate-400">

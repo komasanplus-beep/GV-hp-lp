@@ -7,6 +7,7 @@ import { Loader2, Check, ChevronRight, Eye } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { incrementUsage } from '@/lib/planUsage';
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: '美容室・ヘアサロン', icon: '✂️' },
@@ -96,6 +97,9 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
         user_id: user.id,
       });
     }
+
+    // サイト作成成功後にusage incrementする
+    await incrementUsage('site_count');
 
     setLoading(false);
     setDone(true);

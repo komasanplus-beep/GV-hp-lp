@@ -72,7 +72,8 @@ export function usePlan() {
 
   // --- 制限値オブジェクト (limits) ---
   const limits = {
-    max_lp: plan.max_lp,         // -1=無制限
+    max_lp: plan.max_lp,           // -1=無制限
+    max_sites: plan.max_sites ?? 1, // -1=無制限
     ai_limit: plan.ai_limit,
     domain_limit: plan.domain_limit, // -1=無制限, 0=サブドメインのみ
     member_limit: plan.member_limit,
@@ -99,6 +100,7 @@ export function usePlan() {
 
   // --- 制限チェック関数 ---
   const isAtLPLimit = plan.max_lp !== -1 && usage.lp_count >= plan.max_lp;
+  const isAtSiteLimit = (plan.max_sites ?? 1) !== -1 && (usage.site_count || 0) >= (plan.max_sites ?? 1);
   const isAtAILimit = plan.ai_limit > 0 && usage.ai_used >= plan.ai_limit;
   const isAtDomainLimit = (count) => plan.domain_limit !== -1 && plan.domain_limit > 0 && count >= plan.domain_limit;
 
@@ -124,6 +126,7 @@ export function usePlan() {
     user,
     userFeatures,
     isAtLPLimit,
+    isAtSiteLimit,
     isAtAILimit,
     isAtDomainLimit,
     isFeatureEnabled,

@@ -9,6 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Copy, Check, Loader2 } from 'lucide-react';
 import LimitGuard from '@/components/plan/LimitGuard';
+import { usePlan } from '@/components/plan/usePlan';
+import { incrementUsage } from '@/lib/planUsage';
+import { useQueryClient } from '@tanstack/react-query';
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: 'ヘアサロン' },
@@ -36,6 +39,8 @@ const CONTENT_TYPES = [
 ];
 
 export default function AdminAIGenerate() {
+  const queryClient = useQueryClient();
+  const { isAtAILimit, plan, usage } = usePlan();
   const [form, setForm] = useState({
     business_type: 'hair_salon',
     service: '',
@@ -49,6 +54,7 @@ export default function AdminAIGenerate() {
   const [copied, setCopied] = useState(null);
 
   const handleGenerate = async () => {
+    if (isAtAILimit) return;
     setLoading(true);
     setResult(null);
     const res = await base44.functions.invoke('aiGenerate', {
@@ -56,6 +62,9 @@ export default function AdminAIGenerate() {
       content_type: selectedType,
     });
     setResult(res.data);
+    // AI生成成功後にusage incrementする
+    await incrementUsage('ai_used');
+    queryClient.invalidateQueries({ queryKey: ['planUsage'] });
     setLoading(false);
   };
 
@@ -191,10 +200,13 @@ export default function AdminAIGenerate() {
                 ))}
               </div>
 
+              <p className="text-xs text-slate-400 mt-3">
+                AI生成残り: {plan.ai_limit > 0 ? Math.max(0, plan.ai_limit - (usage.ai_used || 0)) : '∞'} 回
+              </p>
               <Button
                 onClick={handleGenerate}
-                disabled={loading}
-                className="mt-4 bg-amber-500 hover:bg-amber-600 text-white w-full"
+                disabled={loading || isAtAILimit}
+                className="mt-2 bg-amber-500 hover:bg-amber-600 text-white w-full"
               >
                 {loading ? (
                   <><Loader2 className="w-4 h-4 animate-spin mr-2" />生成中...</>

@@ -5,6 +5,8 @@ import { createPageUrl } from '@/utils';
 import { useNavigate } from 'react-router-dom';
 import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
+import { usePlan } from '@/components/plan/usePlan';
+import { incrementUsage } from '@/lib/planUsage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +37,7 @@ function StepIndicator({ current }) {
 export default function AdminLPGenerate() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isAtAILimit, isAtLPLimit, plan, usage } = usePlan();
   const [mode, setMode] = useState('wizard'); // 'wizard' | 'freetext'
   const [freeText, setFreeText] = useState('');
   const [freeTextResult, setFreeTextResult] = useState(null);
@@ -162,6 +165,9 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
           },
         },
       });
+      // AI生成成功後にai_usedをincrement
+      await incrementUsage('ai_used');
+      queryClient.invalidateQueries({ queryKey: ['planUsage'] });
       return result;
     },
     onSuccess: (data) => setGenerated(data),
@@ -244,11 +250,13 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      const user = await base44.auth.me();
       const lp = await base44.entities.LandingPage.create({
         title: form.lp_title,
         slug: form.lp_slug,
         template_type: 'new_service',
         status: 'draft',
+        user_id: user.id,
       });
 
       await Promise.all(
@@ -261,10 +269,13 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
         await base44.entities.LPSeoData.create({ lp_id: lp.id, ...generated.seo });
       }
 
+      // LP保存成功後にlp_countをincrement
+      await incrementUsage('lp_count');
       return lp;
     },
     onSuccess: (lp) => {
       queryClient.invalidateQueries({ queryKey: ['landingPages'] });
+      queryClient.invalidateQueries({ queryKey: ['planUsage'] });
       navigate(createPageUrl(`AdminLPEditor?id=${lp.id}`));
     },
   });
@@ -282,6 +293,17 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
               <p className="text-sm text-slate-500">AIがWEB検索してSEO最適化されたLPを自動生成します</p>
             </div>
           </div>
+
+          {isAtAILimit && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+              今月のAI生成回数（{plan.ai_limit}回）の上限に達しています。プランをアップグレードしてください。
+            </div>
+          )}
+          {isAtLPLimit && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
+              LP作成数（{plan.max_lp}件）の上限に達しています。既存LPを削除するかプランをアップグレードしてください。
+            </div>
+          )}
 
           {/* モード切替 */}
           <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-lg">
@@ -491,7 +513,8 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(0)}>戻る</Button>
                 <Button className="bg-amber-600 hover:bg-amber-700"
-                  disabled={!form.service || !form.lp_title || !form.lp_slug}
+                  disabled={!form.service || !form.lp_title || !form.lp_slug || isAtAILimit || isAtLPLimit}
+                  title={isAtAILimit ? 'AI生成回数の上限に達しています' : isAtLPLimit ? 'LP作成数の上限に達しています' : ''}
                   onClick={() => { setStep(2); generateMutation.mutate(); }}>
                   <Sparkles className="w-4 h-4 mr-1" /> AI生成開始
                 </Button>

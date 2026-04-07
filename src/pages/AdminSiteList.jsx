@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SiteCreateWizard from '@/components/site/SiteCreateWizard';
 import { toast } from 'sonner';
+import { usePlan } from '@/components/plan/usePlan';
 
 const BUSINESS_TYPES = [
   { value: 'hair_salon', label: '美容室・ヘアサロン' },
@@ -30,6 +31,7 @@ export default function AdminSiteList() {
   const [editSite, setEditSite] = useState(null);
   const [editForm, setEditForm] = useState({});
   const queryClient = useQueryClient();
+  const { plan, usage, isAtSiteLimit } = usePlan();
 
   const { data: sites = [], isLoading } = useQuery({
     queryKey: ['sites'],
@@ -62,12 +64,25 @@ export default function AdminSiteList() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-slate-800">サイト一覧</h2>
-              <p className="text-sm text-slate-500 mt-0.5">ホームページを管理します</p>
+              <p className="text-sm text-slate-500 mt-0.5">
+                {usage.site_count || 0} / {(plan.max_sites ?? 1) === -1 ? '∞' : (plan.max_sites ?? 1)} 件使用中
+              </p>
             </div>
-            <Button onClick={() => setShowWizard(true)} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+            <Button
+              onClick={() => setShowWizard(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 gap-2"
+              disabled={isAtSiteLimit}
+              title={isAtSiteLimit ? 'サイト作成数の上限に達しています' : ''}
+            >
               <Plus className="w-4 h-4" />新規サイト作成
             </Button>
           </div>
+
+          {isAtSiteLimit && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+              サイト作成数の上限（{plan.max_sites ?? 1}件）に達しています。プランをアップグレードしてください。
+            </div>
+          )}
 
           {isLoading ? (
             <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>
@@ -134,6 +149,7 @@ export default function AdminSiteList() {
             <SiteCreateWizard
               onComplete={(site) => {
                 queryClient.invalidateQueries({ queryKey: ['sites'] });
+                queryClient.invalidateQueries({ queryKey: ['planUsage'] });
                 setShowWizard(false);
               }}
               onCancel={() => setShowWizard(false)}
