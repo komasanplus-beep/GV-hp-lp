@@ -1,0 +1,62 @@
+{
+  "name": "FeatureAuditLog",
+  "type": "object",
+  "properties": {
+    "actor_user_id": {
+      "type": "string",
+      "description": "実行者ユーザーID"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": ["user", "site", "tenant", "plan", "subscription"],
+      "description": "対象の種類"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "対象のID"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "grant_feature",
+        "revoke_feature",
+        "plan_change",
+        "subscription_status_change",
+        "limit_change"
+      ],
+      "description": "実行されたアクション"
+    },
+    "feature_code": {
+      "type": "string",
+      "description": "対象機能コード（機能系アクションの場合）"
+    },
+    "old_value": {
+      "type": "object",
+      "description": "変更前の値"
+    },
+    "new_value": {
+      "type": "object",
+      "description": "変更後の値"
+    },
+    "reason": {
+      "type": "string",
+      "description": "変更理由"
+    }
+  },
+  "required": [
+    "actor_user_id",
+    "target_type",
+    "target_id",
+    "action"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "update": false,
+    "delete": false
+  }
+}

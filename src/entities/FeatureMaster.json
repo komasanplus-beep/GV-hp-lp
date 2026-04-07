@@ -1,0 +1,81 @@
+{
+  "name": "FeatureMaster",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "機能コード（site_builder, crm_guest等）"
+    },
+    "name": {
+      "type": "string",
+      "description": "機能名"
+    },
+    "description": {
+      "type": "string",
+      "description": "機能説明"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "site_core",
+        "lp",
+        "booking",
+        "crm",
+        "campaign",
+        "seo",
+        "analytics",
+        "domain",
+        "ai",
+        "integration"
+      ],
+      "description": "機能カテゴリ"
+    },
+    "default_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "デフォルト有効か"
+    },
+    "requires_payment": {
+      "type": "boolean",
+      "default": false,
+      "description": "課金が必須か"
+    },
+    "ui_label": {
+      "type": "string",
+      "description": "UI表示ラベル"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "表示順"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived"],
+      "default": "active",
+      "description": "機能状態"
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master"
+      }
+    }
+  }
+}

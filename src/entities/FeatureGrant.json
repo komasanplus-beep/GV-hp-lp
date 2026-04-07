@@ -1,0 +1,76 @@
+{
+  "name": "FeatureGrant",
+  "type": "object",
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": ["user", "site", "tenant"],
+      "description": "付与対象の種類"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "付与対象のID"
+    },
+    "feature_code": {
+      "type": "string",
+      "description": "機能コード"
+    },
+    "grant_type": {
+      "type": "string",
+      "enum": ["enable", "disable"],
+      "description": "付与の種類（有効化 / 無効化）"
+    },
+    "reason": {
+      "type": "string",
+      "description": "付与理由"
+    },
+    "start_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "開始日時"
+    },
+    "end_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "終了日時"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "expired", "revoked"],
+      "default": "active",
+      "description": "付与状態"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "付与者ユーザーID"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "feature_code",
+    "grant_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master"
+      }
+    }
+  }
+}

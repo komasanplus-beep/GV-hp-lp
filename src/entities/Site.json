@@ -1,0 +1,154 @@
+{
+  "name": "Site",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "site_name": {
+      "type": "string"
+    },
+    "business_type": {
+      "type": "string",
+      "enum": [
+        "hair_salon",
+        "beauty_salon",
+        "nail_salon",
+        "esthetic",
+        "relaxation",
+        "gym",
+        "clinic",
+        "school",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "enabled_features": {
+      "type": "object",
+      "description": "テンプレートから引き継いだ有効機能フラグ（補助用、最終判定は FeatureGrant / Subscription / PlanMaster を優先）",
+      "properties": {
+        "booking": {
+          "type": "boolean",
+          "default": false
+        },
+        "blog": {
+          "type": "boolean",
+          "default": false
+        },
+        "inquiry": {
+          "type": "boolean",
+          "default": true
+        },
+        "customer": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "owner_user_id": {
+      "type": "string",
+      "description": "サイト所有者のユーザーID"
+    },
+    "assigned_plan_code": {
+      "type": "string",
+      "description": "このサイトに割り当てられたプランコード（オプション、個別プラン的な使い方用）"
+    },
+    "navigation_config": {
+      "type": "object",
+      "description": "ヘッダーナビゲーション設定"
+    },
+    "footer_config": {
+      "type": "object",
+      "description": "フッター設定",
+      "properties": {
+        "copyright_text": {
+          "type": "string",
+          "description": "著作権表記のカスタムテキスト"
+        },
+        "footer_links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              },
+              "sort_order": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "label",
+              "href"
+            ]
+          },
+          "description": "フッターのリンク項目"
+        },
+        "show_site_name": {
+          "type": "boolean",
+          "default": true,
+          "description": "サイト名を表示するか"
+        },
+        "show_year": {
+          "type": "boolean",
+          "default": true,
+          "description": "年号を表示するか"
+        }
+      }
+    },
+    "seo_config": {
+      "type": "object",
+      "description": "SEO設定",
+      "properties": {
+        "meta_title": {
+          "type": "string",
+          "description": "ページタイトル（60文字以内推奨）"
+        },
+        "meta_description": {
+          "type": "string",
+          "description": "メタディスクリプション（160文字以内推奨）"
+        },
+        "og_image_url": {
+          "type": "string",
+          "description": "OGP画像URL"
+        }
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "site_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

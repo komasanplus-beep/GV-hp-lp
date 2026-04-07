@@ -1,0 +1,105 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "契約者ユーザーID"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "テナントID（オプション）"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "現在のプランコード"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": ["monthly", "yearly"],
+      "default": "monthly",
+      "description": "課金周期"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "canceled",
+        "expired"
+      ],
+      "default": "trialing",
+      "description": "契約状態"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "契約開始日"
+    },
+    "current_period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "現在の課金期間開始"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "現在の課金期間終了"
+    },
+    "trial_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "試用期間終了日"
+    },
+    "canceled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "キャンセル日"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": ["stripe", "manual", "none"],
+      "default": "none",
+      "description": "支払いプロバイダ"
+    },
+    "external_subscription_id": {
+      "type": "string",
+      "description": "外部（Stripe等）の契約ID"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "master"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master"
+      }
+    }
+  }
+}

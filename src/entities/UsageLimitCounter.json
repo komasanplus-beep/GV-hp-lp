@@ -1,0 +1,82 @@
+{
+  "name": "UsageLimitCounter",
+  "type": "object",
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": ["user", "site", "tenant"],
+      "description": "対象の種類"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "対象のID"
+    },
+    "feature_code": {
+      "type": "string",
+      "description": "機能コード（ai_generation_count等）"
+    },
+    "counter_type": {
+      "type": "string",
+      "enum": [
+        "site_count",
+        "lp_count",
+        "page_count",
+        "ai_generation_count",
+        "campaign_send_count",
+        "guest_count",
+        "reservation_count"
+      ],
+      "description": "カウンター種類"
+    },
+    "used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "使用数"
+    },
+    "reset_cycle": {
+      "type": "string",
+      "enum": ["daily", "monthly", "yearly", "none"],
+      "default": "none",
+      "description": "リセット周期"
+    },
+    "last_reset_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "最後のリセット日時"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "counter_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "target_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "master"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master"
+      }
+    }
+  }
+}

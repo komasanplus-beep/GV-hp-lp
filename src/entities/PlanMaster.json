@@ -1,0 +1,107 @@
+{
+  "name": "PlanMaster",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "プランコード（free, starter, business等）"
+    },
+    "name": {
+      "type": "string",
+      "description": "プラン名"
+    },
+    "description": {
+      "type": "string",
+      "description": "プラン説明"
+    },
+    "monthly_price": {
+      "type": "number",
+      "default": 0,
+      "description": "月額料金（円）"
+    },
+    "yearly_price": {
+      "type": "number",
+      "default": 0,
+      "description": "年額料金（円）"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "archived"],
+      "default": "active",
+      "description": "プラン状態"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "表示順"
+    },
+    "included_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "含まれる機能コード一覧"
+    },
+    "trial_days": {
+      "type": "number",
+      "default": 0,
+      "description": "無料試用期間（日数）"
+    },
+    "limits": {
+      "type": "object",
+      "description": "利用制限（site_count, lp_count等）",
+      "properties": {
+        "site_count": {
+          "type": "number",
+          "description": "作成可能サイト数"
+        },
+        "page_count": {
+          "type": "number",
+          "description": "1サイトあたりのページ数上限"
+        },
+        "lp_count": {
+          "type": "number",
+          "description": "作成可能LP数"
+        },
+        "ai_generation_count": {
+          "type": "number",
+          "description": "月間AI生成回数"
+        },
+        "guest_count": {
+          "type": "number",
+          "description": "管理可能ゲスト数"
+        },
+        "reservation_count": {
+          "type": "number",
+          "description": "管理可能予約数"
+        },
+        "campaign_send_count": {
+          "type": "number",
+          "description": "月間配信回数"
+        }
+      }
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "master"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "master"
+      }
+    }
+  }
+}
