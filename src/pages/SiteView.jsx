@@ -46,8 +46,43 @@ function SiteViewInner({ siteId, isPreview }) {
     );
   }
 
-  // 401/403: プレビュー権限なし
-  if (error || !site) {
+  // エラーハンドリング
+  if (error) {
+    const status = error.response?.status;
+    const errorMsg = error.response?.data?.error || '';
+
+    if (status === 401) {
+      return (
+        <div className="min-h-screen flex items-center justify-center text-slate-600">
+          <div className="text-center">
+            <p className="text-2xl mb-2">ログインが必要です</p>
+            <p className="text-sm text-slate-400">下書きサイトを閲覧するにはログインしてください</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (status === 403) {
+      return (
+        <div className="min-h-screen flex items-center justify-center text-slate-600">
+          <div className="text-center">
+            <p className="text-2xl mb-2">閲覧権限がありません</p>
+            <p className="text-sm text-slate-400">この下書きサイトを閲覧する権限がありません</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-400">
+        <div className="text-center">
+          <p className="text-2xl mb-2">サイトが見つかりません</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!site) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
         <div className="text-center">
