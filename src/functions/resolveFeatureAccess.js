@@ -13,6 +13,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
  * 5. PlanMaster.included_features
  * 6. FeatureMaster.default_enabled
  */
+// deno-lint-ignore no-undef
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);

@@ -8,6 +8,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import AnimatedBlock from './AnimatedBlock';
 import ImageSlider from './ImageSlider';
+import ServiceListByType from '@/components/service/ServiceListByType';
+import { getUIConfig } from '@/lib/uiConfig';
 
 const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
 const parsePairs = (text) => parseLines(text).map(line => {
@@ -557,7 +559,17 @@ export default function SiteBlockRenderer({ block }) {
       </section>
     );
   } else if (type === 'Service') {
-    content = <ServiceBlock d={d} siteId={block.site_id} businessType={block.business_type} />;
+    const config = getUIConfig(block.business_type || 'other');
+    content = (
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-4xl mx-auto px-6">
+          {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-4 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+          <p className="text-center text-slate-500 mb-10">{config.icon}</p>
+          {d.subtitle && <p className="text-slate-500 text-center mb-10">{d.subtitle}</p>}
+          <ServiceListByType siteId={block.site_id} businessType={block.business_type || 'other'} />
+        </div>
+      </section>
+    );
   } else if (type === 'Contact') {
     content = <ContactBlock d={d} siteId={block.site_id} />;
   } else if (type === 'Booking') {
