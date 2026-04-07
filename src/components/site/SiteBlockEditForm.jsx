@@ -34,7 +34,7 @@ const SITE_BLOCK_FIELDS = {
   ],
   Gallery: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: ギャラリー' },
-    { key: 'image_urls', label: '画像URL（1行: 1URL）', type: 'textarea', placeholder: 'https://example.com/img1.jpg\nhttps://example.com/img2.jpg\nhttps://example.com/img3.jpg' },
+    { key: 'image_urls', label: '画像URL（1行: 1URL）', type: 'image_list' },
   ],
   Voice: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: お客様の声' },
@@ -160,6 +160,54 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
                 placeholder="またはURLを直接入力"
                 className="text-xs"
               />
+            </div>
+          )}
+          {field.type === 'image_list' && (
+            <div className="space-y-3">
+              {Array.isArray(data[field.key]) && data[field.key].length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {data[field.key].map((url, i) => (
+                    <div key={i} className="relative group">
+                      <img src={url} alt="" className="w-full h-20 object-cover rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={() => setData(d => ({ ...d, [field.key]: d[field.key].filter((_, idx) => idx !== i) }))}
+                        className="absolute top-1 right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <label className="cursor-pointer block">
+                <Button variant="outline" size="sm" asChild>
+                  <span>
+                    {uploading[field.key]
+                      ? <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      : <ImageIcon className="w-4 h-4 mr-1" />}
+                      画像を追加
+                    </span>
+                  </Button>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => {
+                      if (e.target.files[0]) {
+                        const key = field.key;
+                        setUploading(u => ({ ...u, [key]: true }));
+                        base44.integrations.Core.UploadFile({ file: e.target.files[0] }).then(({ file_url }) => {
+                          setData(d => ({
+                            ...d,
+                            [key]: Array.isArray(d[key]) ? [...d[key], file_url] : [file_url]
+                          }));
+                          setUploading(u => ({ ...u, [key]: false }));
+                        });
+                      }
+                    }}
+                  />
+                </label>
             </div>
           )}
         </div>

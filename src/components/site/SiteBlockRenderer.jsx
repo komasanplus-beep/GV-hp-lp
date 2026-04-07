@@ -284,7 +284,7 @@ export default function SiteBlockRenderer({ block }) {
   );
 
   if (type === 'Gallery') {
-    const imageUrls = (d.image_urls || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const imageUrls = Array.isArray(d.image_urls) ? d.image_urls.filter(Boolean) : [];
     return (
       <section className="py-20 bg-slate-50">
         <div className="max-w-5xl mx-auto px-6">
