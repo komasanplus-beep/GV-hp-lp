@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { AlertCircle, Upload, Loader2, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import ImageMappingUI from '@/components/lp/ImageMappingUI';
 
 const TEMPLATE_OPTIONS = [
   { value: 'default', label: 'デフォルト' },
@@ -65,6 +66,16 @@ export default function AdminLPCodeCreator() {
     enabled: !!lpId,
   });
 
+  // アップロード済み画像取得
+  const { data: lpAssets = [] } = useQuery({
+    queryKey: ['lpAssets', lpId],
+    queryFn: () =>
+      lpId
+        ? base44.entities.LandingPageAsset.filter({ landing_page_id: lpId }, 'sort_order')
+        : Promise.resolve([]),
+    enabled: !!lpId,
+  });
+
   useEffect(() => {
     if (existingLp && existingLp.length > 0) {
       const lp = existingLp[0];
@@ -100,17 +111,30 @@ export default function AdminLPCodeCreator() {
           throw new Error('Sanitize response is invalid');
         }
 
-        // 2. 画像URL置換
+        // 2. 画像URL置換（DBから最新のマッピング取得）
         let finalHtml = sanitizeRes.data.sanitized_html || preCleanedHtml;
-        if (imageReplacements.length > 0) {
-          const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
-            html_code: finalHtml,
-            replacements: imageReplacements.map(r => ({
-              original_url: r.original_url,
-              file_url: r.file_url,
-            })),
-          });
-          finalHtml = replaceRes.data?.replaced_html || finalHtml;
+        if (lpId) {
+          const mappingsData = await base44.entities.LandingPageImageMapping.filter({
+            landing_page_id: lpId,
+            status: 'mapped',
+          }).catch(() => []);
+
+          if (mappingsData.length > 0) {
+            const replacements = mappingsData
+              .filter(m => m.uploaded_url)
+              .map(m => ({
+                original_url: m.original_url,
+                file_url: m.uploaded_url,
+              }));
+
+            if (replacements.length > 0) {
+              const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
+                html_code: finalHtml,
+                replacements,
+              });
+              finalHtml = replaceRes.data?.replaced_html || finalHtml;
+            }
+          }
         }
 
         // 3. LP保存
@@ -250,8 +274,34 @@ export default function AdminLPCodeCreator() {
         throw new Error('Sanitize response is invalid');
       }
 
+      // マッピング適用
+      let htmlToPreview = sanitizeRes.data.sanitized_html || preCleanedHtml;
+      if (lpId) {
+        const mappingsData = await base44.entities.LandingPageImageMapping.filter({
+          landing_page_id: lpId,
+          status: 'mapped',
+        }).catch(() => []);
+
+        if (mappingsData.length > 0) {
+          const replacements = mappingsData
+            .filter(m => m.uploaded_url)
+            .map(m => ({
+              original_url: m.original_url,
+              file_url: m.uploaded_url,
+            }));
+
+          if (replacements.length > 0) {
+            const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
+              html_code: htmlToPreview,
+              replacements,
+            });
+            htmlToPreview = replaceRes.data?.replaced_html || htmlToPreview;
+          }
+        }
+      }
+
       setPreviewData({
-        sanitized_html: sanitizeRes.data.sanitized_html || preCleanedHtml,
+        sanitized_html: htmlToPreview,
         css_code: form.css_code,
       });
 
@@ -508,6 +558,18 @@ export default function AdminLPCodeCreator() {
                 保存
               </Button>
             </div>
+
+            {/* 画像マッピングUI */}
+            {lpId && (
+              <ImageMappingUI
+                lpId={lpId}
+                htmlCode={form.html_code}
+                uploadedAssets={lpAssets}
+                onMappingChange={() => {
+                  // マッピング変更時の処理（必要に応じて）
+                }}
+              />
+            )}
 
             {previewUrl && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
