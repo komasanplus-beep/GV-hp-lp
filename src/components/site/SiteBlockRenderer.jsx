@@ -93,7 +93,9 @@ function BookingBlock({ d, siteId }) {
 function ServiceBlock({ d, siteId }) {
   const { data: services = [] } = React.useQuery({
     queryKey: ['services', siteId],
-    queryFn: () => base44.entities.Service.filter({ site_id: siteId }, 'sort_order'),
+    queryFn: () => siteId
+      ? base44.entities.Service.filter({ site_id: siteId }, 'sort_order')
+      : Promise.resolve([]),
   });
 
   return (
@@ -111,10 +113,7 @@ function ServiceBlock({ d, siteId }) {
                 <div className="p-5">
                   <h3 className="font-semibold text-slate-800 mb-1">{svc.name}</h3>
                   {svc.description && <p className="text-sm text-slate-500 mb-3 line-clamp-2">{svc.description}</p>}
-                  <div className="flex items-center justify-between text-sm">
-                    {svc.price > 0 && <span className="text-amber-600 font-medium">¥{svc.price.toLocaleString()}</span>}
-                    {svc.duration && <span className="text-slate-400">{svc.duration}</span>}
-                  </div>
+                  {svc.price > 0 && <span className="text-amber-600 font-medium">¥{svc.price.toLocaleString()}</span>}
                 </div>
               </div>
             ))}

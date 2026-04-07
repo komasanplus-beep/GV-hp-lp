@@ -26,8 +26,7 @@ const SITE_BLOCK_FIELDS = {
   ],
   Service: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: サービス' },
-    { key: 'items', label: 'サービス（1行: タイトル|説明）', type: 'textarea', placeholder: '完全個室|プライベートな空間でご提供\nオーダーメイド|お客様に合わせた施術' },
-    { key: 'image_url', label: '画像', type: 'image' },
+    { key: 'subtitle', label: 'サブタイトル', type: 'text', placeholder: '当店で提供するサービスをご紹介します' },
   ],
   Staff: [
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: スタッフ紹介' },
@@ -70,10 +69,6 @@ const SITE_BLOCK_FIELDS = {
     { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: ご予約' },
     { key: 'body', label: '説明文', type: 'textarea', placeholder: 'ご希望の日時をお選びください' },
     { key: 'button_text', label: 'ボタンテキスト', type: 'text', placeholder: 'ご予約する' },
-  ],
-  Service: [
-    { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: サービス' },
-    { key: 'subtitle', label: 'サブタイトル', type: 'text', placeholder: '当店で提供するサービスをご紹介します' },
   ],
   CTA: [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '例: まずはお気軽にご相談ください' },
