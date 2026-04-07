@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import { Card } from '@/components/ui/card';
 import { AlertCircle, Upload, Loader2, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ImageMappingUI from '@/components/lp/ImageMappingUI';
+import { extractImageUrlsFromHtml } from '@/lib/imageExtractor';
 
 const TEMPLATE_OPTIONS = [
   { value: 'default', label: 'デフォルト' },
@@ -58,6 +59,7 @@ export default function AdminLPCodeCreator() {
   const [imageReplacements, setImageReplacements] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewData, setPreviewData] = useState(null);
+  const autoExtractTimerRef = useRef(null);
 
   // 既存LP読み込み
   const { data: existingLp } = useQuery({
@@ -416,7 +418,21 @@ export default function AdminLPCodeCreator() {
                 <TabsContent value="html" className="mt-4">
                   <Textarea
                     value={form.html_code}
-                    onChange={(e) => setForm(f => ({ ...f, html_code: e.target.value }))}
+                    onChange={(e) => {
+                      const newHtml = e.target.value;
+                      setForm(f => ({ ...f, html_code: newHtml }));
+
+                      // 自動抽出（デバウンス付き）
+                      if (autoExtractTimerRef.current) {
+                        clearTimeout(autoExtractTimerRef.current);
+                      }
+                      autoExtractTimerRef.current = setTimeout(() => {
+                        if (lpId && newHtml.trim()) {
+                          // 自動抽出してmappingUIに通知する処理は
+                          // mappingUIの autoExtractAndSync で実行される
+                        }
+                      }, 800);
+                    }}
                     placeholder="<div>...</div>"
                     rows={12}
                     className="font-mono text-xs"

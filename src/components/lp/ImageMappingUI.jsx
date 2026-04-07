@@ -21,7 +21,9 @@ import {
   ChevronDown,
   Eye,
   Loader2,
+  Zap,
 } from 'lucide-react';
+import { extractImageUrlsFromHtml, getDiffUrls } from '@/lib/imageExtractor';
 
 const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => {
   const { toast } = useToast();
@@ -32,6 +34,7 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [previewImages, setPreviewImages] = useState({});
+  const [isAutoExtracting, setIsAutoExtracting] = useState(false);
 
   // マッピングデータ取得
   const { data: mappings = [] } = useQuery({
@@ -74,7 +77,29 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
     },
   });
 
-  // HTMLから画像URL抽出
+  // HTMLから画像URL自動抽出・マッピング生成
+  const autoExtractAndSync = async (html) => {
+    if (!html || !lpId) return;
+
+    try {
+      setIsAutoExtracting(true);
+      const urls = extractImageUrlsFromHtml(html);
+      
+      if (urls.length === 0) {
+        setExtractedUrls([]);
+        return;
+      }
+
+      setExtractedUrls(urls);
+      await syncMappings(urls);
+    } catch (error) {
+      console.error('Auto extract error:', error);
+    } finally {
+      setIsAutoExtracting(false);
+    }
+  };
+
+  // HTMLから画像URL抽出（手動ボタン）
   const handleExtractImages = () => {
     if (!htmlCode) {
       toast({
@@ -85,19 +110,9 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
       return;
     }
 
-    const imgRegex = /src=["']([^"']+)["']/gi;
-    const urls = new Set();
-    let match;
+    const urls = extractImageUrlsFromHtml(htmlCode);
 
-    while ((match = imgRegex.exec(htmlCode)) !== null) {
-      if (match[1] && match[1].trim()) {
-        urls.add(match[1].trim());
-      }
-    }
-
-    const urlArray = Array.from(urls);
-
-    if (urlArray.length === 0) {
+    if (urls.length === 0) {
       toast({
         title: '画像なし',
         description: 'HTMLに画像タグが見つかりません',
@@ -105,31 +120,35 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
       return;
     }
 
-    setExtractedUrls(urlArray);
+    setExtractedUrls(urls);
     toast({
       title: '抽出完了',
-      description: `${urlArray.length}個の画像URLを抽出しました`,
+      description: `${urls.length}個の画像URLを抽出しました`,
     });
 
     // 既存マッピングとマージ
-    syncMappings(urlArray);
+    syncMappings(urls);
   };
 
-  // マッピングをDBと同期
+  // マッピングをDBと同期（差分のみ追加）
   const syncMappings = async (urls) => {
     if (!lpId) return;
 
-    const existingUrls = new Set(mappings.map((m) => m.original_url));
-    const newUrls = urls.filter((url) => !existingUrls.has(url));
+    const existingUrls = mappings.map((m) => m.original_url);
+    const newUrls = getDiffUrls(urls, existingUrls);
 
-    for (const url of newUrls) {
+    if (newUrls.length === 0) return;
+
+    // 新規URL をバッチで追加
+    for (let i = 0; i < newUrls.length; i++) {
+      const url = newUrls[i];
       await updateMappingMutation.mutateAsync({
         mappingId: null,
         data: {
           landing_page_id: lpId,
           original_url: url,
           status: 'unmapped',
-          sort_order: mappings.length,
+          sort_order: mappings.length + i,
         },
       });
     }
@@ -211,6 +230,18 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
     img.src = url;
   };
 
+  // HTML変更時に自動抽出・同期（デバウンス付き）
+  useEffect(() => {
+    if (!lpId || !htmlCode) return;
+
+    const timer = setTimeout(() => {
+      autoExtractAndSync(htmlCode);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [htmlCode, lpId]);
+
+  // 元画像プレビュー試行
   useEffect(() => {
     mappings.forEach((m) => {
       if (!previewImages[m.id]) {
@@ -238,6 +269,12 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
             <h3 className="text-lg font-semibold text-slate-900">画像マッピング</h3>
             <p className="text-sm text-slate-500 mt-1">
               HTML内の画像URLを、アップロード済み画像に差し替えます
+              {isAutoExtracting && (
+                <span className="block text-xs text-blue-600 mt-1">
+                  <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
+                  HTMLを解析中...
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -260,9 +297,10 @@ const ImageMappingUI = ({ lpId, htmlCode, uploadedAssets, onMappingChange }) => 
             variant="outline"
             size="sm"
             onClick={handleExtractImages}
-            disabled={updateMappingMutation.isPending}
+            disabled={updateMappingMutation.isPending || isAutoExtracting}
           >
-            HTMLから画像URLを抽出
+            {isAutoExtracting && <Loader2 className="w-3 h-3 mr-2 animate-spin" />}
+            {isAutoExtracting ? '抽出中...' : 'HTMLから画像URLを抽出'}
           </Button>
           <Button
             variant="outline"
