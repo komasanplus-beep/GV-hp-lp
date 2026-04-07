@@ -15,21 +15,21 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const SITE_BLOCK_TYPES = [
-  'Hero', 'About', 'Menu', 'Service', 'Staff', 'Gallery',
-  'Voice', 'Feature', 'FAQ', 'Access', 'Contact', 'Booking', 'CTA', 'Campaign', 'Custom',
+  'Hero', 'About', 'Menu', 'Staff', 'Gallery',
+  'Voice', 'Feature', 'FAQ', 'Access', 'Service', 'Contact', 'Booking', 'CTA', 'Campaign', 'Custom',
 ];
 
 const BLOCK_COLORS = {
   Hero: 'bg-purple-50 border-purple-200 text-purple-700',
   About: 'bg-blue-50 border-blue-200 text-blue-700',
   Menu: 'bg-amber-50 border-amber-200 text-amber-700',
-  Service: 'bg-green-50 border-green-200 text-green-700',
   Staff: 'bg-pink-50 border-pink-200 text-pink-700',
   Gallery: 'bg-indigo-50 border-indigo-200 text-indigo-700',
   Voice: 'bg-rose-50 border-rose-200 text-rose-700',
   Feature: 'bg-cyan-50 border-cyan-200 text-cyan-700',
   FAQ: 'bg-orange-50 border-orange-200 text-orange-700',
   Access: 'bg-teal-50 border-teal-200 text-teal-700',
+  Service: 'bg-green-50 border-green-200 text-green-700',
   Contact: 'bg-slate-50 border-slate-200 text-slate-700',
   Booking: 'bg-lime-50 border-lime-200 text-lime-700',
   CTA: 'bg-emerald-50 border-emerald-200 text-emerald-700',

@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { Star, CheckCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 
 const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
 const parsePairs = (text) => parseLines(text).map(line => {
@@ -83,6 +84,43 @@ function BookingBlock({ d, siteId }) {
               {status === 'sending' ? '送信中...' : (d.button_text || 'ご予約する')}
             </button>
           </form>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ServiceBlock({ d, siteId }) {
+  const { data: services = [] } = React.useQuery({
+    queryKey: ['services', siteId],
+    queryFn: () => base44.entities.Service.filter({ site_id: siteId }, 'sort_order'),
+  });
+
+  return (
+    <section className="py-20 bg-slate-50">
+      <div className="max-w-4xl mx-auto px-6">
+        {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+        {d.subtitle && <p className="text-slate-500 text-center mb-10">{d.subtitle}</p>}
+        {services.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services.map(svc => (
+              <div key={svc.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                {svc.image_url && (
+                  <img src={svc.image_url} alt={svc.name} className="w-full h-40 object-cover" />
+                )}
+                <div className="p-5">
+                  <h3 className="font-semibold text-slate-800 mb-1">{svc.name}</h3>
+                  {svc.description && <p className="text-sm text-slate-500 mb-3 line-clamp-2">{svc.description}</p>}
+                  <div className="flex items-center justify-between text-sm">
+                    {svc.price > 0 && <span className="text-amber-600 font-medium">¥{svc.price.toLocaleString()}</span>}
+                    {svc.duration && <span className="text-slate-400">{svc.duration}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-slate-300 py-8 text-4xl">🛎️</div>
         )}
       </div>
     </section>
@@ -372,6 +410,8 @@ export default function SiteBlockRenderer({ block }) {
       </div>
     </section>
   );
+
+  if (type === 'Service') return <ServiceBlock d={d} siteId={block.site_id} />;
 
   if (type === 'Contact') return <ContactBlock d={d} siteId={block.site_id} />;
 

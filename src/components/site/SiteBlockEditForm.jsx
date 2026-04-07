@@ -74,6 +74,10 @@ const SITE_BLOCK_FIELDS = {
     { key: 'body', label: '説明文', type: 'textarea', placeholder: 'ご希望の日時をお選びください' },
     { key: 'button_text', label: 'ボタンテキスト', type: 'text', placeholder: 'ご予約する' },
   ],
+  Service: [
+    { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: サービス' },
+    { key: 'subtitle', label: 'サブタイトル', type: 'text', placeholder: '当店で提供するサービスをご紹介します' },
+  ],
   CTA: [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '例: まずはお気軽にご相談ください' },
     { key: 'body', label: '補足テキスト', type: 'textarea', placeholder: '' },

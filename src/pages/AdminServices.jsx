@@ -1,0 +1,284 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import ProtectedRoute from '@/components/admin/ProtectedRoute';
+import UserLayout from '@/components/user/UserLayout';
+import { Plus, Pencil, Trash2, Loader2, ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from 'sonner';
+
+const defaultService = {
+  name: '',
+  description: '',
+  price: 0,
+  duration: '',
+  image_url: '',
+  status: 'available',
+};
+
+export default function AdminServices() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const siteId = urlParams.get('site_id');
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
+  const [deleteService, setDeleteService] = useState(null);
+  const [formData, setFormData] = useState(defaultService);
+  const [isUploading, setIsUploading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: services = [], isLoading } = useQuery({
+    queryKey: ['services', siteId],
+    queryFn: () => base44.entities.Service.filter({ site_id: siteId }, 'sort_order'),
+    enabled: !!siteId,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.Service.create({ ...data, site_id: siteId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', siteId] });
+      handleCloseModal();
+      toast.success('サービスを追加しました');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Service.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', siteId] });
+      handleCloseModal();
+      toast.success('更新しました');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Service.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['services', siteId] });
+      setDeleteService(null);
+      toast.success('削除しました');
+    },
+  });
+
+  const handleOpenModal = (service = null) => {
+    if (service) {
+      setEditingService(service);
+      setFormData(service);
+    } else {
+      setEditingService(null);
+      setFormData(defaultService);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingService(null);
+    setFormData(defaultService);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setFormData(prev => ({ ...prev, image_url: file_url }));
+    setIsUploading(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name) {
+      toast.error('サービス名は必須です');
+      return;
+    }
+    if (editingService) {
+      updateMutation.mutate({ id: editingService.id, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  return (
+    <ProtectedRoute requiredRole="admin">
+      <UserLayout title="サービス管理">
+        <div className="max-w-5xl space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">サービス一覧</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{services.length} 件</p>
+            </div>
+            <Button
+              onClick={() => handleOpenModal()}
+              className="bg-amber-600 hover:bg-amber-700 gap-2"
+            >
+              <Plus className="w-4 h-4" />新規サービス
+            </Button>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+            </div>
+          ) : services.length === 0 ? (
+            <Card>
+              <CardContent className="py-16 text-center text-slate-400">
+                <p className="font-medium">サービスがありません</p>
+                <p className="text-sm mt-1 mb-4">最初のサービスを追加してください</p>
+                <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700 gap-2">
+                  <Plus className="w-4 h-4" />サービスを追加
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {services.map(service => (
+                <Card key={service.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    {service.image_url && (
+                      <img src={service.image_url} alt={service.name} className="w-full h-32 object-cover rounded-lg mb-3" />
+                    )}
+                    <h3 className="font-semibold text-slate-800">{service.name}</h3>
+                    {service.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{service.description}</p>}
+                    <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
+                      {service.price > 0 && <span>¥{service.price.toLocaleString()}</span>}
+                      {service.duration && <span>{service.duration}</span>}
+                    </div>
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleOpenModal(service)}>
+                        <Pencil className="w-3.5 h-3.5 mr-1" />編集
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-500 hover:bg-red-50"
+                        onClick={() => setDeleteService(service)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{editingService ? 'サービスを編集' : 'サービスを追加'}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">サービス名 *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="例: ヘッドスパ"
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">説明</label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="サービスの説明..."
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">料金 (¥)</label>
+                  <Input
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">所要時間</label>
+                  <Input
+                    value={formData.duration}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+                    placeholder="例: 60分"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">画像</label>
+                {formData.image_url && (
+                  <img src={formData.image_url} alt="" className="w-full h-24 object-cover rounded-lg mb-2" />
+                )}
+                <label className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg p-3 cursor-pointer hover:border-amber-300 transition-colors">
+                  {isUploading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                  ) : (
+                    <span className="text-xs text-slate-500 flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />アップロード
+                    </span>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                </label>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button type="button" variant="outline" className="flex-1" onClick={handleCloseModal}>キャンセル</Button>
+                <Button type="submit" className="flex-1 bg-amber-600 hover:bg-amber-700" disabled={createMutation.isPending || updateMutation.isPending}>
+                  {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {editingService ? '更新' : '追加'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <AlertDialog open={!!deleteService} onOpenChange={() => setDeleteService(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>サービスを削除</AlertDialogTitle>
+              <AlertDialogDescription>
+                「{deleteService?.name}」を削除してもよろしいですか？
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>キャンセル</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate(deleteService.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                削除
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </UserLayout>
+    </ProtectedRoute>
+  );
+}
