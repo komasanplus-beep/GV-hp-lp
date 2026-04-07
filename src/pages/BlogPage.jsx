@@ -22,8 +22,11 @@ export default function BlogPage() {
     enabled: !!siteId,
   });
   const { data: categories = [] } = useQuery({
-    queryKey: ['blogCategories'],
-    queryFn: () => base44.entities.BlogCategory.list('name'),
+    queryKey: ['blogCategories', siteId],
+    queryFn: () => siteId
+      ? base44.entities.BlogCategory.filter({ site_id: siteId }, 'name')
+      : [],
+    enabled: !!siteId,
   });
 
   const published = posts.filter(p => p.status === 'published');

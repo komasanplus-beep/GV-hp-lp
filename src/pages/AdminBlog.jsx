@@ -36,8 +36,11 @@ export default function AdminBlog() {
       : base44.entities.BlogPost.list('-created_date', 100),
   });
   const { data: categories = [] } = useQuery({
-    queryKey: ['blogCategories'],
-    queryFn: () => base44.entities.BlogCategory.list('name'),
+    queryKey: ['blogCategories', siteId],
+    queryFn: () => siteId
+      ? base44.entities.BlogCategory.filter({ site_id: siteId }, 'name')
+      : [],
+    enabled: !!siteId,
   });
 
   const openCreate = () => { setEditing('new'); setForm(defaultForm); };

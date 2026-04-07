@@ -1,0 +1,41 @@
+{
+  "name": "BlogCategory",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30b5\u30a4\u30c8ID\uff08\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u5206\u96e2\u30ad\u30fc\uff09"
+    },
+    "name": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "site_id",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

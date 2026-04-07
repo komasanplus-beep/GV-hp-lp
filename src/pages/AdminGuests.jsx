@@ -73,8 +73,11 @@ export default function AdminGuests() {
   });
 
   const { data: bookings = [] } = useQuery({
-    queryKey: ['bookings'],
-    queryFn: () => base44.entities.Booking.list(),
+    queryKey: ['bookings', siteId],
+    queryFn: () => siteId
+      ? base44.entities.Booking.filter({ site_id: siteId }, '-created_date')
+      : [],
+    enabled: !!siteId,
   });
 
   const createMutation = useMutation({
