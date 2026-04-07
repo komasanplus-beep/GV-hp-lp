@@ -428,7 +428,7 @@ export default function SiteBlockRenderer({ block }) {
         </div>
       </section>
     );
-  } else if (type === 'Menu' || type === 'Service') {
+  } else if (type === 'Menu') {
     content = (
       <section className="py-20 bg-slate-50">
         <div className="max-w-4xl mx-auto px-6">
@@ -594,47 +594,6 @@ export default function SiteBlockRenderer({ block }) {
             ))}
             {parsePairs(d.faqs).length === 0 && (
               <div className="text-center text-slate-300 py-8 text-4xl">❓</div>
-            )}
-          </div>
-        </div>
-      </section>
-    );
-  } else if (type === 'Access') {
-    content = (
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-6">
-          {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
-          <div className="grid md:grid-cols-2 gap-10 items-start">
-            <div className="space-y-4">
-              {d.address && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
-                  <p className="text-slate-700">{d.address}</p>
-                </div>
-              )}
-              {d.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-amber-500 shrink-0" />
-                  <p className="text-slate-700">{d.phone}</p>
-                </div>
-              )}
-              {d.email && (
-                <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-amber-500 shrink-0" />
-                  <p className="text-slate-700">{d.email}</p>
-                </div>
-              )}
-              {d.hours && (
-                <div className="flex items-start gap-3">
-                  <Clock className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
-                  <p className="text-slate-700 whitespace-pre-line">{d.hours}</p>
-                </div>
-              )}
-            </div>
-            {d.map_embed_url ? (
-              <iframe src={d.map_embed_url} className="w-full h-64 rounded-xl border-0" allowFullScreen loading="lazy" />
-            ) : (
-              <div className="w-full h-64 bg-slate-200 rounded-xl flex items-center justify-center text-slate-300 text-4xl">🗺</div>
             )}
           </div>
         </div>

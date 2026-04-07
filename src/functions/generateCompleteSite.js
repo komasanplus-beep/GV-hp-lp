@@ -70,7 +70,11 @@ Deno.serve(async (req) => {
     const blocks = generateBlocks(business_type, site.id, page.id);
     const createdBlocks = [];
     for (const block of blocks) {
-      const createdBlock = await base44.entities.SiteBlock.create(block);
+      const blockData = {
+        ...block,
+        site_id: site.id,
+      };
+      const createdBlock = await base44.entities.SiteBlock.create(blockData);
       createdBlocks.push(createdBlock);
     }
 
@@ -233,7 +237,7 @@ function generateBlocks(businessType, siteId, pageId) {
       {
         page_id: pageId,
         site_id: siteId,
-        block_type: 'Contact',
+        block_type: 'Booking',
         sort_order: 6,
         data: {
           title: 'Make Your Reservation',
