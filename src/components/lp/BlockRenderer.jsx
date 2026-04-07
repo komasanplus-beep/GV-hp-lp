@@ -7,9 +7,22 @@ const parsePairs = (text) => parseLines(text).map(line => {
   return { a: (a || '').trim(), b: (b || '').trim() };
 });
 
-export default function BlockRenderer({ block }) {
+export default function BlockRenderer({ block, siteId }) {
   const d = block?.data || {};
   const type = block.block_type;
+  
+  // CTA・Hero・footer CTAを site 予約・問い合わせに遷移
+  const ctaUrl = (url) => {
+    if (!url) return '#';
+    // すでに絶対URLの場合はそのまま返す
+    if (url.startsWith('http') || url.startsWith('/')) return url;
+    // 相対URLの場合は site に遷移
+    if (siteId) {
+      if (url === '#booking') return `/site/${siteId}?section=booking`;
+      if (url === '#contact') return `/site/${siteId}?section=contact`;
+    }
+    return url;
+  };
 
   if (type === 'Hero') return (
     <section
@@ -25,7 +38,7 @@ export default function BlockRenderer({ block }) {
         {d.headline && <h1 className="text-3xl md:text-5xl lg:text-6xl font-light mb-6 leading-tight" style={{ fontFamily: 'serif' }}>{d.headline}</h1>}
         {d.subheadline && <p className="text-base md:text-lg lg:text-xl text-white/80 mb-10 font-light">{d.subheadline}</p>}
         {d.cta_text && (
-          <a href={d.cta_url || '#cta'} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-8 md:px-10 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
+          <a href={ctaUrl(d.cta_url || '#booking')} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-8 md:px-10 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
             {d.cta_text}
           </a>
         )}
@@ -229,7 +242,7 @@ export default function BlockRenderer({ block }) {
         {d.title && <h2 className="text-2xl md:text-3xl lg:text-4xl font-light mb-4 md:mb-6" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
         {d.body && <p className="text-white/70 mb-8 md:mb-10 leading-relaxed text-sm md:text-base">{d.body}</p>}
         {d.cta_text && (
-          <a href={d.cta_url || '#'} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-10 md:px-12 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
+          <a href={ctaUrl(d.cta_url || '#booking')} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-10 md:px-12 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
             {d.cta_text}
           </a>
         )}

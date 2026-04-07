@@ -13,6 +13,7 @@ function LPViewInner({ slug }) {
   });
 
   const lp = pages[0];
+  const siteId = lp?.site_id;
 
   const { data: blocks = [], isLoading: blocksLoading } = useQuery({
     queryKey: ['lpBlocksView', lp?.id],
@@ -71,7 +72,7 @@ function LPViewInner({ slug }) {
   return (
     <div className="min-h-screen">
       {blocks.map((block) => (
-        <BlockRenderer key={block.id} block={block} />
+        <BlockRenderer key={block.id} block={block} siteId={siteId} />
       ))}
     </div>
   );

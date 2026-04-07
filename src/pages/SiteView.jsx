@@ -5,7 +5,7 @@
  * データ取得は getSiteViewData backend function に一元化。
  * 公開判定・権限チェックはすべて function 側で行う。
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import SiteBlockRenderer from '@/components/site/SiteBlockRenderer';
@@ -27,6 +27,18 @@ function SiteViewInner({ siteId, isPreview }) {
   const homePage = data?.homePage || null;
   const blocks = data?.blocks || [];
   const seo = data?.seo || null;
+
+  // section パラメータで booking/contact にスクロール遷移（Hook の呼び出しルール遵守）
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const section = urlParams.get('section');
+    if (section && site) {
+      const el = document.getElementById(`section-${section}`);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 300);
+      }
+    }
+  }, [site]);
 
   useSeoHead({
     title: seo?.meta_title || site?.site_name,
@@ -118,7 +130,9 @@ function SiteViewInner({ siteId, isPreview }) {
   return (
     <div className="min-h-screen">
       {blocks.map((block) => (
-        <SiteBlockRenderer key={block.id} block={block} />
+        <div key={block.id} id={block.block_type === 'Booking' || block.block_type === 'Contact' ? `section-${block.block_type.toLowerCase()}` : undefined}>
+          <SiteBlockRenderer block={block} />
+        </div>
       ))}
     </div>
   );
