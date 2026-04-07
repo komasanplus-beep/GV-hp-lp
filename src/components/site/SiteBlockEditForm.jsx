@@ -69,6 +69,11 @@ const SITE_BLOCK_FIELDS = {
     { key: 'line_url', label: 'LINE URL', type: 'text', placeholder: 'https://line.me/...' },
     { key: 'booking_url', label: '予約URL', type: 'text', placeholder: 'https://...' },
   ],
+  Booking: [
+    { key: 'title', label: 'セクションタイトル', type: 'text', placeholder: '例: ご予約' },
+    { key: 'body', label: '説明文', type: 'textarea', placeholder: 'ご希望の日時をお選びください' },
+    { key: 'button_text', label: 'ボタンテキスト', type: 'text', placeholder: 'ご予約する' },
+  ],
   CTA: [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '例: まずはお気軽にご相談ください' },
     { key: 'body', label: '補足テキスト', type: 'textarea', placeholder: '' },

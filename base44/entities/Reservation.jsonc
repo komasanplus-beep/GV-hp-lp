@@ -1,0 +1,61 @@
+{
+  "name": "Reservation",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30b5\u30a4\u30c8ID\uff08\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u5206\u96e2\u30ad\u30fc\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u3054\u4e88\u7d04\u8005\u69d8\u540d"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u3054\u6765\u5e97\u65e5"
+    },
+    "message": {
+      "type": "string",
+      "description": "\u305d\u306e\u4ed6\u3054\u8981\u671b\u30fb\u30e1\u30c3\u30bb\u30fc\u30b8"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "cancelled"
+      ],
+      "default": "pending",
+      "description": "\u4e88\u7d04\u30b9\u30c6\u30fc\u30bf\u30b9"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "date"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

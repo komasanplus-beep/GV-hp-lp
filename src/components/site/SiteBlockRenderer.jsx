@@ -1,6 +1,6 @@
 /**
  * SiteBlockRenderer - Site用ブロックタイプのレンダリング
- * block_type: Hero, About, Menu, Service, Staff, Gallery, Voice, Feature, FAQ, Access, Contact, CTA, Campaign, Custom
+ * block_type: Hero, About, Menu, Service, Staff, Gallery, Voice, Feature, FAQ, Access, Contact, Booking, CTA, Campaign, Custom
  */
 import React, { useState } from 'react';
 import { Star, CheckCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
@@ -11,6 +11,83 @@ const parsePairs = (text) => parseLines(text).map(line => {
   const [a, ...rest] = line.split('|');
   return { a: (a || '').trim(), b: rest.join('|').trim() };
 });
+
+function BookingBlock({ d, siteId }) {
+  const [form, setForm] = useState({ name: '', email: '', date: '', message: '' });
+  const [status, setStatus] = useState('idle');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.date) return;
+    setStatus('sending');
+    await base44.entities.Reservation.create({
+      site_id: siteId,
+      name: form.name,
+      email: form.email,
+      date: form.date,
+      message: form.message,
+      status: 'pending',
+    });
+    setStatus('done');
+  };
+
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-2xl mx-auto px-6">
+        {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-4 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+        {d.body && <p className="text-slate-500 text-center mb-10">{d.body}</p>}
+        {status === 'done' ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-8 h-8 text-emerald-500" />
+            </div>
+            <p className="text-xl font-light text-slate-700">ご予約ありがとうございます</p>
+            <p className="text-slate-400 text-sm mt-2">確認メールをお送りいたします。</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              placeholder="お名前 *"
+              value={form.name}
+              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              required
+            />
+            <input
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              placeholder="メールアドレス *"
+              type="email"
+              value={form.email}
+              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+              required
+            />
+            <input
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              placeholder="ご来店日 *"
+              type="date"
+              value={form.date}
+              onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+              required
+            />
+            <textarea
+              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-slate-700 h-32 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              placeholder="その他ご要望・メッセージ"
+              value={form.message}
+              onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+            />
+            <button
+              type="submit"
+              disabled={status === 'sending' || !form.name || !form.email || !form.date}
+              className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white py-4 rounded-lg font-light tracking-wide transition-colors"
+            >
+              {status === 'sending' ? '送信中...' : (d.button_text || 'ご予約する')}
+            </button>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function ContactBlock({ d, siteId }) {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -297,6 +374,8 @@ export default function SiteBlockRenderer({ block }) {
   );
 
   if (type === 'Contact') return <ContactBlock d={d} siteId={block.site_id} />;
+
+  if (type === 'Booking') return <BookingBlock d={d} siteId={block.site_id} />;
 
   if (type === 'CTA') return (
     <section

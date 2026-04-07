@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 const SITE_BLOCK_TYPES = [
   'Hero', 'About', 'Menu', 'Service', 'Staff', 'Gallery',
-  'Voice', 'Feature', 'FAQ', 'Access', 'Contact', 'CTA', 'Campaign', 'Custom',
+  'Voice', 'Feature', 'FAQ', 'Access', 'Contact', 'Booking', 'CTA', 'Campaign', 'Custom',
 ];
 
 const BLOCK_COLORS = {
@@ -31,6 +31,7 @@ const BLOCK_COLORS = {
   FAQ: 'bg-orange-50 border-orange-200 text-orange-700',
   Access: 'bg-teal-50 border-teal-200 text-teal-700',
   Contact: 'bg-slate-50 border-slate-200 text-slate-700',
+  Booking: 'bg-lime-50 border-lime-200 text-lime-700',
   CTA: 'bg-emerald-50 border-emerald-200 text-emerald-700',
   Campaign: 'bg-red-50 border-red-200 text-red-700',
   Custom: 'bg-gray-50 border-gray-200 text-gray-700',
