@@ -102,7 +102,10 @@ export default function Home() {
             <div>
               <p className="text-xs uppercase tracking-widest text-stone-400 mb-2">About</p>
               <h2 className="text-3xl font-bold text-stone-800 mb-4">{about.title}</h2>
-              <p className="text-stone-600 leading-relaxed whitespace-pre-line">{about.content}</p>
+              <div
+                className="text-stone-600 leading-relaxed prose prose-stone max-w-none"
+                dangerouslySetInnerHTML={{ __html: about.content }}
+              />
             </div>
           </div>
         </section>
@@ -122,7 +125,7 @@ export default function Home() {
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-stone-800">{item.title}</h3>
-                    {item.content && <p className="text-sm text-stone-500 mt-1 line-clamp-2">{item.content}</p>}
+                    {item.content && <div className="text-sm text-stone-500 mt-1 line-clamp-2 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: item.content }} />}
                     {item.price && <p className="text-sm font-bold text-stone-700 mt-2">{item.price}</p>}
                   </div>
                 </div>
@@ -145,7 +148,7 @@ export default function Home() {
                     <img src={s.image_url} alt={s.staff_name || s.title} className="w-24 h-24 object-cover rounded-full mx-auto mb-3" />
                   )}
                   <h3 className="font-semibold text-stone-800">{s.staff_name || s.title}</h3>
-                  {s.content && <p className="text-xs text-stone-500 mt-1">{s.content}</p>}
+                  {s.content && <div className="text-xs text-stone-500 mt-1 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: s.content }} />}
                 </div>
               ))}
             </div>
@@ -180,7 +183,7 @@ export default function Home() {
                   <div className="flex gap-1 mb-3">
                     {[1,2,3,4,5].map(n => <Star key={n} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
                   </div>
-                  <p className="text-stone-700 text-sm leading-relaxed mb-3">"{v.content}"</p>
+                  <div className="text-stone-700 text-sm leading-relaxed mb-3 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: `"${v.content}"` }} />
                   <p className="text-xs text-stone-400 font-medium">{v.title}</p>
                 </div>
               ))}
