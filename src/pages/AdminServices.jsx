@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import { Plus, Pencil, Trash2, Loader2, ImageIcon } from 'lucide-react';
+import { getServiceLabel, getPriceLabel, getDurationLabel, getCapacityLabel, BUSINESS_TYPE_LABELS } from '@/lib/businessTypeLabels';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -46,11 +47,19 @@ export default function AdminServices() {
   const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
 
+  const { data: site } = useQuery({
+    queryKey: ['site', siteId],
+    queryFn: () => base44.entities.Site.filter({ id: siteId }).then(r => r[0]),
+    enabled: !!siteId,
+  });
+
   const { data: services = [], isLoading } = useQuery({
     queryKey: ['services', siteId],
     queryFn: () => base44.entities.Service.filter({ site_id: siteId }, 'sort_order'),
     enabled: !!siteId,
   });
+
+  const typeInfo = site ? (BUSINESS_TYPE_LABELS[site.business_type] || BUSINESS_TYPE_LABELS.other) : BUSINESS_TYPE_LABELS.other;
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Service.create({ ...data, site_id: siteId }),
@@ -124,14 +133,14 @@ export default function AdminServices() {
         <div className="max-w-5xl space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-800">サービス一覧</h2>
-              <p className="text-sm text-slate-500 mt-0.5">{services.length} 件</p>
+              <h2 className="text-xl font-bold text-slate-800">{typeInfo.service_label}一覧</h2>
+              <p className="text-sm text-slate-500 mt-0.5">{services.length} 件 {typeInfo.icon}</p>
             </div>
             <Button
               onClick={() => handleOpenModal()}
               className="bg-amber-600 hover:bg-amber-700 gap-2"
             >
-              <Plus className="w-4 h-4" />新規サービス
+              <Plus className="w-4 h-4" />新規{typeInfo.service_label}
             </Button>
           </div>
 
@@ -142,10 +151,11 @@ export default function AdminServices() {
           ) : services.length === 0 ? (
             <Card>
               <CardContent className="py-16 text-center text-slate-400">
-                <p className="font-medium">サービスがありません</p>
-                <p className="text-sm mt-1 mb-4">最初のサービスを追加してください</p>
+                <p className="text-3xl mb-2">{typeInfo.icon}</p>
+                <p className="font-medium">{typeInfo.service_label}がありません</p>
+                <p className="text-sm mt-1 mb-4">最初の{typeInfo.service_label}を追加してください</p>
                 <Button onClick={() => handleOpenModal()} className="bg-amber-600 hover:bg-amber-700 gap-2">
-                  <Plus className="w-4 h-4" />サービスを追加
+                  <Plus className="w-4 h-4" />{typeInfo.service_label}を追加
                 </Button>
               </CardContent>
             </Card>
@@ -159,9 +169,10 @@ export default function AdminServices() {
                     )}
                     <h3 className="font-semibold text-slate-800">{service.name}</h3>
                     {service.description && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{service.description}</p>}
-                    <div className="flex items-center gap-4 mt-3 text-sm text-slate-600">
-                      {service.price > 0 && <span>¥{service.price.toLocaleString()}</span>}
-                      {service.duration && <span>{service.duration}</span>}
+                    <div className="flex flex-col gap-1 mt-3 text-xs text-slate-600">
+                      {service.price > 0 && <div><span className="text-slate-500">{getPriceLabel(site?.business_type)}</span>: ¥{service.price.toLocaleString()}</div>}
+                      {service.duration && <div><span className="text-slate-500">{getDurationLabel(site?.business_type)}</span>: {service.duration}</div>}
+                      {service.capacity && <div><span className="text-slate-500">{getCapacityLabel(site?.business_type)}</span>: {service.capacity}名</div>}
                     </div>
                     <div className="flex gap-2 mt-4">
                       <Button variant="outline" size="sm" className="flex-1" onClick={() => handleOpenModal(service)}>
@@ -186,15 +197,15 @@ export default function AdminServices() {
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingService ? 'サービスを編集' : 'サービスを追加'}</DialogTitle>
+              <DialogTitle>{editingService ? `${typeInfo.service_label}を編集` : `${typeInfo.service_label}を追加`}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4 pt-2">
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">サービス名 *</label>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">{typeInfo.service_label}名 *</label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="例: ヘッドスパ"
+                  placeholder={`例: ${typeInfo.service_label}`}
                   required
                 />
               </div>
@@ -209,7 +220,7 @@ export default function AdminServices() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 mb-1 block">料金 (¥)</label>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">{getPriceLabel(site?.business_type)} (¥)</label>
                   <Input
                     type="number"
                     value={formData.price}
@@ -218,7 +229,7 @@ export default function AdminServices() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-slate-700 mb-1 block">所要時間</label>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">{getDurationLabel(site?.business_type)}</label>
                   <Input
                     value={formData.duration}
                     onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
@@ -252,7 +263,7 @@ export default function AdminServices() {
                 <Button type="button" variant="outline" className="flex-1" onClick={handleCloseModal}>キャンセル</Button>
                 <Button type="submit" className="flex-1 bg-amber-600 hover:bg-amber-700" disabled={createMutation.isPending || updateMutation.isPending}>
                   {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  {editingService ? '更新' : '追加'}
+                  {editingService ? '更新' : `${typeInfo.service_label}を追加`}
                 </Button>
               </div>
             </form>
@@ -262,7 +273,7 @@ export default function AdminServices() {
         <AlertDialog open={!!deleteService} onOpenChange={() => setDeleteService(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>サービスを削除</AlertDialogTitle>
+              <AlertDialogTitle>{typeInfo.service_label}を削除</AlertDialogTitle>
               <AlertDialogDescription>
                 「{deleteService?.name}」を削除してもよろしいですか？
               </AlertDialogDescription>

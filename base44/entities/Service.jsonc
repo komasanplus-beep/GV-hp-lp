@@ -8,7 +8,7 @@
     },
     "name": {
       "type": "string",
-      "description": "\u30b5\u30fc\u30d3\u30b9\u540d"
+      "description": "\u30b5\u30fc\u30d3\u30b9\u540d\uff08\u5ba2\u5ba4\u3001\u30e1\u30cb\u30e5\u30fc\u3001\u65bd\u8853\u5185\u5bb9\u306a\u3069\u696d\u7a2e\u5225\uff09"
     },
     "description": {
       "type": "string",
@@ -22,9 +22,24 @@
       "type": "string",
       "description": "\u6240\u8981\u6642\u9593\uff08\u4f8b\uff1a60\u5206\uff09"
     },
+    "capacity": {
+      "type": "number",
+      "description": "\u53ce\u5bb9\u4eba\u6570\uff08\u5ba2\u5ba4\u306e\u5b9a\u54e1\u3001\u30b5\u30fc\u30d3\u30b9\u306e\u5bfe\u5fdc\u4eba\u6570\u306a\u3069\uff09"
+    },
     "image_url": {
       "type": "string",
       "description": "\u30b5\u30fc\u30d3\u30b9\u753b\u50cfURL"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u8907\u6570\u306e\u753b\u50cfURLs\uff08\u30db\u30c6\u30eb\u306e\u5834\u5408\u306e\u8ffd\u52a0\u753b\u50cf\uff09"
+    },
+    "category": {
+      "type": "string",
+      "description": "\u30ab\u30c6\u30b4\u30ea\uff08hotel=room_type, salon=menu_category, clinic=treatment_type\u7b49\uff09"
     },
     "status": {
       "type": "string",
@@ -39,6 +54,21 @@
       "type": "number",
       "default": 0,
       "description": "\u8868\u793a\u9806"
+    },
+    "amenities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u8a2d\u5099\u30fb\u7279\u5fb4\uff08\u30db\u30c6\u30eb\u306e\u5834\u5408\u306e\u30a2\u30e1\u30cb\u30c6\u30a3\uff09"
+    },
+    "size": {
+      "type": "number",
+      "description": "\u30b5\u30a4\u30ba\uff08\u30db\u30c6\u30eb\u306e\u5834\u5408\u306f\u5ba2\u5ba4\u9762\u7a4dm\u00b2\uff09"
+    },
+    "bed_type": {
+      "type": "string",
+      "description": "\u30d9\u30c3\u30c9\u30bf\u30a4\u30d7\uff08\u30db\u30c6\u30eb\u56fa\u6709\uff09"
     }
   },
   "required": [

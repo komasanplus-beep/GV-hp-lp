@@ -92,7 +92,7 @@ function BookingBlock({ d, siteId }) {
   );
 }
 
-function ServiceBlock({ d, siteId }) {
+function ServiceBlock({ d, siteId, businessType = 'other' }) {
   const { data: services = [] } = React.useQuery({
     queryKey: ['services', siteId],
     queryFn: () => siteId
@@ -103,10 +103,29 @@ function ServiceBlock({ d, siteId }) {
   const [searchParams] = React.useState(new URLSearchParams(window.location.search));
   const isPreview = searchParams.get('preview') === 'true';
 
+  // 業種別UI
+  const { getServiceLabel, BUSINESS_TYPE_LABELS } = React.useMemo(() => {
+    const labels = {
+      hotel: { service_label: '客室', icon: '🏨' },
+      salon: { service_label: 'メニュー', icon: '💇' },
+      clinic: { service_label: '診療科目', icon: '🏥' },
+      gym: { service_label: 'コース', icon: '💪' },
+      school: { service_label: 'レッスン', icon: '🎓' },
+      restaurant: { service_label: 'メニュー', icon: '🍽️' },
+      beauty: { service_label: '施術', icon: '💄' },
+      wellness: { service_label: 'プログラム', icon: '🧘' },
+      other: { service_label: 'サービス', icon: '⭐' }
+    };
+    return { BUSINESS_TYPE_LABELS: labels, getServiceLabel: (t) => labels[t]?.service_label || 'サービス' };
+  }, []);
+
+  const typeLabel = BUSINESS_TYPE_LABELS[businessType] || BUSINESS_TYPE_LABELS.other;
+
   return (
     <section className="py-20 bg-slate-50">
       <div className="max-w-4xl mx-auto px-6">
-        {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+        {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-4 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
+        <p className="text-center text-slate-500 mb-10">{typeLabel.icon}</p>
         {d.subtitle && <p className="text-slate-500 text-center mb-10">{d.subtitle}</p>}
         {services.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -131,7 +150,7 @@ function ServiceBlock({ d, siteId }) {
             ))}
           </div>
         ) : (
-          <div className="text-center text-slate-300 py-8 text-4xl">🛎️</div>
+          <div className="text-center text-slate-300 py-8 text-4xl">{typeLabel.icon}</div>
         )}
       </div>
     </section>
@@ -538,7 +557,7 @@ export default function SiteBlockRenderer({ block }) {
       </section>
     );
   } else if (type === 'Service') {
-    content = <ServiceBlock d={d} siteId={block.site_id} />;
+    content = <ServiceBlock d={d} siteId={block.site_id} businessType={block.business_type} />;
   } else if (type === 'Contact') {
     content = <ContactBlock d={d} siteId={block.site_id} />;
   } else if (type === 'Booking') {

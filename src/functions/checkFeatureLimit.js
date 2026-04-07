@@ -1,6 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// deno-lint-ignore no-undef
 /**
  * checkFeatureLimit
  * 
@@ -17,6 +16,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
  * - limit: プランの上限
  * - remaining: 残数
  */
+// deno-lint-ignore no-undef
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);

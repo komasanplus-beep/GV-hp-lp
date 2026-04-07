@@ -9,7 +9,7 @@ import AdminLPCodeCreator from './pages/AdminLPCodeCreator'
 import SiteHeaderSettings from './pages/SiteHeaderSettings'
 import SiteFooterSettings from './pages/SiteFooterSettings'
 import SiteSeoSettings from './pages/SiteSeoSettings'
-import ServiceDetail from './pages/ServiceDetail'
+import ServiceDetail from './pages/ServiceDetail.jsx'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
