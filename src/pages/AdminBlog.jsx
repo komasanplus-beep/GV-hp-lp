@@ -25,9 +25,15 @@ export default function AdminBlog() {
   const [form, setForm] = useState(defaultForm);
   const [uploading, setUploading] = useState(false);
 
+  // URLパラメータからsite_idを取得（マルチテナント分離）
+  const urlParams = new URLSearchParams(window.location.search);
+  const siteId = urlParams.get('site_id') || null;
+
   const { data: posts = [] } = useQuery({
-    queryKey: ['blogPosts'],
-    queryFn: () => base44.entities.BlogPost.list('-created_date', 100),
+    queryKey: ['blogPosts', siteId],
+    queryFn: () => siteId
+      ? base44.entities.BlogPost.filter({ site_id: siteId }, '-created_date', 100)
+      : base44.entities.BlogPost.list('-created_date', 100),
   });
   const { data: categories = [] } = useQuery({
     queryKey: ['blogCategories'],
@@ -40,20 +46,20 @@ export default function AdminBlog() {
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
-      if (editing === 'new') return base44.entities.BlogPost.create(data);
+      if (editing === 'new') return base44.entities.BlogPost.create({ ...data, site_id: siteId });
       return base44.entities.BlogPost.update(editing, data);
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['blogPosts'] }); closeDialog(); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['blogPosts', siteId] }); closeDialog(); },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.BlogPost.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blogPosts'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['blogPosts', siteId] }),
   });
 
   const toggleStatus = (post) => {
     base44.entities.BlogPost.update(post.id, { status: post.status === 'published' ? 'draft' : 'published' })
-      .then(() => queryClient.invalidateQueries({ queryKey: ['blogPosts'] }));
+      .then(() => queryClient.invalidateQueries({ queryKey: ['blogPosts', siteId] }));
   };
 
   const handleUpload = async (e) => {

@@ -1,0 +1,66 @@
+{
+  "name": "Guest",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30b5\u30a4\u30c8ID\uff08\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u5206\u96e2\u30ad\u30fc\uff09"
+    },
+    "full_name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "id_number": {
+      "type": "string"
+    },
+    "nationality": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "total_stays": {
+      "type": "number",
+      "default": 0
+    },
+    "vip_status": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "full_name",
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

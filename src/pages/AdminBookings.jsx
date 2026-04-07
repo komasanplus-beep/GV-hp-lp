@@ -52,15 +52,21 @@ export default function AdminBookings() {
 
   const queryClient = useQueryClient();
 
+  // URLパラメータからsite_idを取得（マルチテナント分離）
+  const urlParams = new URLSearchParams(window.location.search);
+  const siteId = urlParams.get('site_id') || null;
+
   const { data: bookings = [], isLoading } = useQuery({
-    queryKey: ['bookings'],
-    queryFn: () => base44.entities.Booking.list('-created_date'),
+    queryKey: ['bookings', siteId],
+    queryFn: () => siteId
+      ? base44.entities.Booking.filter({ site_id: siteId }, '-created_date')
+      : base44.entities.Booking.list('-created_date'),
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Booking.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings', siteId] });
     },
   });
 

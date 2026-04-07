@@ -1,0 +1,73 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30b5\u30a4\u30c8ID\uff08\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u5206\u96e2\u30ad\u30fc\uff09"
+    },
+    "title": {
+      "type": "string"
+    },
+    "slug": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "excerpt": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "category_id": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "show_on_home": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u306b\u8868\u793a\u3059\u308b\u304b"
+    },
+    "home_block_order": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30c8\u30c3\u30d7\u30da\u30fc\u30b8\u3067\u306e\u8868\u793a\u9806"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
