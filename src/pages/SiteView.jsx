@@ -53,11 +53,9 @@ function SiteViewInner({ siteId, isPreview }) {
   }, [site]);
 
   useSeoHead({
-    title: seo?.meta_title || site?.site_name,
-    description: seo?.meta_description,
-    ogTitle: seo?.og_title,
-    ogDescription: seo?.og_description,
-    ogImage: seo?.og_image_url,
+    title: site?.seo_config?.meta_title || seo?.meta_title || site?.site_name,
+    description: site?.seo_config?.meta_description || seo?.meta_description,
+    ogImage: site?.seo_config?.og_image_url || seo?.og_image_url,
     canonicalUrl: seo?.canonical_url,
     keywords: seo?.seo_keywords,
   });

@@ -97,6 +97,24 @@
           "description": "\u5e74\u53f7\u3092\u8868\u793a\u3059\u308b\u304b"
         }
       }
+    },
+    "seo_config": {
+      "type": "object",
+      "description": "SEO\u8a2d\u5b9a",
+      "properties": {
+        "meta_title": {
+          "type": "string",
+          "description": "\u30da\u30fc\u30b8\u30bf\u30a4\u30c8\u30eb\uff0860\u6587\u5b57\u4ee5\u5185\u63a8\u5968\uff09"
+        },
+        "meta_description": {
+          "type": "string",
+          "description": "\u30e1\u30bf\u30c7\u30a3\u30b9\u30af\u30ea\u30d7\u30b7\u30e7\u30f3\uff08160\u6587\u5b57\u4ee5\u5185\u63a8\u5968\uff09"
+        },
+        "og_image_url": {
+          "type": "string",
+          "description": "OGP\u753b\u50cfURL"
+        }
+      }
     }
   },
   "required": [

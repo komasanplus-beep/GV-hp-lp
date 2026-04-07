@@ -32,6 +32,13 @@ export const hotelTemplate = {
     ],
   },
 
+  // SEO設定
+  seo_config: {
+    meta_title: 'マイホテル | 快適な滞在体験をお約束',
+    meta_description: '東京のプレミアムホテル。高級感あふれる客室と充実した施設で、ビジネスから観光まで幅広いニーズに対応します。',
+    og_image_url: '',
+  },
+
   // ナビゲーション設定
   navigation_config: {
     logo_url: 'https://images.unsplash.com/photo-1572193645878-05fe266ab6bb?w=200&h=60&fit=crop',
