@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search, ChevronDown } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
+import PageBlocksList from '@/components/site/PageBlocksList';
 
 const PAGE_TYPES = [
   { value: 'home', label: 'HOME' },
@@ -37,6 +38,7 @@ export default function SitePageManager() {
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ title: '', slug: '', page_type: 'custom', status: 'draft' });
+  const [expandedPageId, setExpandedPageId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: sites = [] } = useQuery({
@@ -201,42 +203,59 @@ export default function SitePageManager() {
                 </Card>
               ) : (
                 <div className="grid gap-3">
-                  {pages.map(page => (
-                    <Card key={page.id} className="hover:shadow-md transition-shadow">
-                      <CardContent className="py-4 px-5 flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                          {PAGE_ICONS[page.page_type] || '📄'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-slate-800">{page.title}</h3>
-                            <span className={cn(
-                              "text-xs px-2 py-0.5 rounded-full border flex-shrink-0",
-                              page.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'
-                            )}>
-                              {page.status === 'published' ? '公開中' : '下書き'}
-                            </span>
+                    {pages.map(page => (
+                      <Card key={page.id} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          {/* Page Header */}
+                          <div className="py-4 px-5 flex items-center gap-4">
+                            <button
+                              onClick={() => setExpandedPageId(expandedPageId === page.id ? null : page.id)}
+                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
+                            >
+                              <ChevronDown className={cn(
+                                "w-5 h-5 transition-transform",
+                                expandedPageId === page.id ? 'rotate-180' : ''
+                              )} />
+                            </button>
+                            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-base flex-shrink-0">
+                              {PAGE_ICONS[page.page_type] || '📄'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-slate-800">{page.title}</h3>
+                                <span className={cn(
+                                  "text-xs px-2 py-0.5 rounded-full border flex-shrink-0",
+                                  page.status === 'published' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-500'
+                                )}>
+                                  {page.status === 'published' ? '公開中' : '下書き'}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-400 mt-0.5">/{page.slug}</p>
+                            </div>
+                            <div className="flex gap-2 flex-shrink-0">
+                              <Button variant="ghost" size="icon" onClick={() => openEdit(page)}>
+                                <Pencil className="w-4 h-4 text-slate-400" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}>
+                                <Trash2 className="w-4 h-4 text-red-400" />
+                              </Button>
+                            </div>
                           </div>
-                          <p className="text-xs text-slate-400 mt-0.5">/{page.slug}</p>
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <Link to={`${createPageUrl('SiteBlockEditor')}?page_id=${page.id}&site_id=${selectedSiteId}`}>
-                            <Button variant="outline" size="sm" className="gap-1 text-xs">
-                              <Layout className="w-3.5 h-3.5" />ブロック編集
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </Button>
-                          </Link>
-                          <Button variant="ghost" size="icon" onClick={() => openEdit(page)}>
-                            <Pencil className="w-4 h-4 text-slate-400" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}>
-                            <Trash2 className="w-4 h-4 text-red-400" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+
+                          {/* Block List (Expanded) */}
+                          {expandedPageId === page.id && (
+                            <div className="border-t border-slate-200 py-4 px-5 bg-slate-50/50">
+                              <PageBlocksList
+                                pageId={page.id}
+                                siteId={selectedSiteId}
+                                onUpdate={() => queryClient.invalidateQueries({ queryKey: ['sitePages'] })}
+                              />
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
               )}
             </>
           )}
