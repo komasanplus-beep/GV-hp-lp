@@ -1,8 +1,9 @@
 /**
  * SiteView - サイト固有の公開ビュー
  * URL: /site/:siteId  または  /SiteView?site_id=xxx
- * - published ページのブロックを順番通りに表示
- * - SEOデータをdocument headに適用
+ *
+ * データ取得は getSiteViewData backend function に一元化。
+ * 公開判定・権限チェックはすべて function 側で行う。
  */
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -11,36 +12,21 @@ import SiteBlockRenderer from '@/components/site/SiteBlockRenderer';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 
-function SiteViewInner({ siteId }) {
-  const { data: siteArr = [], isLoading: loadingSite } = useQuery({
-    queryKey: ['siteById', siteId],
-    queryFn: () => base44.entities.Site.filter({ id: siteId }),
+function SiteViewInner({ siteId, isPreview }) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['siteViewData', siteId, isPreview],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getSiteViewData', { site_id: siteId, preview: isPreview });
+      return res.data;
+    },
     enabled: !!siteId,
-  });
-  const site = siteArr[0] || null;
-
-  // ホームページを取得（page_type: 'home' 優先、なければ sort_order 最小）
-  const { data: pages = [], isLoading: loadingPages } = useQuery({
-    queryKey: ['sitePages', siteId],
-    queryFn: () => base44.entities.SitePage.filter({ site_id: siteId }, 'sort_order'),
-    enabled: !!siteId,
+    retry: false,
   });
 
-  const homePage = pages.find(p => p.page_type === 'home') || pages[0] || null;
-
-  const { data: blocks = [], isLoading: loadingBlocks } = useQuery({
-    queryKey: ['siteBlocksView', homePage?.id],
-    queryFn: () => base44.entities.SiteBlock.filter({ page_id: homePage.id }, 'sort_order'),
-    enabled: !!homePage?.id,
-  });
-
-  // SEOデータ (target_type: 'site')
-  const { data: seoArr = [] } = useQuery({
-    queryKey: ['siteSeo', siteId],
-    queryFn: () => base44.entities.LPSeoData.filter({ lp_id: siteId }),
-    enabled: !!siteId,
-  });
-  const seo = seoArr[0] || null;
+  const site = data?.site || null;
+  const homePage = data?.homePage || null;
+  const blocks = data?.blocks || [];
+  const seo = data?.seo || null;
 
   useSeoHead({
     title: seo?.meta_title || site?.site_name,
@@ -52,8 +38,6 @@ function SiteViewInner({ siteId }) {
     keywords: seo?.seo_keywords,
   });
 
-  const isLoading = loadingSite || loadingPages || loadingBlocks;
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,7 +46,8 @@ function SiteViewInner({ siteId }) {
     );
   }
 
-  if (!site) {
+  // 401/403: プレビュー権限なし
+  if (error || !site) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
         <div className="text-center">
@@ -72,10 +57,7 @@ function SiteViewInner({ siteId }) {
     );
   }
 
-  // URLパラメータにpreview=trueがあれば下書きでも表示
-  const urlParams2 = new URLSearchParams(window.location.search);
-  const isPreview = urlParams2.get('preview') === 'true';
-
+  // 非公開（準備中）
   if (site.status !== 'published' && !isPreview) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
@@ -110,10 +92,10 @@ function SiteViewInner({ siteId }) {
 export default function SiteView() {
   const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
-  // /site/:siteId または ?site_id=xxx
   const siteId = urlParams.get('site_id')
     || (pathParts.includes('site') ? pathParts[pathParts.indexOf('site') + 1] : null)
     || '';
+  const isPreview = urlParams.get('preview') === 'true';
 
   if (!siteId) {
     return (
@@ -123,5 +105,5 @@ export default function SiteView() {
     );
   }
 
-  return <SiteViewInner siteId={siteId} />;
+  return <SiteViewInner siteId={siteId} isPreview={isPreview} />;
 }
