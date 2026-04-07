@@ -26,7 +26,8 @@ Deno.serve(async (req) => {
 
     // 4. すべての on[a-z]+ 属性を除去（onclick, onload, onerror など）
     // パターン1: onclick="..." / onclick='...'
-    sanitized = sanitized.replace(/\s+on[a-z]+\s*=\s*["']([^"']*)['"]/gi, '');
+    sanitized = sanitized.replace(/\s+on[a-z]+\s*=\s*"[^"]*"/gi, '');
+    sanitized = sanitized.replace(/\s+on[a-z]+\s*=\s*'[^']*'/gi, '');
     // パターン2: onclick=no_quotes_value
     sanitized = sanitized.replace(/\s+on[a-z]+\s*=\s*[^\s>]+/gi, '');
 
