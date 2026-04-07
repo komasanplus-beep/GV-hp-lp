@@ -1,9 +1,16 @@
 import React from 'react';
 import { Star, CheckCircle, ChevronRight } from 'lucide-react';
 
-const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
-const parsePairs = (text) => parseLines(text).map(line => {
-  const [a, b] = line.split('|');
+const parseLines = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === 'string') return value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (value == null) return [];
+  if (typeof value === 'object') return Object.values(value).filter(Boolean).map(String);
+  return [String(value)];
+};
+
+const parsePairs = (value) => parseLines(value).map(line => {
+  const [a, b] = String(line).split('|');
   return { a: (a || '').trim(), b: (b || '').trim() };
 });
 
