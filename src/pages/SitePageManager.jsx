@@ -115,7 +115,7 @@ export default function SitePageManager() {
               )}
               {selectedSiteId && (
                 <>
-                  <a href={createPageUrl('Home')} target="_blank" rel="noreferrer">
+                  <a href={`/site/${selectedSiteId}?preview=true`} target="_blank" rel="noreferrer">
                     <Button variant="outline" size="sm" className="gap-1.5">
                       <Eye className="w-3.5 h-3.5" />プレビュー
                     </Button>
