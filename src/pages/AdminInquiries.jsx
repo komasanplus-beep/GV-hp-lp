@@ -19,9 +19,14 @@ export default function AdminInquiries() {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState(null);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const siteId = urlParams.get('site_id');
+
   const { data: inquiries = [], isLoading } = useQuery({
-    queryKey: ['inquiries'],
-    queryFn: () => base44.entities.Inquiry.list('-created_date', 100),
+    queryKey: ['inquiries', siteId],
+    queryFn: () => siteId
+      ? base44.entities.Inquiry.filter({ site_id: siteId }, '-created_date', 100)
+      : base44.entities.Inquiry.list('-created_date', 100),
   });
 
   const { data: sites = [] } = useQuery({

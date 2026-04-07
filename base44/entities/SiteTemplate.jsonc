@@ -1,0 +1,115 @@
+{
+  "name": "SiteTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u540d"
+    },
+    "template_key": {
+      "type": "string",
+      "description": "\u4e00\u610f\u306e\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30ad\u30fc (\u4f8b: hair_salon_basic)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "salon",
+        "beauty",
+        "clinic",
+        "fitness",
+        "school",
+        "general"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "preview_image_url": {
+      "type": "string"
+    },
+    "default_pages": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u9069\u7528\u6642\u306b\u81ea\u52d5\u751f\u6210\u3059\u308bSitePage\u306e\u5b9a\u7fa9"
+    },
+    "default_blocks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u9069\u7528\u6642\u306b\u81ea\u52d5\u751f\u6210\u3059\u308bSiteBlock\u306e\u5b9a\u7fa9\uff08block_type, data, sort_order\u3092\u542b\u3080\uff09"
+    },
+    "enabled_features": {
+      "type": "object",
+      "description": "\u6709\u52b9\u5316\u3059\u308b\u6a5f\u80fd\u30d5\u30e9\u30b0\u3002\u4f8b: { booking: true, blog: true, inquiry: true, customer: true }",
+      "properties": {
+        "booking": {
+          "type": "boolean",
+          "default": false,
+          "description": "\u4e88\u7d04\u6a5f\u80fd"
+        },
+        "blog": {
+          "type": "boolean",
+          "default": false,
+          "description": "\u30d6\u30ed\u30b0\u6a5f\u80fd"
+        },
+        "inquiry": {
+          "type": "boolean",
+          "default": true,
+          "description": "\u554f\u3044\u5408\u308f\u305b\u6a5f\u80fd"
+        },
+        "customer": {
+          "type": "boolean",
+          "default": false,
+          "description": "\u9867\u5ba2\u7ba1\u7406\u6a5f\u80fd"
+        }
+      }
+    },
+    "initial_data": {
+      "type": "object",
+      "description": "\u30b5\u30a4\u30c8\u751f\u6210\u6642\u306b\u6295\u5165\u3059\u308b\u30b5\u30f3\u30d7\u30eb\u30c7\u30fc\u30bf\u3002\u4f8b: { blog_posts: [...], reservations: [] }",
+      "properties": {
+        "blog_posts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "reservations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "template_key"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
