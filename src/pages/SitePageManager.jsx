@@ -120,6 +120,11 @@ export default function SitePageManager() {
                       <Edit3 className="w-3.5 h-3.5" />ヘッダー設定
                     </Button>
                   </Link>
+                  <Link to={`${createPageUrl('SiteFooterSettings')}?site_id=${selectedSiteId}`}>
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Edit3 className="w-3.5 h-3.5" />フッター設定
+                    </Button>
+                  </Link>
                   <a href={`/site/${selectedSiteId}?preview=true`} target="_blank" rel="noreferrer">
                     <Button variant="outline" size="sm" className="gap-1.5">
                       <Eye className="w-3.5 h-3.5" />プレビュー

@@ -20,6 +20,18 @@ export const hotelTemplate = {
     },
   },
 
+  // フッター設定
+  footer_config: {
+    copyright_text: '© 2026 マイホテル. All rights reserved.',
+    show_site_name: true,
+    show_year: true,
+    footer_links: [
+      { label: 'プライバシーポリシー', href: '/privacy', sort_order: 0 },
+      { label: '利用規約', href: '/terms', sort_order: 1 },
+      { label: 'お問い合わせ', href: '#contact', sort_order: 2 },
+    ],
+  },
+
   // ナビゲーション設定
   navigation_config: {
     logo_url: 'https://images.unsplash.com/photo-1572193645878-05fe266ab6bb?w=200&h=60&fit=crop',

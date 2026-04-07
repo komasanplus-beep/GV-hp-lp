@@ -189,8 +189,34 @@ function SiteViewInner({ siteId, isPreview }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-stone-900 text-stone-500 text-center py-6 text-xs mt-auto">
-        © {new Date().getFullYear()} {site?.site_name || 'Site'}. All rights reserved.
+      <footer className="bg-stone-900 text-stone-500 text-center py-6 mt-auto">
+        <div className="max-w-6xl mx-auto px-4 space-y-4">
+          {/* Copyright Text */}
+          <p className="text-xs">
+            {site?.footer_config?.copyright_text || (
+              <>
+                {site?.footer_config?.show_year !== false && <span>{new Date().getFullYear()} </span>}
+                {site?.footer_config?.show_site_name !== false && <span>{site?.site_name || 'Site'}</span>}
+                . All rights reserved.
+              </>
+            )}
+          </p>
+
+          {/* Footer Links */}
+          {site?.footer_config?.footer_links && site.footer_config.footer_links.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-4 text-xs">
+              {site.footer_config.footer_links.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.href}
+                  className="hover:text-stone-300 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       </footer>
     </div>
   );
