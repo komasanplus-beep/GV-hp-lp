@@ -8,8 +8,11 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChevronLeft, Plus, Trash2, Loader2, Eye, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import ManualNavigationLinkForm from '@/components/site/ManualNavigationLinkForm';
+import ManualNavigationLinkList from '@/components/site/ManualNavigationLinkList';
 
 const SNS_PLATFORMS = [
   { key: 'x', label: 'X (Twitter)' },
@@ -49,6 +52,8 @@ export default function SiteHeaderSettings() {
   const [pages, setPages] = useState([]);
   const [newMenuItem, setNewMenuItem] = useState({ label: '', href: '', target: '_self', is_visible: true });
   const [newOtherSns, setNewOtherSns] = useState({ name: '', url: '' });
+  const [showNavLinkDialog, setShowNavLinkDialog] = useState(false);
+  const [editingNavLink, setEditingNavLink] = useState(null);
 
   const { data: site, isLoading: siteLoading } = useQuery({
     queryKey: ['site', siteId],
@@ -59,6 +64,12 @@ export default function SiteHeaderSettings() {
   const { data: sitePages = [] } = useQuery({
     queryKey: ['sitePages', siteId],
     queryFn: () => siteId ? base44.entities.SitePage.filter({ site_id: siteId }, 'sort_order') : Promise.resolve([]),
+    enabled: !!siteId,
+  });
+
+  const { data: navLinks = [] } = useQuery({
+    queryKey: ['navigationLinks', siteId],
+    queryFn: () => siteId ? base44.entities.NavigationLink.filter({ site_id: siteId }, 'sort_order') : Promise.resolve([]),
     enabled: !!siteId,
   });
 
@@ -126,6 +137,63 @@ export default function SiteHeaderSettings() {
       toast.error(`保存エラー: ${err.message}`);
     },
   });
+
+  const navLinkCreateMutation = useMutation({
+    mutationFn: async (data) => {
+      return base44.entities.NavigationLink.create({
+        site_id: siteId,
+        ...data,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['navigationLinks', siteId] });
+      queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
+      setShowNavLinkDialog(false);
+      toast.success('リンクを追加しました');
+    },
+  });
+
+  const navLinkUpdateMutation = useMutation({
+    mutationFn: async ({ id, data }) => {
+      return base44.entities.NavigationLink.update(id, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['navigationLinks', siteId] });
+      queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
+      setShowNavLinkDialog(false);
+      setEditingNavLink(null);
+      toast.success('リンクを更新しました');
+    },
+  });
+
+  const navLinkDeleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.NavigationLink.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['navigationLinks', siteId] });
+      queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
+      toast.success('リンクを削除しました');
+    },
+  });
+
+  const handleNavLinkSave = (data) => {
+    if (editingNavLink) {
+      navLinkUpdateMutation.mutate({ id: editingNavLink.id, data });
+    } else {
+      const maxSort = navLinks.length > 0 ? Math.max(...navLinks.map(l => l.sort_order || 0)) : 0;
+      navLinkCreateMutation.mutate({ ...data, sort_order: data.sort_order || maxSort + 1 });
+    }
+  };
+
+  const handleNavLinkMove = async (id, direction) => {
+    const sorted = [...navLinks].sort((a, b) => a.sort_order - b.sort_order);
+    const idx = sorted.findIndex(l => l.id === id);
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    
+    await base44.entities.NavigationLink.update(sorted[idx].id, { sort_order: sorted[swapIdx].sort_order });
+    await base44.entities.NavigationLink.update(sorted[swapIdx].id, { sort_order: sorted[idx].sort_order });
+    queryClient.invalidateQueries({ queryKey: ['navigationLinks', siteId] });
+  };
 
   const addMenuItem = () => {
     if (!newMenuItem.label || !newMenuItem.href) return;
@@ -351,70 +419,29 @@ export default function SiteHeaderSettings() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-semibold text-slate-800">手動追加リンク</h3>
-                <p className="text-xs text-slate-500 mt-1">外部サイトや任意のURLをメニューに追加できます</p>
+                <p className="text-xs text-slate-500 mt-1">外部サイトや任意のURLをメニューに追加できます。ページ連動メニューとは別に、独自リンクを追加できます。</p>
               </div>
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1" onClick={addMenuItem}>
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 gap-1"
+                onClick={() => {
+                  setEditingNavLink(null);
+                  setShowNavLinkDialog(true);
+                }}
+              >
                 <Plus className="w-4 h-4" />追加
               </Button>
             </div>
-            <div className="space-y-3">
-              {formData.menu_items.map((item, idx) => (
-                <div key={idx} className="border border-slate-200 rounded-lg p-4 space-y-3">
-                  <div className="grid md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 mb-1 block">リンク名</label>
-                      <Input
-                        value={item.label}
-                        onChange={e => updateMenuItem(idx, 'label', e.target.value)}
-                        placeholder="例: ブログ"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 mb-1 block">URL</label>
-                      <Input
-                        value={item.href}
-                        onChange={e => updateMenuItem(idx, 'href', e.target.value)}
-                        placeholder="例: https://example.com or /blog"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                      <select
-                        value={item.target || '_self'}
-                        onChange={e => updateMenuItem(idx, 'target', e.target.value)}
-                        className="border border-slate-200 rounded px-2 py-1 text-xs"
-                      >
-                        <option value="_self">同一タブで開く</option>
-                        <option value="_blank">新規タブで開く</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={item.is_visible}
-                        onChange={e => updateMenuItem(idx, 'is_visible', e.target.checked)}
-                        className="w-4 h-4 rounded"
-                      />
-                      表示
-                    </label>
-                    <div className="ml-auto flex gap-1">
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveMenuItem(idx, -1)} disabled={idx === 0}>
-                        <ArrowUp className="w-3 h-3" />
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveMenuItem(idx, 1)} disabled={idx === formData.menu_items.length - 1}>
-                        <ArrowDown className="w-3 h-3" />
-                      </Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-red-500" onClick={() => deleteMenuItem(idx)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <ManualNavigationLinkList
+              links={navLinks}
+              onEdit={(link) => {
+                setEditingNavLink(link);
+                setShowNavLinkDialog(true);
+              }}
+              onDelete={(id) => navLinkDeleteMutation.mutate(id)}
+              onMove={handleNavLinkMove}
+              isLoading={navLinkDeleteMutation.isPending}
+            />
           </Card>
 
           {/* SNS設定 */}
@@ -619,8 +646,34 @@ export default function SiteHeaderSettings() {
               {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : '保存'}
             </Button>
           </div>
-        </div>
-      </UserLayout>
-    </ProtectedRoute>
-  );
-}
+          </div>
+
+          {/* Manual Link Dialog */}
+          <Dialog open={showNavLinkDialog} onOpenChange={setShowNavLinkDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {editingNavLink ? 'リンクを編集' : '新しいリンクを追加'}
+              </DialogTitle>
+            </DialogHeader>
+            <ManualNavigationLinkForm
+              initialData={editingNavLink ? {
+                label: editingNavLink.label,
+                url: editingNavLink.url,
+                target: editingNavLink.target,
+                placement: editingNavLink.placement,
+                sort_order: editingNavLink.sort_order,
+              } : null}
+              onSave={handleNavLinkSave}
+              onCancel={() => {
+                setShowNavLinkDialog(false);
+                setEditingNavLink(null);
+              }}
+              isLoading={navLinkCreateMutation.isPending || navLinkUpdateMutation.isPending}
+            />
+          </DialogContent>
+          </Dialog>
+          </UserLayout>
+          </ProtectedRoute>
+          );
+          }

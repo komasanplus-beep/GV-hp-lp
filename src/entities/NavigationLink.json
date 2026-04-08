@@ -1,0 +1,65 @@
+{
+  "name": "NavigationLink",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "所属するサイトID"
+    },
+    "label": {
+      "type": "string",
+      "description": "リンク表示名"
+    },
+    "url": {
+      "type": "string",
+      "description": "リンクURL"
+    },
+    "target": {
+      "type": "string",
+      "enum": ["_self", "_blank"],
+      "default": "_self",
+      "description": "開き方（同一タブ/_blank）"
+    },
+    "placement": {
+      "type": "string",
+      "enum": ["header", "footer", "both"],
+      "default": "header",
+      "description": "表示場所"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["manual"],
+      "default": "manual",
+      "description": "リンク種別"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "表示順"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "有効フラグ"
+    }
+  },
+  "required": ["site_id", "label", "url"],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
