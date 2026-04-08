@@ -122,14 +122,13 @@ export default function SiteBlockEditor() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
               </Link>
-              <div className="flex items-center gap-2">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800">
-                    {page ? page.title : 'ブロック編集'}
-                  </h2>
-                  <p className="text-sm text-slate-400 mt-0.5">ブロックを並べてページを構成します</p>
-                </div>
-                <BlockEditHelpIcon />
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">
+                  ブロック編集 {page && `- ${page.title}`}
+                </h2>
+                <p className="text-sm text-slate-500 mt-0.5">
+                  このページを構成するブロック（セクション）を管理します。各ブロックをドラッグで並べ替えたり、内容を編集できます。
+                </p>
               </div>
             </div>
             <Button

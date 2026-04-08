@@ -8,7 +8,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, Plus, Trash2, Loader2, Eye, ArrowUp, ArrowDown, Upload, X } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Loader2, Eye, ArrowUp, ArrowDown, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SNS_PLATFORMS = [
@@ -20,6 +20,12 @@ const SNS_PLATFORMS = [
   { key: 'linkedin', label: 'LinkedIn' },
   { key: 'note', label: 'note' },
   { key: 'tiktok', label: 'TikTok' },
+];
+
+const OTHER_SNS = [
+  { key: 'other_1', label: 'その他1', type: 'other' },
+  { key: 'other_2', label: 'その他2', type: 'other' },
+  { key: 'other_3', label: 'その他3', type: 'other' },
 ];
 
 export default function SiteHeaderSettings() {
@@ -41,7 +47,8 @@ export default function SiteHeaderSettings() {
     social_links: [],
   });
   const [pages, setPages] = useState([]);
-  const [newMenuItem, setNewMenuItem] = useState({ label: '', href: '', is_visible: true });
+  const [newMenuItem, setNewMenuItem] = useState({ label: '', href: '', target: '_self', is_visible: true });
+  const [newOtherSns, setNewOtherSns] = useState({ name: '', url: '' });
 
   const { data: site, isLoading: siteLoading } = useQuery({
     queryKey: ['site', siteId],
@@ -126,7 +133,30 @@ export default function SiteHeaderSettings() {
       ...p,
       menu_items: [...p.menu_items, { ...newMenuItem, sort_order: p.menu_items.length }]
     }));
-    setNewMenuItem({ label: '', href: '', is_visible: true });
+    setNewMenuItem({ label: '', href: '', target: '_self', is_visible: true });
+  };
+
+  const addOtherSns = () => {
+    if (!newOtherSns.name || !newOtherSns.url) return;
+    setFormData(p => ({
+      ...p,
+      social_links: [...p.social_links, {
+        platform: `other_${Date.now()}`,
+        name: newOtherSns.name,
+        url: newOtherSns.url,
+        show_in_header: false,
+        show_in_footer: false,
+        open_new_tab: true,
+      }]
+    }));
+    setNewOtherSns({ name: '', url: '' });
+  };
+
+  const deleteOtherSns = (platform) => {
+    setFormData(p => ({
+      ...p,
+      social_links: p.social_links.filter(s => s.platform !== platform)
+    }));
   };
 
   const updateMenuItem = (idx, field, value) => {
@@ -287,7 +317,10 @@ export default function SiteHeaderSettings() {
 
           {/* ページ連動メニュー */}
           <Card className="p-6">
-            <h3 className="font-semibold text-slate-800 mb-4">ページ連動メニュー</h3>
+            <div className="mb-4">
+              <h3 className="font-semibold text-slate-800">ページ連動メニュー</h3>
+              <p className="text-xs text-slate-500 mt-1">公開中のページが自動で上部メニューに反映されます</p>
+            </div>
             <div className="space-y-2">
               {publishedPages.length === 0 ? (
                 <p className="text-sm text-slate-500">公開済みページがありません</p>
@@ -316,7 +349,10 @@ export default function SiteHeaderSettings() {
           {/* 手動リンク */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-800">手動追加リンク</h3>
+              <div>
+                <h3 className="font-semibold text-slate-800">手動追加リンク</h3>
+                <p className="text-xs text-slate-500 mt-1">外部サイトや任意のURLをメニューに追加できます</p>
+              </div>
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1" onClick={addMenuItem}>
                 <Plus className="w-4 h-4" />追加
               </Button>
@@ -326,7 +362,7 @@ export default function SiteHeaderSettings() {
                 <div key={idx} className="border border-slate-200 rounded-lg p-4 space-y-3">
                   <div className="grid md:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-600 mb-1 block">ラベル</label>
+                      <label className="text-xs font-medium text-slate-600 mb-1 block">リンク名</label>
                       <Input
                         value={item.label}
                         onChange={e => updateMenuItem(idx, 'label', e.target.value)}
@@ -338,9 +374,21 @@ export default function SiteHeaderSettings() {
                       <Input
                         value={item.href}
                         onChange={e => updateMenuItem(idx, 'href', e.target.value)}
-                        placeholder="例: #about or /blog"
+                        placeholder="例: https://example.com or /blog"
                       />
                     </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                      <select
+                        value={item.target || '_self'}
+                        onChange={e => updateMenuItem(idx, 'target', e.target.value)}
+                        className="border border-slate-200 rounded px-2 py-1 text-xs"
+                      >
+                        <option value="_self">同一タブで開く</option>
+                        <option value="_blank">新規タブで開く</option>
+                      </select>
+                    </label>
                   </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
@@ -421,6 +469,110 @@ export default function SiteHeaderSettings() {
                   </div>
                 );
               })}
+
+              {/* その他 */}
+              <div className="border-t pt-4 mt-4">
+                <h4 className="font-medium text-slate-700 mb-3">その他のSNS</h4>
+                <div className="space-y-3">
+                  {formData.social_links.filter(s => s.platform.startsWith('other_')).map((link) => (
+                    <div key={link.platform} className="border border-slate-200 rounded-lg p-4 space-y-3">
+                      <div className="grid md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-slate-600 mb-1 block">サービス名</label>
+                          <Input
+                            value={link.name || ''}
+                            onChange={e => {
+                              setFormData(p => ({
+                                ...p,
+                                social_links: p.social_links.map(s => s.platform === link.platform ? { ...s, name: e.target.value } : s)
+                              }));
+                            }}
+                            placeholder="例: YouTube"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-slate-600 mb-1 block">URL</label>
+                          <Input
+                            value={link.url || ''}
+                            onChange={e => {
+                              setFormData(p => ({
+                                ...p,
+                                social_links: p.social_links.map(s => s.platform === link.platform ? { ...s, url: e.target.value } : s)
+                              }));
+                            }}
+                            placeholder="https://..."
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6 text-sm">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={link.show_in_header}
+                            onChange={e => {
+                              setFormData(p => ({
+                                ...p,
+                                social_links: p.social_links.map(s => s.platform === link.platform ? { ...s, show_in_header: e.target.checked } : s)
+                              }));
+                            }}
+                            className="w-4 h-4 rounded"
+                          />
+                          ヘッダーに表示
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={link.show_in_footer}
+                            onChange={e => {
+                              setFormData(p => ({
+                                ...p,
+                                social_links: p.social_links.map(s => s.platform === link.platform ? { ...s, show_in_footer: e.target.checked } : s)
+                              }));
+                            }}
+                            className="w-4 h-4 rounded"
+                          />
+                          フッターに表示
+                        </label>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="ml-auto w-7 h-7 text-red-500"
+                          onClick={() => deleteOtherSns(link.platform)}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border border-dashed border-slate-300 rounded-lg p-4 space-y-3 bg-slate-50">
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-slate-600 mb-1 block">サービス名</label>
+                        <Input
+                          value={newOtherSns.name}
+                          onChange={e => setNewOtherSns(p => ({ ...p, name: e.target.value }))}
+                          placeholder="例: YouTube"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-slate-600 mb-1 block">URL</label>
+                        <Input
+                          value={newOtherSns.url}
+                          onChange={e => setNewOtherSns(p => ({ ...p, url: e.target.value }))}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 gap-1 w-full"
+                      onClick={addOtherSns}
+                    >
+                      <Plus className="w-4 h-4" />追加
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </Card>
 

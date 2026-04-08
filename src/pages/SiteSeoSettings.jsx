@@ -8,7 +8,8 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, Loader2, ImageIcon, Globe } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ChevronLeft, Loader2, ImageIcon, Globe, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SiteSeoSettings() {
@@ -19,6 +20,10 @@ export default function SiteSeoSettings() {
     meta_title: '',
     meta_description: '',
     og_image_url: '',
+    analytics_code: '',
+    tag_manager_code: '',
+    head_script: '',
+    body_script: '',
   });
   const [uploading, setUploading] = useState(false);
 
@@ -38,6 +43,10 @@ export default function SiteSeoSettings() {
         meta_title: site.seo_config.meta_title || '',
         meta_description: site.seo_config.meta_description || '',
         og_image_url: site.seo_config.og_image_url || '',
+        analytics_code: site.seo_config.analytics_code || '',
+        tag_manager_code: site.seo_config.tag_manager_code || '',
+        head_script: site.seo_config.head_script || '',
+        body_script: site.seo_config.body_script || '',
       });
     }
   }, [site]);
@@ -158,6 +167,79 @@ export default function SiteSeoSettings() {
                       placeholder="またはURLを直接入力"
                       className="text-xs"
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Google Analytics Code */}
+              <Card>
+                <CardContent className="pt-6">
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">Google Analytics コード</label>
+                  <Textarea
+                    value={form.analytics_code}
+                    onChange={e => setForm(f => ({ ...f, analytics_code: e.target.value }))}
+                    placeholder="Google AnalyticsのGTAG スクリプトをここに貼り付けます"
+                    rows={3}
+                    className="resize-none font-mono text-xs"
+                  />
+                  <p className="text-xs text-slate-400 mt-2">例: &lt;script async src="https://www.googletagmanager.com/gtag/js?id=GA_ID"&gt;&lt;/script&gt;</p>
+                </CardContent>
+              </Card>
+
+              {/* Google Tag Manager Code */}
+              <Card>
+                <CardContent className="pt-6">
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">Google Tag Manager コード</label>
+                  <Textarea
+                    value={form.tag_manager_code}
+                    onChange={e => setForm(f => ({ ...f, tag_manager_code: e.target.value }))}
+                    placeholder="Google Tag ManagerのコードをHTMLのhead内に埋め込みます"
+                    rows={3}
+                    className="resize-none font-mono text-xs"
+                  />
+                  <p className="text-xs text-slate-400 mt-2">例: &lt;script&gt;(function(w,d)...&lt;/script&gt;</p>
+                </CardContent>
+              </Card>
+
+              {/* Head Scripts */}
+              <Card>
+                <CardContent className="pt-6">
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">head内スクリプト</label>
+                  <Textarea
+                    value={form.head_script}
+                    onChange={e => setForm(f => ({ ...f, head_script: e.target.value }))}
+                    placeholder="ページのhead内に埋め込みたいスクリプトを記述（メタタグ、link タグなど）"
+                    rows={4}
+                    className="resize-none font-mono text-xs"
+                  />
+                  <p className="text-xs text-slate-400 mt-2">コード例: &lt;meta property="og:url" content="..."&gt;</p>
+                </CardContent>
+              </Card>
+
+              {/* Body Scripts */}
+              <Card>
+                <CardContent className="pt-6">
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">body 末尾スクリプト</label>
+                  <Textarea
+                    value={form.body_script}
+                    onChange={e => setForm(f => ({ ...f, body_script: e.target.value }))}
+                    placeholder="ページのbody末尾に埋め込みたいスクリプトを記述"
+                    rows={4}
+                    className="resize-none font-mono text-xs"
+                  />
+                  <p className="text-xs text-slate-400 mt-2">コード例: &lt;script&gt;...&lt;/script&gt;</p>
+                </CardContent>
+              </Card>
+
+              {/* Warning */}
+              <Card className="bg-amber-50 border-amber-200">
+                <CardContent className="pt-6">
+                  <div className="flex gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-amber-800">
+                      <p className="font-medium mb-1">スクリプト埋め込みについて</p>
+                      <p>外部スクリプトの埋め込みには注意が必要です。信頼できるサービスのコードのみを使用してください。悪意のあるコードはサイトを破損する可能性があります。</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

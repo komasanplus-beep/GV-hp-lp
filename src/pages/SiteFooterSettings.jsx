@@ -35,6 +35,7 @@ export default function SiteFooterSettings() {
     company_name: '',
     footer_links: [],
     social_links: [],
+    footer_page_visibility: {}, // page_id -> is_visible
   });
   const [newLink, setNewLink] = useState({ label: '', href: '' });
   const [pages, setPages] = useState([]);
@@ -65,9 +66,21 @@ export default function SiteFooterSettings() {
         company_name: site.footer_config.company_name || '',
         footer_links: site.footer_config.footer_links || [],
         social_links: site.footer_config.social_links || [],
+        footer_page_visibility: site.footer_config.footer_page_visibility || {},
       });
     }
   }, [site]);
+
+  // 初期化時にフッター対象ページをすべてONに
+  useEffect(() => {
+    if (pages.length > 0 && Object.keys(form.footer_page_visibility).length === 0) {
+      const visibility = {};
+      pages.forEach(p => {
+        visibility[p.id] = visibility[p.id] !== undefined ? visibility[p.id] : true;
+      });
+      setForm(f => ({ ...f, footer_page_visibility: visibility }));
+    }
+  }, [pages]);
 
   const saveMutation = useMutation({
     mutationFn: () => base44.entities.Site.update(siteId, { footer_config: form }),
@@ -198,12 +211,29 @@ export default function SiteFooterSettings() {
                 <Card>
                   <CardContent className="pt-6 space-y-3">
                     <h3 className="font-semibold text-slate-800">固定ページリンク</h3>
-                    <p className="text-xs text-slate-500">以下は自動的にフッターに表示されます</p>
+                    <p className="text-xs text-slate-500">チェックONのページはフッターに表示されます（デフォルト：すべてON）</p>
                     <div className="space-y-2">
                       {fixedPages.map(page => (
-                        <div key={page.id} className="text-sm text-slate-700 p-2 bg-slate-50 rounded">
-                          • {page.title}
-                        </div>
+                        <label key={page.id} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                          <input
+                            type="checkbox"
+                            checked={form.footer_page_visibility[page.id] !== false}
+                            onChange={(e) => {
+                              setForm(f => ({
+                                ...f,
+                                footer_page_visibility: {
+                                  ...f.footer_page_visibility,
+                                  [page.id]: e.target.checked
+                                }
+                              }));
+                            }}
+                            className="w-4 h-4 rounded"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-slate-700">{page.title}</p>
+                            <p className="text-xs text-slate-400">/{page.slug}</p>
+                          </div>
+                        </label>
                       ))}
                     </div>
                   </CardContent>
