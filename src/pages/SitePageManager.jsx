@@ -14,6 +14,8 @@ import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye
 import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
 import PageBlocksList from '@/components/site/PageBlocksList';
+import BackupManager from '@/components/site/BackupManager';
+import { createBackup } from '@/lib/backup';
 
 const PAGE_TYPES = [
   { value: 'home', label: 'HOME' },
@@ -42,6 +44,7 @@ export default function SitePageManager() {
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [isResetting, setIsResetting] = useState(false);
+  const [resetStep, setResetStep] = useState('confirm'); // 'confirm' | 'backup_prompt' | 'executing'
   const queryClient = useQueryClient();
 
   const { data: sites = [] } = useQuery({
@@ -249,9 +252,16 @@ export default function SitePageManager() {
           )}
         </div>
 
+        {/* ── バックアップ管理 ── */}
+        {selectedSiteId && (
+          <div className="max-w-4xl mt-4">
+            <BackupManager siteId={selectedSiteId} />
+          </div>
+        )}
+
         {/* ── 危険ゾーン ── */}
         {selectedSiteId && (
-          <div className="mt-10 border-2 border-red-200 bg-red-50/60 rounded-xl p-6">
+          <div className="mt-6 max-w-4xl border-2 border-red-200 bg-red-50/60 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
               <AlertTriangle className="w-5 h-5 text-red-500" />
               <h3 className="text-base font-semibold text-red-700">データ管理（危険操作）</h3>
@@ -266,7 +276,7 @@ export default function SitePageManager() {
             <Button
               variant="destructive"
               className="gap-2"
-              onClick={() => { setResetConfirmText(''); setShowResetModal(true); }}
+              onClick={() => { setResetConfirmText(''); setResetStep('confirm'); setShowResetModal(true); }}
             >
               <AlertTriangle className="w-4 h-4" />データを初期化する
             </Button>
@@ -277,76 +287,125 @@ export default function SitePageManager() {
         {showResetModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                </div>
-                <h2 className="text-lg font-bold text-slate-900">本当に初期化しますか？</h2>
-              </div>
-              <p className="text-sm text-slate-600 mb-5 leading-relaxed">
-                この操作により、すべてのデータが削除されます。<br />
-                <strong className="text-red-600">元に戻すことはできません。</strong>
-              </p>
-              <div className="bg-slate-50 rounded-lg p-4 mb-5">
-                <p className="text-sm font-medium text-slate-700 mb-2">
-                  実行する場合は <code className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono">DELETE</code> と入力してください
-                </p>
-                <input
-                  type="text"
-                  value={resetConfirmText}
-                  onChange={e => setResetConfirmText(e.target.value)}
-                  placeholder="DELETE"
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400"
-                  autoFocus
-                />
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowResetModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                  disabled={isResetting}
-                >
-                  キャンセル
-                </button>
-                <button
-                  disabled={resetConfirmText !== 'DELETE' || isResetting}
-                  onClick={async () => {
-                    setIsResetting(true);
-                    try {
-                      // SitePage 全削除
-                      const pages = await base44.entities.SitePage.filter({ site_id: selectedSiteId });
-                      for (const p of pages) await base44.entities.SitePage.delete(p.id);
 
-                      // SiteBlock 全削除
-                      const blocks = await base44.entities.SiteBlock.filter({ site_id: selectedSiteId });
-                      for (const b of blocks) await base44.entities.SiteBlock.delete(b.id);
+              {/* Step1: バックアップ確認 */}
+              {resetStep === 'confirm' && (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertTriangle className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">初期化前にバックアップを作成しますか？</h2>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                    初期化を実行する前に、現在の状態を保存しておくことをおすすめします。バックアップがあれば、後から復元できます。
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowResetModal(false)}
+                      className="px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      onClick={() => setResetStep('backup_prompt')}
+                      className="flex-1 px-4 py-2.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      スキップして続行
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setIsResetting(true);
+                        try {
+                          await createBackup(selectedSiteId, { name: '初期化前の自動保存', type: 'auto' });
+                          queryClient.invalidateQueries({ queryKey: ['backups', selectedSiteId] });
+                          sonnerToast.success('バックアップを作成しました');
+                          setResetStep('backup_prompt');
+                        } catch (err) {
+                          sonnerToast.error('バックアップに失敗: ' + err.message);
+                        } finally {
+                          setIsResetting(false);
+                        }
+                      }}
+                      disabled={isResetting}
+                      className="flex-1 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {isResetting
+                        ? <><Loader2 className="w-4 h-4 animate-spin" />保存中...</>
+                        : 'バックアップして続行'
+                      }
+                    </button>
+                  </div>
+                </>
+              )}
 
-                      // Service 全削除
-                      const services = await base44.entities.Service.filter({ site_id: selectedSiteId });
-                      for (const s of services) await base44.entities.Service.delete(s.id);
-
-                      // Post 全削除
-                      const posts = await base44.entities.Post.filter({ site_id: selectedSiteId });
-                      for (const po of posts) await base44.entities.Post.delete(po.id);
-
-                      queryClient.invalidateQueries({ queryKey: ['sitePages'] });
-                      setShowResetModal(false);
-                      sonnerToast.success('データを初期化しました');
-                    } catch (err) {
-                      sonnerToast.error('初期化に失敗しました: ' + err.message);
-                    } finally {
-                      setIsResetting(false);
-                      setResetConfirmText('');
-                    }
-                  }}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
-                >
-                  {isResetting
-                    ? <><Loader2 className="w-4 h-4 animate-spin" />初期化中...</>
-                    : <><AlertTriangle className="w-4 h-4" />初期化を実行する</>
-                  }
-                </button>
-              </div>
+              {/* Step2: DELETE入力 */}
+              {resetStep === 'backup_prompt' && (
+                <>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-900">本当に初期化しますか？</h2>
+                  </div>
+                  <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                    この操作により、すべてのデータが削除されます。<br />
+                    <strong className="text-red-600">元に戻すことはできません。</strong>
+                  </p>
+                  <div className="bg-slate-50 rounded-lg p-4 mb-5">
+                    <p className="text-sm font-medium text-slate-700 mb-2">
+                      実行する場合は <code className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono">DELETE</code> と入力してください
+                    </p>
+                    <input
+                      type="text"
+                      value={resetConfirmText}
+                      onChange={e => setResetConfirmText(e.target.value)}
+                      placeholder="DELETE"
+                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowResetModal(false)}
+                      className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                      disabled={isResetting}
+                    >
+                      キャンセル
+                    </button>
+                    <button
+                      disabled={resetConfirmText !== 'DELETE' || isResetting}
+                      onClick={async () => {
+                        setIsResetting(true);
+                        try {
+                          const pages = await base44.entities.SitePage.filter({ site_id: selectedSiteId });
+                          for (const p of pages) await base44.entities.SitePage.delete(p.id);
+                          const blocks = await base44.entities.SiteBlock.filter({ site_id: selectedSiteId });
+                          for (const b of blocks) await base44.entities.SiteBlock.delete(b.id);
+                          const services = await base44.entities.Service.filter({ site_id: selectedSiteId });
+                          for (const s of services) await base44.entities.Service.delete(s.id);
+                          const posts = await base44.entities.Post.filter({ site_id: selectedSiteId });
+                          for (const po of posts) await base44.entities.Post.delete(po.id);
+                          queryClient.invalidateQueries({ queryKey: ['sitePages'] });
+                          setShowResetModal(false);
+                          sonnerToast.success('データを初期化しました');
+                        } catch (err) {
+                          sonnerToast.error('初期化に失敗しました: ' + err.message);
+                        } finally {
+                          setIsResetting(false);
+                          setResetConfirmText('');
+                        }
+                      }}
+                      className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {isResetting
+                        ? <><Loader2 className="w-4 h-4 animate-spin" />初期化中...</>
+                        : <><AlertTriangle className="w-4 h-4" />初期化を実行する</>
+                      }
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
