@@ -19,6 +19,7 @@ import SiteCreateWizard from './pages/SiteCreateWizard'
 import AdminPostList from './pages/AdminPostList'
 import AdminPostManager from './pages/AdminPostManager.jsx'
 import AdminPostEdit from './pages/AdminPostEdit'
+import AdminBlogEditor from './pages/AdminBlogEditor'
 import AdminPostCategories from './pages/AdminPostCategories'
 import AdminPostTags from './pages/AdminPostTags'
 import PostListPage from './pages/PostListPage'
@@ -117,6 +118,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminPostList" element={<AdminPostList />} />
       <Route path="/AdminPostManager" element={<AdminPostManager />} />
       <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
+      <Route path="/AdminBlogEditor" element={<AdminBlogEditor />} />
       <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
       <Route path="/AdminPostTags" element={<AdminPostTags />} />
       <Route path="/posts" element={<PostListPage />} />
