@@ -1,5 +1,5 @@
 /**
- * AdminPostEdit - 記事編集ページ（2カラムレイアウト）
+ * AdminPostEdit - 記事編集ページ（管理レイアウト統一版）
  * /AdminPostEdit?site_id=xxx&post_id=xxx（新規はpost_idなし）
  */
 import React, { useState, useEffect } from 'react';
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Eye, Image } from 'lucide-react';
+import { Loader2, Save, Eye, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import BlockBasedPostEditor from '@/components/post/BlockBasedPostEditor';
 import PostSeoPanel from '@/components/post/PostSeoPanel';
@@ -238,57 +238,49 @@ export default function AdminPostEdit() {
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <div className="editor-container">
-        {/* ── ヘッダー ── */}
-        <div className="editor-header">
-          <Input
-            value={form.title}
-            onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
-            placeholder="記事タイトル"
-            className="flex-1 border-0 focus-visible:ring-0 focus-visible:border-amber-500 px-0 bg-transparent text-lg font-bold"
-          />
-          
-          {form.slug && !isNew && (
-            <a
-              href={`/post/${form.slug}?site_id=${siteId}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-amber-600 transition-colors"
-            >
-              <Eye className="w-3.5 h-3.5" />プレビュー
-            </a>
-          )}
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleSave('draft')}
-            disabled={saveMutation.isPending}
-            className="gap-1.5"
-          >
-            {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            下書き保存
-          </Button>
-          
-          <Button
-            size="sm"
-            onClick={() => handleSave('published')}
-            disabled={saveMutation.isPending}
-            className="bg-amber-600 hover:bg-amber-700 gap-1.5"
-          >
-            {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-            {form.status === 'published' ? '更新・公開' : '公開する'}
-          </Button>
-        </div>
+      <UserLayout title={isNew ? '新規記事作成' : '記事編集'}>
+        <div className="max-w-7xl mx-auto space-y-4">
+          {/* 保存ボタンバー */}
+          <div className="flex items-center justify-between gap-3 pb-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-slate-800">{form.title || '新規記事'}</h2>
+            <div className="flex items-center gap-2">
+              {form.slug && !isNew && (
+                <a
+                  href={`/post/${form.slug}?site_id=${siteId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-slate-500 hover:text-amber-600 transition-colors"
+                  title="記事をプレビュー"
+                >
+                  <Eye className="w-4 h-4" />
+                </a>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleSave('draft')}
+                disabled={saveMutation.isPending}
+                className="gap-1.5"
+              >
+                {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                下書き
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => handleSave('published')}
+                disabled={saveMutation.isPending}
+                className="bg-amber-600 hover:bg-amber-700 gap-1.5"
+              >
+                {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                {form.status === 'published' ? '更新' : '公開'}
+              </Button>
+            </div>
+          </div>
 
-        {/* ── ボディ ── */}
-        <div className="editor-body">
-          <div className="max-w-7xl mx-auto p-6">
-            {/* 2カラムレイアウト */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
-
-              {/* ── 左カラム: コンテンツ ── */}
-              <div className="space-y-4">
+          {/* 2カラムレイアウト */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
+            {/* ── 左カラム: コンテンツ ── */}
+            <div className="space-y-4">
               {/* タイトル */}
               <div>
                 <Input
@@ -331,7 +323,6 @@ export default function AdminPostEdit() {
 
             {/* ── 右カラム: AI + 設定 ── */}
             <div className="space-y-4">
-
               {/* AIパネル */}
               <Card>
                 <CardContent className="pt-4">
@@ -484,12 +475,10 @@ export default function AdminPostEdit() {
                   <PostSeoPanel form={form} setForm={setForm} />
                 </CardContent>
               </Card>
-
-              </div>
-          </div>
+            </div>
           </div>
         </div>
-      </div>
+      </UserLayout>
     </ProtectedRoute>
   );
 }
