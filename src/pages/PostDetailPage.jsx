@@ -6,6 +6,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import BlockBasedPostRenderer from '@/components/post/BlockBasedPostRenderer';
+import TableOfContents from '@/components/blog/TableOfContents';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { Loader2, ChevronUp } from 'lucide-react';
@@ -49,7 +51,21 @@ export default function PostDetailPage() {
   });
 
   const post = posts[0] || null;
-  const toc = useMemo(() => extractToc(post?.content), [post?.content]);
+  
+  // ブロック優先、なければ旧content(HTML)を使用
+  const toc = useMemo(() => {
+    if (post?.blocks && post.blocks.length > 0) {
+      // ブロック配列から見出しを抽出
+      return post.blocks.filter(b => b.type === 'heading').map(b => ({
+        level: parseInt(b.level.substring(1), 10),
+        text: b.text,
+        id: b.id,
+      }));
+    }
+    // 旧形式互換
+    return extractToc(post?.content);
+  }, [post?.blocks, post?.content]);
+  
   const processedContent = useMemo(() => injectHeadingIds(post?.content), [post?.content]);
 
   // SEO head injection
@@ -191,8 +207,7 @@ export default function PostDetailPage() {
         )}
 
         {/* ─── 本文 ─── */}
-        <div
-          className="
+        <div className="
             prose prose-slate max-w-none
             prose-headings:font-light prose-headings:text-slate-800
             prose-h2:text-2xl prose-h2:border-b prose-h2:border-slate-200 prose-h2:pb-3 prose-h2:mt-10 prose-h2:mb-5
@@ -206,9 +221,13 @@ export default function PostDetailPage() {
             prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
             prose-pre:bg-slate-900 prose-pre:text-slate-100
             prose-hr:border-slate-200 prose-hr:my-10
-          "
-          dangerouslySetInnerHTML={{ __html: processedContent }}
-        />
+          ">
+          {post.blocks && post.blocks.length > 0 ? (
+            <BlockBasedPostRenderer blocks={post.blocks} />
+          ) : (
+            <div dangerouslySetInnerHTML={{ __html: processedContent }} />
+          )}
+        </div>
 
         {/* ─── フッター ─── */}
         <footer className="mt-14 pt-8 border-t border-slate-100">

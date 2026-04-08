@@ -17,8 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, ArrowLeft, Eye, Image } from 'lucide-react';
 import { toast } from 'sonner';
-import PostEditor from '@/components/post/PostEditor';
-import { useCallback } from 'react';
+import BlockBasedPostEditor from '@/components/post/BlockBasedPostEditor';
 import PostSeoPanel from '@/components/post/PostSeoPanel';
 import PostCategoryTagPanel from '@/components/post/PostCategoryTagPanel';
 import AIPostGeneratorPanel from '@/components/post/AIPostGeneratorPanel';
@@ -50,6 +49,7 @@ export default function AdminPostEdit() {
     slug: '',
     excerpt: '',
     content: '',
+    blocks: [],
     featured_image_url: '',
     status: 'draft',
     published_at: '',
@@ -65,29 +65,34 @@ export default function AdminPostEdit() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
 
-  const handleContentChange = useCallback((newContent) => {
-    setForm(p => {
-      if (p.content === newContent) return p; // prevent loops
-      return { ...p, content: newContent };
-    });
-  }, [setForm]);
-
   // AI feature access
   const { data: aiAccess } = useFeatureAccess('ai_post_generation');
   const canUseAI = aiAccess?.allowed !== false;
 
   // 既存記事の取得
-  const { isLoading: isLoadingPost } = useQuery({
+  const { data: postData, isLoading: isLoadingPost } = useQuery({
     queryKey: ['post', postId],
     queryFn: () => base44.entities.Post.filter({ id: postId }),
     enabled: !!postId,
-    onSuccess: (data) => {
-      if (data && data.length > 0) {
-        setForm({ ...data[0] });
-        setSlugTouched(true);
-      }
-    },
   });
+
+  // 取得した記事データをフォームに反映（旧content→blocks互換変換付き）
+  React.useEffect(() => {
+    if (postData && postData.length > 0) {
+      const post = postData[0];
+      let blocks = post.blocks || [];
+      // 旧形式互換：content(HTML)があってblocksが空の場合、paragraphブロックに変換
+      if (blocks.length === 0 && post.content) {
+        blocks = [{
+          id: `blk_migrated_${Date.now()}`,
+          type: 'paragraph',
+          html: post.content,
+        }];
+      }
+      setForm({ ...post, blocks });
+      setSlugTouched(true);
+    }
+  }, [postData]);
 
   // カテゴリー・タグ取得
   const { data: categories = [] } = useQuery({
@@ -135,6 +140,10 @@ export default function AdminPostEdit() {
     if (data.status === 'published' && !data.published_at) {
       data.published_at = new Date().toISOString();
     }
+    // ブロック配列が空でなければ使用、なければ空文字列（旧contentはDB内で保持）
+    if (!data.blocks || data.blocks.length === 0) {
+      data.blocks = [];
+    }
     saveMutation.mutate(data);
   };
 
@@ -155,13 +164,23 @@ export default function AdminPostEdit() {
     }
   };
 
-  // AI生成結果の反映
+  // AI生成結果の反映（blocks対応）
   const handleApplyAll = (generated) => {
+    // AI結果をブロック配列に変換（generated.blocksがあればそのまま使用）
+    let newBlocks = generated.blocks || [];
+    if (newBlocks.length === 0 && generated.content) {
+      // HTML文字列が返ってきた場合はparagraphブロックに変換
+      newBlocks = [{
+        id: `blk_ai_${Date.now()}`,
+        type: 'paragraph',
+        html: generated.content,
+      }];
+    }
     setForm(p => ({
       ...p,
       title:           generated.title       || p.title,
       excerpt:         generated.excerpt      || p.excerpt,
-      content:         generated.content      || p.content,
+      blocks:          newBlocks.length > 0 ? newBlocks : p.blocks,
       seo_title:       generated.seo_title    || p.seo_title,
       seo_description: generated.seo_description || p.seo_description,
       slug: !slugTouched && generated.title ? slugify(generated.title) : p.slug,
@@ -273,11 +292,12 @@ export default function AdminPostEdit() {
                 className="resize-none text-sm"
               />
 
-              {/* 本文エディタ */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <PostEditor
-                  content={form.content}
-                  onChange={handleContentChange}
+              {/* 本文ブロックエディタ */}
+              <div className="border border-slate-200 rounded-xl p-4 bg-white">
+                <h3 className="text-sm font-bold text-slate-700 mb-3">本文ブロック</h3>
+                <BlockBasedPostEditor
+                  blocks={form.blocks || []}
+                  onChange={(newBlocks) => setForm(p => ({ ...p, blocks: newBlocks }))}
                 />
               </div>
             </div>
