@@ -17,15 +17,19 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const {
       site_id,
-      target_audience,
       post_type,
-      theme,
+      target_audience,
+      content_instruction,  // ② 内容指示（メイン）
+      theme,                 // 旧パラメータ互換
+      tone,                  // トーン
+      length,                // 文章量
       reference_text,
       reference_url,
       file_urls,
       use_web_search,
       seo_enabled,
       seo_keywords,
+      seo_optimize_title,
     } = body;
 
     // ===== AI ガードチェック =====
@@ -41,7 +45,6 @@ Deno.serve(async (req) => {
         guardReason = guardRes.data?.reason || 'AI記事生成機能が利用できません';
       }
     } catch (guardErr) {
-      // FeatureMaster未設定などの場合はスルー（管理者が設定するまでは動作させる）
       console.warn('aiGuard skipped:', guardErr.message);
     }
     if (!guardAllowed) {
@@ -55,41 +58,51 @@ Deno.serve(async (req) => {
     const knowledgeText = knowledgeList.map(k => `[${k.type}] ${k.title}\n${k.content}`).join('\n\n');
 
     const postTypeLabels = {
-      news: 'お知らせ',
-      blog: 'ブログ',
-      staff_blog: 'スタッフブログ',
-      column: 'コラム',
-      campaign: 'キャンペーン',
+      news: 'お知らせ', blog: 'ブログ', staff_blog: 'スタッフブログ',
+      column: 'コラム', campaign: 'キャンペーン',
     };
 
-    const inputSummary = `種別:${post_type || 'blog'} 対象:${target_audience || ''} テーマ:${theme || ''}`.slice(0, 200);
+    const toneLabels = {
+      polite: '丁寧・敬語ベース', casual: 'カジュアル・親近感',
+      luxury: '高級感・格調', friendly: '親しみやすい・ポップ',
+    };
 
-    const prompt = `あなたはプロの日本語ライターです。以下の条件でブログ記事を生成してください。
+    const lengthTargets = {
+      short: '600〜800文字', medium: '1000〜1500文字', long: '1800〜2500文字',
+    };
+
+    const mainInstruction = content_instruction || theme || '';
+    const inputSummary = `種別:${post_type || 'blog'} 対象:${target_audience || ''} 内容:${mainInstruction}`.slice(0, 200);
+
+    const prompt = `あなたはプロの日本語ライターです。以下の条件で記事を生成してください。
 
 ## 記事条件
-- 記事の種類: ${postTypeLabels[post_type] || 'ブログ'}
+- 記事タイプ: ${postTypeLabels[post_type] || 'ブログ'}
 - 読者ターゲット: ${target_audience || '一般客'}
-- テーマ・目的: ${theme || ''}
+- 記事の内容・目的: ${mainInstruction}
+- 文体・トーン: ${toneLabels[tone] || '親しみやすい'}
+- 文章量の目安: ${lengthTargets[length] || '1000〜1500文字'}
 ${reference_text ? `- 参考テキスト:\n${reference_text}` : ''}
 ${reference_url ? `- 参考URL: ${reference_url}` : ''}
-${knowledgeText ? `\n## サービス情報\n${knowledgeText}` : ''}
-${seo_enabled ? `\n## SEO要件\n狙いたいキーワード: ${seo_keywords || ''}` : ''}
+${knowledgeText ? `\n## サービス・ブランド情報\n${knowledgeText}` : ''}
+${seo_enabled ? `\n## SEO要件\n- 狙いたいキーワード: ${seo_keywords || ''}${seo_optimize_title ? '\n- タイトルはSEO最適化（キーワードを自然に含める）' : ''}` : ''}
 
 ## 出力ルール
-- タイトル: 魅力的で30文字程度
-- 本文: HTML形式で1000〜2000文字、h2/h3で構成
+- タイトル: 魅力的で${seo_optimize_title ? 'キーワードを含む' : ''}30〜40文字
+- 本文: HTML形式（<h2>/<h3>/<p>/<ul>を使用）、指定の文章量
 - 抜粋: 80〜120文字のプレーンテキスト
-${seo_enabled ? '- SEOタイトル: 30文字以内\n- SEO説明文: 120文字以内' : ''}
-- 日本語のみ、体言止めや感情的な表現を適度に使用
+${seo_enabled ? '- SEOタイトル: キーワードを含む30文字以内\n- SEO説明文: キーワードを含む120文字以内' : ''}
+- 日本語のみ。体言止めや感情的な共感表現を適度に使用
+- 読者が行動したくなるCTAを本文末尾に入れる
 `;
 
     const responseSchema = {
       type: 'object',
       properties: {
-        title: { type: 'string' },
-        excerpt: { type: 'string' },
-        content: { type: 'string' },
-        seo_title: { type: 'string' },
+        title:           { type: 'string' },
+        excerpt:         { type: 'string' },
+        content:         { type: 'string' },
+        seo_title:       { type: 'string' },
         seo_description: { type: 'string' },
       },
     };

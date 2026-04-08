@@ -156,3 +156,9 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .label-xs {
+    @apply text-xs font-medium text-slate-600;
+  }
+}

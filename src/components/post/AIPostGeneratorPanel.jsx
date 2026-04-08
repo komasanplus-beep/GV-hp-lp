@@ -1,6 +1,7 @@
 /**
  * AIPostGeneratorPanel
- * AI記事生成パネル - AdminPostEdit に埋め込んで使用
+ * プロ水準のAI記事生成パネル
+ * 右サイドバーに常設表示（AdminPostEdit 2カラムレイアウト）
  */
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
@@ -8,18 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Sparkles, Globe, FileText, X, Upload } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import {
+  Loader2, Sparkles, Globe, FileText, Upload, X, RefreshCw,
+  ChevronDown, ChevronUp, CheckCircle2, Wand2, Copy
+} from 'lucide-react';
 import { toast } from 'sonner';
-
-const TARGET_AUDIENCES = [
-  '新規客向け',
-  'リピーター向け',
-  '保護者向け',
-  '宿泊検討者向け',
-  '女性向け',
-  '男性向け',
-  'シニア向け',
-];
 
 const POST_TYPES = [
   { value: 'news',       label: 'お知らせ' },
@@ -29,59 +25,102 @@ const POST_TYPES = [
   { value: 'campaign',   label: 'キャンペーン' },
 ];
 
-export default function AIPostGeneratorPanel({ siteId, onGenerated, onClose }) {
-  const [form, setForm] = useState({
-    target_audience: '新規客向け',
-    post_type: 'blog',
-    theme: '',
-    reference_text: '',
-    reference_url: '',
-    use_web_search: false,
-    seo_enabled: false,
-    seo_keywords: '',
-  });
-  const [fileUrls, setFileUrls] = useState([]);
+const TONES = [
+  { value: 'polite',     label: '丁寧' },
+  { value: 'casual',     label: 'カジュアル' },
+  { value: 'luxury',     label: '高級感' },
+  { value: 'friendly',   label: '親しみやすい' },
+];
+
+const LENGTHS = [
+  { value: 'short',   label: '短め（600字）' },
+  { value: 'medium',  label: '普通（1200字）' },
+  { value: 'long',    label: '長め（2000字）' },
+];
+
+const AUDIENCE_CHIPS = [
+  '新規客向け', 'リピーター向け', '宿泊検討者', '美容初心者',
+  '女性向け', 'シニア向け', '保護者向け', 'ビジネス層向け',
+];
+
+const DEFAULT_FORM = {
+  post_type: 'blog',
+  target_audience: '新規客向け',
+  content_instruction: '',
+  tone: 'friendly',
+  length: 'medium',
+  reference_text: '',
+  reference_url: '',
+  // sources
+  use_input: true,
+  use_attachments: false,
+  use_web_search: false,
+  use_url: false,
+  // seo
+  seo_enabled: false,
+  seo_keywords: '',
+  seo_optimize_title: false,
+};
+
+export default function AIPostGeneratorPanel({ siteId, onApplyAll, onApplyTitle, canUseAI }) {
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [fileUrls, setFileUrls]   = useState([]);
+  const [fileNames, setFileNames] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generated, setGenerated]       = useState(null);
   const [usedWebSearch, setUsedWebSearch] = useState(false);
+  const [openSection, setOpenSection]   = useState({ basic: true, content: true, refs: false, sources: false, seo: false });
+
+  const toggle = (key) => setOpenSection(p => ({ ...p, [key]: !p[key] }));
 
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+    if (!files.length) return;
     setIsUploading(true);
     try {
-      const uploaded = await Promise.all(
-        files.map(file => base44.integrations.Core.UploadFile({ file }))
-      );
+      const uploaded = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f })));
       setFileUrls(prev => [...prev, ...uploaded.map(r => r.file_url)]);
-      toast.success(`${files.length}件のファイルを添付しました`);
-    } catch (err) {
-      toast.error('ファイルのアップロードに失敗しました');
+      setFileNames(prev => [...prev, ...files.map(f => f.name)]);
+      setForm(p => ({ ...p, use_attachments: true }));
+      toast.success(`${files.length}件添付しました`);
+    } catch {
+      toast.error('アップロードに失敗しました');
     } finally {
       setIsUploading(false);
       e.target.value = '';
     }
   };
 
+  const removeFile = (i) => {
+    setFileUrls(prev => prev.filter((_, j) => j !== i));
+    setFileNames(prev => prev.filter((_, j) => j !== i));
+    if (fileUrls.length <= 1) setForm(p => ({ ...p, use_attachments: false }));
+  };
+
   const handleGenerate = async () => {
-    if (!form.theme.trim()) {
-      toast.error('どんな記事にしたいか を入力してください');
+    if (!form.content_instruction.trim()) {
+      toast.error('記事の内容を入力してください');
       return;
     }
     setIsGenerating(true);
+    setGenerated(null);
     setUsedWebSearch(false);
     try {
       const res = await base44.functions.invoke('generatePostWithAI', {
         site_id: siteId,
-        target_audience: form.target_audience,
         post_type: form.post_type,
-        theme: form.theme,
-        reference_text: form.reference_text,
-        reference_url: form.reference_url,
-        file_urls: fileUrls,
+        target_audience: form.target_audience,
+        content_instruction: form.content_instruction,
+        tone: form.tone,
+        length: form.length,
+        reference_text: form.use_input ? form.reference_text : '',
+        reference_url: form.use_url ? form.reference_url : '',
+        file_urls: form.use_attachments ? fileUrls : [],
         use_web_search: form.use_web_search,
         seo_enabled: form.seo_enabled,
-        seo_keywords: form.seo_keywords,
+        seo_keywords: form.seo_enabled ? form.seo_keywords : '',
+        seo_optimize_title: form.seo_enabled && form.seo_optimize_title,
       });
 
       if (res.data?.blocked) {
@@ -89,12 +128,12 @@ export default function AIPostGeneratorPanel({ siteId, onGenerated, onClose }) {
         return;
       }
 
-      const generated = res.data?.data;
-      if (!generated) throw new Error('生成結果が空です');
+      const data = res.data?.data;
+      if (!data) throw new Error('生成結果が空です');
 
+      setGenerated(data);
       setUsedWebSearch(res.data?.used_web_search === true);
-      onGenerated(generated);
-      toast.success('AI記事を生成しました');
+      toast.success('生成完了！');
     } catch (err) {
       toast.error('生成に失敗しました: ' + err.message);
     } finally {
@@ -102,154 +141,353 @@ export default function AIPostGeneratorPanel({ siteId, onGenerated, onClose }) {
     }
   };
 
+  const canGenerate = form.content_instruction.trim().length > 0 && !isGenerating;
+
+  // ── ロック表示 ──
+  if (!canUseAI) {
+    return (
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center space-y-3">
+        <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center mx-auto">
+          <Sparkles className="w-5 h-5 text-slate-400" />
+        </div>
+        <p className="text-sm font-medium text-slate-600">AI記事生成</p>
+        <p className="text-xs text-slate-400">ご利用のプランではAI記事生成機能が利用できません。</p>
+        <Badge variant="outline" className="text-xs">プランをアップグレード</Badge>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-200 rounded-xl p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-violet-600 rounded-lg flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <h3 className="font-semibold text-slate-800 text-sm">AI記事生成</h3>
+    <div className="flex flex-col gap-3">
+      {/* ヘッダー */}
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+          <Sparkles className="w-4 h-4 text-white" />
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* 対象 */}
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">対象読者</label>
-        <div className="flex flex-wrap gap-1.5">
-          {TARGET_AUDIENCES.map(a => (
-            <button
-              key={a}
-              type="button"
-              onClick={() => setForm(p => ({ ...p, target_audience: a }))}
-              className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
-                form.target_audience === a
-                  ? 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white text-slate-600 border-slate-300 hover:border-violet-400'
-              }`}
-            >
-              {a}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 記事種類 */}
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">記事の種類</label>
-        <Select value={form.post_type} onValueChange={v => setForm(p => ({ ...p, post_type: v }))}>
-          <SelectTrigger className="h-8 text-sm bg-white">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {POST_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* テーマ */}
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">
-          どんな記事にしたいか <span className="text-red-500">*</span>
-        </label>
-        <Textarea
-          value={form.theme}
-          onChange={e => setForm(p => ({ ...p, theme: e.target.value }))}
-          placeholder="例：梅雨に向けて縮毛矯正のキャンペーン告知。湿気で悩む女性に共感しつつ、割引情報をさりげなく伝えたい"
-          rows={3}
-          className="text-sm resize-none bg-white"
-        />
-      </div>
-
-      {/* 参考情報 */}
-      <div className="space-y-2">
-        <label className="text-xs font-medium text-slate-600 block">参考情報（任意）</label>
-        <Textarea
-          value={form.reference_text}
-          onChange={e => setForm(p => ({ ...p, reference_text: e.target.value }))}
-          placeholder="参考テキスト（サービス詳細、ブランドの声など）"
-          rows={2}
-          className="text-xs resize-none bg-white"
-        />
-        <Input
-          value={form.reference_url}
-          onChange={e => setForm(p => ({ ...p, reference_url: e.target.value }))}
-          placeholder="参考URL（任意）"
-          className="text-xs h-8 bg-white"
-        />
-
-        {/* ファイル添付 */}
         <div>
-          <label className="flex items-center gap-2 cursor-pointer w-fit text-xs text-slate-600 border border-slate-300 bg-white rounded-lg px-3 py-1.5 hover:border-violet-400 transition-colors">
-            {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-            画像・PDFを添付
+          <h3 className="font-bold text-slate-800 text-sm leading-none">AI記事生成</h3>
+          <p className="text-xs text-slate-400 mt-0.5">3分で高品質なSEO記事を作成</p>
+        </div>
+      </div>
+
+      {/* ━━━ ① 基本設定 ━━━ */}
+      <SectionBlock title="① 基本設定" open={openSection.basic} onToggle={() => toggle('basic')}>
+        <div className="space-y-3">
+          <div>
+            <label className="label-xs">記事タイプ</label>
+            <Select value={form.post_type} onValueChange={v => setForm(p => ({ ...p, post_type: v }))}>
+              <SelectTrigger className="h-8 text-sm bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {POST_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="label-xs">ターゲット読者</label>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {AUDIENCE_CHIPS.map(a => (
+                <button
+                  key={a}
+                  type="button"
+                  onClick={() => setForm(p => ({ ...p, target_audience: a }))}
+                  className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                    form.target_audience === a
+                      ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                  }`}
+                >
+                  {a}
+                </button>
+              ))}
+            </div>
+            <Input
+              value={form.target_audience}
+              onChange={e => setForm(p => ({ ...p, target_audience: e.target.value }))}
+              placeholder="自由入力も可"
+              className="h-8 text-xs mt-2 bg-white"
+            />
+          </div>
+        </div>
+      </SectionBlock>
+
+      {/* ━━━ ② 内容指示 ━━━ */}
+      <SectionBlock title="② 内容指示" open={openSection.content} onToggle={() => toggle('content')}>
+        <div className="space-y-3">
+          <div>
+            <label className="label-xs">
+              記事の内容 <span className="text-red-500">*</span>
+            </label>
+            <Textarea
+              value={form.content_instruction}
+              onChange={e => setForm(p => ({ ...p, content_instruction: e.target.value }))}
+              placeholder={"どんな記事を書きたいか具体的に入力\n\n例：\n・新メニューの紹介\n・夏キャンペーンの告知\n・髪質改善のメリット"}
+              rows={4}
+              className="text-sm resize-none bg-white mt-1"
+            />
+            <p className="text-xs text-slate-400 mt-1 text-right">{form.content_instruction.length}字</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="label-xs">トーン</label>
+              <Select value={form.tone} onValueChange={v => setForm(p => ({ ...p, tone: v }))}>
+                <SelectTrigger className="h-8 text-xs bg-white mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TONES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="label-xs">文章量</label>
+              <Select value={form.length} onValueChange={v => setForm(p => ({ ...p, length: v }))}>
+                <SelectTrigger className="h-8 text-xs bg-white mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LENGTHS.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </SectionBlock>
+
+      {/* ━━━ ③ 参考情報 ━━━ */}
+      <SectionBlock title="③ 参考情報（任意）" open={openSection.refs} onToggle={() => toggle('refs')}>
+        <div className="space-y-2">
+          <Textarea
+            value={form.reference_text}
+            onChange={e => setForm(p => ({ ...p, reference_text: e.target.value }))}
+            placeholder="参考テキスト（サービス詳細、ブランドの声、PRポイントなど）"
+            rows={3}
+            className="text-xs resize-none bg-white"
+          />
+          <Input
+            value={form.reference_url}
+            onChange={e => setForm(p => ({ ...p, reference_url: e.target.value }))}
+            placeholder="参考URL（https://...）"
+            className="h-8 text-xs bg-white"
+          />
+          {/* ファイルアップロード */}
+          <label className="flex items-center gap-2 cursor-pointer w-full border border-dashed border-slate-300 bg-white rounded-lg px-3 py-2.5 hover:border-violet-400 transition-colors">
+            {isUploading
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />
+              : <Upload className="w-3.5 h-3.5 text-slate-400" />}
+            <span className="text-xs text-slate-500">画像・PDFを添付（複数可）</span>
             <input type="file" accept="image/*,.pdf" multiple className="hidden" onChange={handleFileUpload} disabled={isUploading} />
           </label>
-          {fileUrls.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {fileUrls.map((url, i) => (
-                <div key={i} className="flex items-center gap-1 bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded-full">
-                  <FileText className="w-3 h-3" />
-                  <span>添付{i + 1}</span>
-                  <button type="button" onClick={() => setFileUrls(prev => prev.filter((_, j) => j !== i))} className="ml-0.5 hover:text-red-500">✕</button>
+          {fileNames.length > 0 && (
+            <div className="flex flex-col gap-1">
+              {fileNames.map((name, i) => (
+                <div key={i} className="flex items-center justify-between bg-violet-50 border border-violet-100 rounded-lg px-2.5 py-1.5 text-xs">
+                  <div className="flex items-center gap-1.5 text-violet-700 truncate">
+                    <FileText className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{name}</span>
+                  </div>
+                  <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-400 ml-1 shrink-0">
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </SectionBlock>
 
-      {/* オプション */}
-      <div className="flex flex-wrap gap-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.use_web_search}
-            onChange={e => setForm(p => ({ ...p, use_web_search: e.target.checked }))}
-            className="w-3.5 h-3.5 accent-violet-600"
-          />
-          <Globe className="w-3.5 h-3.5 text-slate-500" />
-          <span className="text-xs text-slate-600">Web検索を使う</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.seo_enabled}
-            onChange={e => setForm(p => ({ ...p, seo_enabled: e.target.checked }))}
-            className="w-3.5 h-3.5 accent-violet-600"
-          />
-          <span className="text-xs text-slate-600">SEOを意識する</span>
-        </label>
-      </div>
+      {/* ━━━ ④ 情報ソース ━━━ */}
+      <SectionBlock title="④ 情報ソース" open={openSection.sources} onToggle={() => toggle('sources')}>
+        <div className="space-y-2">
+          {[
+            { key: 'use_input',       label: '入力内容をベースにする',     icon: '📝' },
+            { key: 'use_attachments', label: '添付ファイルを参考にする',   icon: '📎', disabled: fileUrls.length === 0 },
+            { key: 'use_web_search',  label: 'Web検索を使用する',          icon: '🌐' },
+            { key: 'use_url',         label: 'URLの情報を使用する',        icon: '🔗', disabled: !form.reference_url },
+          ].map(({ key, label, icon, disabled }) => (
+            <label key={key} className={`flex items-center gap-2.5 cursor-pointer ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
+              <input
+                type="checkbox"
+                checked={form[key]}
+                onChange={e => setForm(p => ({ ...p, [key]: e.target.checked }))}
+                className="w-3.5 h-3.5 accent-violet-600 shrink-0"
+                disabled={disabled}
+              />
+              <span className="text-xs">{icon}</span>
+              <span className="text-xs text-slate-700">{label}</span>
+            </label>
+          ))}
+        </div>
+      </SectionBlock>
 
-      {form.seo_enabled && (
-        <Input
-          value={form.seo_keywords}
-          onChange={e => setForm(p => ({ ...p, seo_keywords: e.target.value }))}
-          placeholder="狙いたいキーワード（例：縮毛矯正 渋谷 安い）"
-          className="text-xs h-8 bg-white"
-        />
-      )}
+      {/* ━━━ ⑤ SEO設定 ━━━ */}
+      <SectionBlock title="⑤ SEO設定" open={openSection.seo} onToggle={() => toggle('seo')}>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-slate-700">SEOを意識する</span>
+            <Switch
+              checked={form.seo_enabled}
+              onCheckedChange={v => setForm(p => ({ ...p, seo_enabled: v }))}
+            />
+          </div>
+          {form.seo_enabled && (
+            <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <Input
+                value={form.seo_keywords}
+                onChange={e => setForm(p => ({ ...p, seo_keywords: e.target.value }))}
+                placeholder="狙いたいキーワード（例：縮毛矯正 渋谷 安い）"
+                className="h-8 text-xs bg-white"
+              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.seo_optimize_title}
+                  onChange={e => setForm(p => ({ ...p, seo_optimize_title: e.target.checked }))}
+                  className="w-3.5 h-3.5 accent-violet-600"
+                />
+                <span className="text-xs text-slate-700">タイトルをSEO最適化する</span>
+              </label>
+            </div>
+          )}
+        </div>
+      </SectionBlock>
 
-      {usedWebSearch && (
-        <p className="text-xs text-violet-600 flex items-center gap-1">
-          <Globe className="w-3 h-3" />Web検索の情報を参考にして生成しました
-        </p>
-      )}
-
+      {/* ━━━ ⑥ 生成ボタン ━━━ */}
       <Button
         onClick={handleGenerate}
-        disabled={isGenerating || !form.theme.trim()}
-        className="w-full bg-violet-600 hover:bg-violet-700 gap-2"
+        disabled={!canGenerate}
+        className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md gap-2 h-10"
       >
         {isGenerating
-          ? <><Loader2 className="w-4 h-4 animate-spin" />生成中...</>
-          : <><Sparkles className="w-4 h-4" />AIで記事を生成</>
+          ? <><Loader2 className="w-4 h-4 animate-spin" />AI生成中...</>
+          : <><Wand2 className="w-4 h-4" />AIで記事を生成</>
         }
       </Button>
+
+      {isGenerating && (
+        <div className="bg-violet-50 border border-violet-100 rounded-lg p-3 text-center">
+          <Loader2 className="w-5 h-5 animate-spin text-violet-500 mx-auto mb-1.5" />
+          <p className="text-xs text-violet-600 font-medium">記事を生成しています...</p>
+          <p className="text-xs text-violet-400 mt-0.5">通常15〜30秒かかります</p>
+        </div>
+      )}
+
+      {/* ━━━ ⑦ 生成結果 ━━━ */}
+      {generated && !isGenerating && (
+        <GeneratedPreview
+          generated={generated}
+          usedWebSearch={usedWebSearch}
+          onApplyAll={onApplyAll}
+          onApplyTitle={onApplyTitle}
+          onRegenerate={handleGenerate}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── セクションブロック ──
+function SectionBlock({ title, open, onToggle, children }) {
+  return (
+    <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2.5 bg-slate-50 hover:bg-slate-100 transition-colors"
+      >
+        <span className="text-xs font-semibold text-slate-700">{title}</span>
+        {open ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+      </button>
+      {open && <div className="p-3">{children}</div>}
+    </div>
+  );
+}
+
+// ── 生成結果プレビュー ──
+function GeneratedPreview({ generated, usedWebSearch, onApplyAll, onApplyTitle, onRegenerate }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyContent = () => {
+    navigator.clipboard.writeText(generated.content || '');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="border-2 border-violet-300 rounded-xl overflow-hidden bg-white shadow-md">
+      {/* ヘッダー */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2.5 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <CheckCircle2 className="w-4 h-4 text-white" />
+          <span className="text-white text-xs font-semibold">生成完了</span>
+          {usedWebSearch && (
+            <span className="bg-white/20 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
+              <Globe className="w-3 h-3" />Web参照
+            </span>
+          )}
+        </div>
+        <button type="button" onClick={copyContent} className="text-white/70 hover:text-white transition-colors">
+          {copied ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+        </button>
+      </div>
+
+      {/* プレビュー */}
+      <div className="p-3 space-y-2 max-h-80 overflow-y-auto">
+        {generated.title && (
+          <div>
+            <p className="text-xs text-slate-400 mb-0.5">タイトル</p>
+            <p className="text-sm font-bold text-slate-800 leading-snug">{generated.title}</p>
+          </div>
+        )}
+        {generated.excerpt && (
+          <div>
+            <p className="text-xs text-slate-400 mb-0.5">抜粋</p>
+            <p className="text-xs text-slate-600 leading-relaxed">{generated.excerpt}</p>
+          </div>
+        )}
+        {generated.content && (
+          <div>
+            <p className="text-xs text-slate-400 mb-0.5">本文プレビュー</p>
+            <div
+              className="text-xs text-slate-700 leading-relaxed prose prose-sm max-w-none [&_h2]:text-sm [&_h2]:font-bold [&_h2]:text-slate-800 [&_h2]:mt-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-slate-700 [&_p]:mt-1"
+              dangerouslySetInnerHTML={{ __html: generated.content.slice(0, 1000) + (generated.content.length > 1000 ? '...' : '') }}
+            />
+          </div>
+        )}
+        {generated.seo_title && (
+          <div className="bg-slate-50 rounded-lg p-2">
+            <p className="text-xs text-slate-400 mb-0.5">SEOタイトル</p>
+            <p className="text-xs text-slate-700">{generated.seo_title}</p>
+          </div>
+        )}
+      </div>
+
+      {/* 操作ボタン */}
+      <div className="border-t border-slate-100 p-3 space-y-2">
+        <Button
+          onClick={() => onApplyAll(generated)}
+          className="w-full bg-violet-600 hover:bg-violet-700 h-9 text-sm gap-1.5"
+        >
+          <CheckCircle2 className="w-3.5 h-3.5" />本文に反映
+        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => onApplyTitle(generated)}
+            className="h-8 text-xs gap-1 border-slate-300"
+          >
+            タイトルだけ反映
+          </Button>
+          <Button
+            variant="outline"
+            onClick={onRegenerate}
+            className="h-8 text-xs gap-1 border-slate-300"
+          >
+            <RefreshCw className="w-3 h-3" />再生成
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
