@@ -49,7 +49,6 @@
  */
 import AdminABTest from './pages/AdminABTest';
 import AdminAIGenerate from './pages/AdminAIGenerate';
-import AdminBlog from './pages/AdminBlog';
 import AdminBookings from './pages/AdminBookings';
 import AdminContent from './pages/AdminContent';
 import AdminDomainSettings from './pages/AdminDomainSettings';
@@ -61,7 +60,6 @@ import AdminLPList from './pages/AdminLPList';
 import AdminRooms from './pages/AdminRooms';
 import AdminSettings from './pages/AdminSettings';
 import AdminSiteList from './pages/AdminSiteList';
-import BlogPage from './pages/BlogPage';
 import BlogPost from './pages/BlogPost';
 import Dashboard from './pages/Dashboard';
 import LPView from './pages/LPView';
@@ -87,7 +85,6 @@ import TemplatePreview from './pages/TemplatePreview';
 export const PAGES = {
     "AdminABTest": AdminABTest,
     "AdminAIGenerate": AdminAIGenerate,
-    "AdminBlog": AdminBlog,
     "AdminBookings": AdminBookings,
     "AdminContent": AdminContent,
     "AdminDomainSettings": AdminDomainSettings,
@@ -99,7 +96,6 @@ export const PAGES = {
     "AdminRooms": AdminRooms,
     "AdminSettings": AdminSettings,
     "AdminSiteList": AdminSiteList,
-    "BlogPage": BlogPage,
     "BlogPost": BlogPost,
     "Dashboard": Dashboard,
     "LPView": LPView,

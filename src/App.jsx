@@ -7,7 +7,6 @@ import MasterBillingPlans from './pages/MasterBillingPlans'
 import MasterSubscriptionManagement from './pages/MasterSubscriptionManagement'
 import SiteView from './pages/SiteView'
 import LPView from './pages/LPView'
-import BlogPage from './pages/BlogPage'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminServices from './pages/AdminServices'
 import AdminLPCodeCreator from './pages/AdminLPCodeCreator'
@@ -17,10 +16,8 @@ import SiteFooterSettings from './pages/SiteFooterSettings'
 import SiteSeoSettings from './pages/SiteSeoSettings'
 import ServiceDetail from './pages/ServiceDetail.jsx'
 import SiteCreateWizard from './pages/SiteCreateWizard'
-import AdminPostList from './pages/AdminPostList'
 import AdminPostManager from './pages/AdminPostManager.jsx'
 import AdminPostEdit from './pages/AdminPostEdit'
-import AdminBlogEditor from './pages/AdminBlogEditor'
 import AdminPostCategories from './pages/AdminPostCategories'
 import AdminPostTags from './pages/AdminPostTags'
 import PostListPage from './pages/PostListPage'
@@ -50,7 +47,7 @@ const AuthenticatedApp = () => {
   const location = window.location.pathname;
   const search = window.location.search;
   const isPublicRoute = 
-    ['/SiteView', '/site/', '/lp/', '/BlogPage'].some(p => location.startsWith(p)) ||
+    ['/SiteView', '/site/', '/lp/'].some(p => location.startsWith(p)) ||
     search.includes('site_id=') || // SiteView query
     search.includes('slug=');       // LPView query
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -81,7 +78,6 @@ const AuthenticatedApp = () => {
       <Route path="/SiteView" element={<SiteView />} />
       <Route path="/site/:siteId" element={<SiteView />} />
       <Route path="/lp/:slug" element={<LPView />} />
-      <Route path="/BlogPage" element={<BlogPage />} />
       
       {/* New Site Creation Wizard - protected */}
       <Route path="/create-site" element={<SiteCreateWizard />} />
@@ -123,10 +119,8 @@ const AuthenticatedApp = () => {
       <Route path="/SiteFooterSettings" element={<SiteFooterSettings />} />
       <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
       <Route path="/service/:serviceId" element={<ServiceDetail />} />
-      <Route path="/AdminPostList" element={<AdminPostList />} />
       <Route path="/AdminPostManager" element={<AdminPostManager />} />
       <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
-      <Route path="/AdminBlogEditor" element={<AdminBlogEditor />} />
       <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
       <Route path="/AdminPostTags" element={<AdminPostTags />} />
       <Route path="/AdminLPAnalytics" element={<AdminLPAnalytics />} />

@@ -96,7 +96,14 @@ export default function AdminPostEdit() {
           html: post.content,
         }];
       }
-      setForm({ ...post, blocks });
+      // 表示先設定がない場合は自動補完（後方互換性）
+      const defaultDisplayTargets = {
+        show_on_home: true,
+        show_on_lp: false,
+        home_page_ids: [],
+        lp_ids: [],
+      };
+      setForm({ ...post, blocks, display_targets: post.display_targets || defaultDisplayTargets });
       setSlugTouched(true);
     }
   }, [postData]);

@@ -24,7 +24,6 @@ const menuGroups = [
       { name: '予約管理', icon: Calendar, page: 'AdminBookings' },
       { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
-      { name: 'ブログ管理', icon: BookOpen, page: 'AdminBlog' },
       { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
   },
@@ -79,7 +78,6 @@ const PAGE_FEATURE_MAP = {
   UserDashboard: null,           // ダッシュボードは常時
   AdminContent: null,            // コンテンツ管理は常時
   AdminSettings: null,           // アカウント設定は常時
-  AdminBlog: 'blog_management',
   AdminAIGenerate: 'ai_package',
   SitePageManager: 'site_builder',
   AdminRooms: 'site_builder',
