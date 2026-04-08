@@ -211,57 +211,57 @@ export default function AdminPostEdit() {
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <UserLayout title={isNew ? '新規記事作成' : '記事編集'}>
-        <div className="max-w-7xl mx-auto">
-
-          {/* トップバー */}
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`/AdminPostManager?site_id=${siteId}`)}
-              className="gap-1.5 text-slate-500"
+      <div className="editor-container">
+        {/* ── ヘッダー ── */}
+        <div className="editor-header">
+          <Input
+            value={form.title}
+            onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+            placeholder="記事タイトル"
+            className="flex-1 border-0 focus-visible:ring-0 focus-visible:border-amber-500 px-0 bg-transparent text-lg font-bold"
+          />
+          
+          {form.slug && !isNew && (
+            <a
+              href={`/post/${form.slug}?site_id=${siteId}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-amber-600 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />記事一覧へ
-            </Button>
-            <div className="flex items-center gap-2">
-              {form.slug && !isNew && (
-                <a
-                  href={`/post/${form.slug}?site_id=${siteId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-amber-600 transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5" />プレビュー
-                </a>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleSave('draft')}
-                disabled={saveMutation.isPending}
-                className="gap-1.5"
-              >
-                {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                下書き保存
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => handleSave('published')}
-                disabled={saveMutation.isPending}
-                className="bg-amber-600 hover:bg-amber-700 gap-1.5"
-              >
-                {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                {form.status === 'published' ? '更新・公開' : '公開する'}
-              </Button>
-            </div>
-          </div>
+              <Eye className="w-3.5 h-3.5" />プレビュー
+            </a>
+          )}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleSave('draft')}
+            disabled={saveMutation.isPending}
+            className="gap-1.5"
+          >
+            {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            下書き保存
+          </Button>
+          
+          <Button
+            size="sm"
+            onClick={() => handleSave('published')}
+            disabled={saveMutation.isPending}
+            className="bg-amber-600 hover:bg-amber-700 gap-1.5"
+          >
+            {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+            {form.status === 'published' ? '更新・公開' : '公開する'}
+          </Button>
+        </div>
 
-          {/* 2カラムレイアウト */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
+        {/* ── ボディ ── */}
+        <div className="editor-body">
+          <div className="max-w-7xl mx-auto p-6">
+            {/* 2カラムレイアウト */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
 
-            {/* ── 左カラム: コンテンツ ── */}
-            <div className="space-y-4">
+              {/* ── 左カラム: コンテンツ ── */}
+              <div className="space-y-4">
               {/* タイトル */}
               <div>
                 <Input
@@ -418,8 +418,9 @@ export default function AdminPostEdit() {
 
             </div>
           </div>
+          </div>
         </div>
-      </UserLayout>
+      </div>
     </ProtectedRoute>
   );
 }

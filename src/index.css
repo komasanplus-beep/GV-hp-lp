@@ -161,4 +161,27 @@ button:focus-visible {
   .label-xs {
     @apply text-xs font-medium text-slate-600;
   }
+
+  .editor-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editor-header {
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .editor-body {
+    flex: 1;
+    overflow-y: auto;
+  }
 }
