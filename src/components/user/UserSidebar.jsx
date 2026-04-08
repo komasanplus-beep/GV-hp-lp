@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Settings, LogOut, Layout, Sparkles, X, Store,
   Link2, Globe, Shield, FileText, ChevronDown,
   Calendar, Users, TrendingUp, BookOpen,
-  Layers, Building2, GitBranch, Eye
+  Layers, Building2, GitBranch, Eye, PenSquare
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,7 @@ const menuGroups = [
     children: [
       { name: 'ページ管理', icon: Layout, page: 'SitePageManager' },
       { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
+      { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
     ],
   },
   {
@@ -91,6 +92,7 @@ const PAGE_FEATURE_MAP = {
   AdminLPAnalytics: 'lp_manage',
   AdminDomainSettings: 'domain_manage',
   AdminServices: 'site_manage',
+  AdminPostManager: 'site_manage',
   AdminBookings: 'reservation_manage',
   AdminGuests: 'reservation_manage',
 };

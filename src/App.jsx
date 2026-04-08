@@ -13,6 +13,7 @@ import SiteSeoSettings from './pages/SiteSeoSettings'
 import ServiceDetail from './pages/ServiceDetail.jsx'
 import SiteCreateWizard from './pages/SiteCreateWizard'
 import AdminPostList from './pages/AdminPostList'
+import AdminPostManager from './pages/AdminPostManager'
 import AdminPostEdit from './pages/AdminPostEdit'
 import AdminPostCategories from './pages/AdminPostCategories'
 import AdminPostTags from './pages/AdminPostTags'
@@ -106,6 +107,7 @@ const AuthenticatedApp = () => {
       <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
       <Route path="/service/:serviceId" element={<ServiceDetail />} />
       <Route path="/AdminPostList" element={<AdminPostList />} />
+      <Route path="/AdminPostManager" element={<AdminPostManager />} />
       <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
       <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
       <Route path="/AdminPostTags" element={<AdminPostTags />} />
