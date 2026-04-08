@@ -176,8 +176,15 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
 
-    // limit に達したかチェック
-    if (limit !== null && used >= limit) {
+    // ===== 3-C. Pay as you go チェック =====
+    const paygConfig = plan?.payg_pricing || {};
+    const paygEnabled = paygConfig.enabled !== false;
+    const freeQuota = paygConfig.free_quota || 0;
+    const unitPrice = paygConfig.unit_price_yen || 0;
+    const monthlyCap = paygConfig.monthly_cap_yen || null;
+
+    // limit に達したかチェック（Pay as you go有効時は継続利用可）
+    if (limit !== null && used >= limit && !paygEnabled) {
       await logAIUsage(base44, { user_id, site_id, feature_code, status: 'limit_exceeded', error_message: `limit: ${limit}, used: ${used}` });
       return Response.json({
         allowed: false,
@@ -189,6 +196,21 @@ Deno.serve(async (req) => {
         plan_code,
         limitData: { used, limit, remaining: 0, plan_code },
       }, { status: 429 });
+    }
+
+    // Pay as you go有効で超過時の警告
+    let paygWarning = null;
+    if (paygEnabled && used >= limit && unitPrice > 0) {
+      const overage = used - limit;
+      const cost = overage * unitPrice;
+      const cappedCost = monthlyCap !== null ? Math.min(cost, monthlyCap) : cost;
+      paygWarning = {
+        enabled: true,
+        overage,
+        cost: cappedCost,
+        freeQuota,
+        unitPrice,
+      };
     }
 
     // ===== 4. 利用回数カウントアップ =====
@@ -220,6 +242,13 @@ Deno.serve(async (req) => {
       limit,
       remaining,
       plan_code,
+      payg: paygWarning || {
+        enabled: paygEnabled,
+        overage: Math.max(0, used + 1 - limit),
+        cost: 0,
+        freeQuota,
+        unitPrice,
+      },
     });
 
   } catch (error) {

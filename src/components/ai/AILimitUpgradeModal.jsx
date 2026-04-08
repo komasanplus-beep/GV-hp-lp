@@ -35,18 +35,13 @@ export default function AILimitUpgradeModal({ open, onOpenChange, limitData, onC
     { id: 'addon_100', label: '100回追加', price: '¥900', value: 100 },
   ]);
 
-  if (!limitData) return null;
-
-  const { used, limit, plan_code, remaining } = limitData;
-  const isFreePlan = plan_code === 'free';
-
   // ────────────── ① ソフト警告トースト（残り少ない） ──────────────
   useEffect(() => {
-    if (open && remaining > 0 && remaining <= 3) {
+    if (limitData && open && limitData.remaining > 0 && limitData.remaining <= 3) {
       toast(
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-500" />
-          <span className="text-sm">残りあと<strong>{remaining}回</strong>です</span>
+          <span className="text-sm">残りあと<strong>{limitData.remaining}回</strong>です</span>
         </div>,
         {
           action: {
@@ -56,7 +51,12 @@ export default function AILimitUpgradeModal({ open, onOpenChange, limitData, onC
         }
       );
     }
-  }, [remaining, open, onOpenChange]);
+  }, [limitData, open, onOpenChange]);
+
+  if (!limitData) return null;
+
+  const { used, limit, plan_code, remaining } = limitData;
+  const isFreePlan = plan_code === 'free';
 
   // Stripe遷移（本実装ではbackend function経由）
   const handleCheckout = async (optionId) => {

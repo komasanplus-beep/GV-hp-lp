@@ -66,6 +66,12 @@
         "ai_generation_count": {
           "type": "number"
         },
+        "ai_post_generation": {
+          "type": "number"
+        },
+        "ai_lp_generation": {
+          "type": "number"
+        },
         "guest_count": {
           "type": "number"
         },
@@ -74,6 +80,32 @@
         },
         "campaign_send_count": {
           "type": "number"
+        }
+      }
+    },
+    "payg_pricing": {
+      "type": "object",
+      "description": "\u5f93\u91cf\u8ab2\u91d1\u8a2d\u5b9a",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Pay as you go\u6709\u52b9\u5316"
+        },
+        "free_quota": {
+          "type": "number",
+          "default": 0,
+          "description": "\u6708\u9593\u7121\u6599\u67a0"
+        },
+        "unit_price_yen": {
+          "type": "number",
+          "default": 0,
+          "description": "1\u56de\u3042\u305f\u308a\u306e\u6599\u91d1\uff08\u5186\uff09"
+        },
+        "monthly_cap_yen": {
+          "type": "number",
+          "default": null,
+          "description": "\u6708\u984d\u4e0a\u9650\u6599\u91d1\uff08\u5186\u3001null=\u7121\u5236\u9650\uff09"
         }
       }
     }
