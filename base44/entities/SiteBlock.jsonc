@@ -24,6 +24,8 @@
         "Contact",
         "CTA",
         "Campaign",
+        "News",
+        "Blog",
         "Custom"
       ]
     },
@@ -50,8 +52,7 @@
         "slide-right",
         "zoom-in"
       ],
-      "default": "fade-up",
-      "description": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u7a2e\u985e"
+      "default": "fade-up"
     },
     "animation_trigger": {
       "type": "string",
@@ -59,23 +60,19 @@
         "on-load",
         "on-scroll"
       ],
-      "default": "on-scroll",
-      "description": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u767a\u706b\u30bf\u30a4\u30df\u30f3\u30b0"
+      "default": "on-scroll"
     },
     "animation_delay": {
       "type": "number",
-      "default": 0,
-      "description": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u9045\u5ef6(ms)"
+      "default": 0
     },
     "animation_duration": {
       "type": "number",
-      "default": 600,
-      "description": "\u30a2\u30cb\u30e1\u30fc\u30b7\u30e7\u30f3\u7d99\u7d9a\u6642\u9593(ms)"
+      "default": 600
     },
     "animation_once": {
       "type": "boolean",
-      "default": true,
-      "description": "1\u56de\u306e\u307f\u518d\u751f\u3059\u308b\u304b"
+      "default": true
     }
   },
   "required": [

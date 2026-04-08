@@ -12,6 +12,12 @@ import SiteFooterSettings from './pages/SiteFooterSettings'
 import SiteSeoSettings from './pages/SiteSeoSettings'
 import ServiceDetail from './pages/ServiceDetail.jsx'
 import SiteCreateWizard from './pages/SiteCreateWizard'
+import AdminPostList from './pages/AdminPostList'
+import AdminPostEdit from './pages/AdminPostEdit'
+import AdminPostCategories from './pages/AdminPostCategories'
+import AdminPostTags from './pages/AdminPostTags'
+import PostListPage from './pages/PostListPage'
+import PostDetailPage from './pages/PostDetailPage'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -99,6 +105,12 @@ const AuthenticatedApp = () => {
       <Route path="/SiteFooterSettings" element={<SiteFooterSettings />} />
       <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
       <Route path="/service/:serviceId" element={<ServiceDetail />} />
+      <Route path="/AdminPostList" element={<AdminPostList />} />
+      <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
+      <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
+      <Route path="/AdminPostTags" element={<AdminPostTags />} />
+      <Route path="/posts" element={<PostListPage />} />
+      <Route path="/post/:slug" element={<PostDetailPage />} />
     </Routes>
   );
 };

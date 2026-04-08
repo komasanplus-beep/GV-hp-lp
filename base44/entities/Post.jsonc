@@ -1,0 +1,108 @@
+{
+  "name": "Post",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u6240\u5c5e\u30b5\u30a4\u30c8ID"
+    },
+    "post_type": {
+      "type": "string",
+      "enum": [
+        "news",
+        "blog",
+        "column",
+        "campaign"
+      ],
+      "default": "blog",
+      "description": "\u8a18\u4e8b\u30bf\u30a4\u30d7"
+    },
+    "title": {
+      "type": "string",
+      "description": "\u8a18\u4e8b\u30bf\u30a4\u30c8\u30eb"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL\u30b9\u30e9\u30c3\u30b0"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "\u629c\u7c8b"
+    },
+    "content": {
+      "type": "string",
+      "description": "\u672c\u6587HTML"
+    },
+    "featured_image_url": {
+      "type": "string",
+      "description": "\u30a2\u30a4\u30ad\u30e3\u30c3\u30c1\u753b\u50cfURL"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author_name": {
+      "type": "string"
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "og_image_url": {
+      "type": "string"
+    },
+    "canonical_url": {
+      "type": "string"
+    },
+    "noindex": {
+      "type": "boolean",
+      "default": false
+    },
+    "category_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u30ab\u30c6\u30b4\u30ea\u30fcID\u914d\u5217"
+    },
+    "tag_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u30bf\u30b0ID\u914d\u5217"
+    }
+  },
+  "required": [
+    "site_id",
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

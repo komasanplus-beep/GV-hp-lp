@@ -7,6 +7,7 @@ import { Star, CheckCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import AnimatedBlock from './AnimatedBlock';
+import RecentPostsBlock from './RecentPostsBlock';
 import ImageSlider from './ImageSlider';
 import ServiceListByType from '@/components/service/ServiceListByType';
 import { getUIConfig } from '@/lib/uiConfig';
@@ -646,6 +647,12 @@ export default function SiteBlockRenderer({ block }) {
         </div>
       </section>
     );
+  } else if (type === 'News') {
+    // 新着お知らせブロック
+    content = <RecentPostsBlock d={d} siteId={block.site_id} postType="news" label="お知らせ" />;
+  } else if (type === 'Blog') {
+    // 新着ブログブロック
+    content = <RecentPostsBlock d={d} siteId={block.site_id} postType="blog" label="ブログ" />;
   } else if (type === 'Custom') {
     content = (
       <section className="py-16 bg-white">
