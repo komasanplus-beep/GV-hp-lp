@@ -27,7 +27,7 @@ const menuGroups = [
       { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
       { name: 'アクセス分析', icon: TrendingUp, page: 'AdminSiteAnalytics' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
-      { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
+      { name: 'AI生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
   },
   {

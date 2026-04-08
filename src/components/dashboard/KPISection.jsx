@@ -2,7 +2,9 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import KPICard from './KPICard';
-import { Calendar, TrendingUp, Users, Sparkles, HardDrive, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Calendar, TrendingUp, Users, Sparkles, HardDrive, Loader2, BarChart3, ArrowRight } from 'lucide-react';
 
 export default function KPISection() {
   const { data: summary, isLoading } = useQuery({
@@ -25,10 +27,26 @@ export default function KPISection() {
 
   const kpis = [
     {
-      label: '予約',
-      value: summary.booking?.today || 0,
+      label: 'アクセス',
+      value: summary.analytics?.access_today || 0,
       subLabel: '今月',
-      subValue: summary.booking?.monthly || 0,
+      subValue: summary.analytics?.access_monthly || 0,
+      icon: BarChart3,
+      color: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+    },
+    {
+      label: 'ページビュー',
+      value: summary.analytics?.page_view_today || 0,
+      subLabel: '今月',
+      subValue: summary.analytics?.page_view_monthly || 0,
+      icon: TrendingUp,
+      color: 'bg-cyan-50 border-cyan-200 text-cyan-700',
+    },
+    {
+      label: '予約送信',
+      value: summary.analytics?.booking_action_today || 0,
+      subLabel: '今月',
+      subValue: summary.analytics?.booking_action_monthly || 0,
       icon: Calendar,
       color: 'bg-blue-50 border-blue-200 text-blue-700',
     },
@@ -70,10 +88,24 @@ export default function KPISection() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-      {kpis.map((kpi, idx) => (
-        <KPICard key={idx} {...kpi} />
-      ))}
+    <div className="space-y-4">
+      {/* アクセス分析カードへのリンク */}
+      <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-6 text-white flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold mb-1">アクセス分析</h3>
+          <p className="text-indigo-100 text-sm">今日のアクセス、ページビュー、予約送信を確認</p>
+        </div>
+        <Link to={createPageUrl('AdminSiteAnalytics')} className="text-white hover:text-indigo-100 transition-colors">
+          <ArrowRight className="w-6 h-6" />
+        </Link>
+      </div>
+
+      {/* KPI グリッド */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpis.map((kpi, idx) => (
+          <KPICard key={idx} {...kpi} />
+        ))}
+      </div>
     </div>
   );
 }

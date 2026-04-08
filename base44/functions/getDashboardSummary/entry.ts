@@ -19,9 +19,11 @@ Deno.serve(async (req) => {
     const [
       sites,
       lps,
+      analyticsEvents,
     ] = await Promise.all([
       base44.entities.Site.list('-created_date', 100).catch(() => []),
       base44.entities.LandingPage.list('-created_date', 100).catch(() => []),
+      base44.entities.SiteAnalyticsEvent.list('-created_date', 10000).catch(() => []),
     ]);
 
     // 簡易版：実際のデータは以下参照
@@ -67,6 +69,35 @@ Deno.serve(async (req) => {
     const publishedSite = (sites || []).filter(s => s.status === 'published').length;
     const publishedLP = (lps || []).filter(l => l.status === 'published').length;
 
+    // アクセス分析集計
+    const events = analyticsEvents || [];
+    const accessToday = new Set(
+      events
+        .filter(e => new Date(e.created_date) >= today && e.event_type === 'page_view')
+        .map(e => e.visitor_id)
+    ).size;
+    const accessMonthly = new Set(
+      events
+        .filter(e => new Date(e.created_date) >= monthStart && new Date(e.created_date) <= monthEnd && e.event_type === 'page_view')
+        .map(e => e.visitor_id)
+    ).size;
+    const pageViewToday = events.filter(e => {
+      const ed = new Date(e.created_date);
+      return ed >= today && e.event_type === 'page_view';
+    }).length;
+    const pageViewMonthly = events.filter(e => {
+      const ed = new Date(e.created_date);
+      return ed >= monthStart && ed <= monthEnd && e.event_type === 'page_view';
+    }).length;
+    const bookingActionToday = events.filter(e => {
+      const ed = new Date(e.created_date);
+      return ed >= today && ['booking_submit', 'booking_click'].includes(e.event_type);
+    }).length;
+    const bookingActionMonthly = events.filter(e => {
+      const ed = new Date(e.created_date);
+      return ed >= monthStart && ed <= monthEnd && ['booking_submit', 'booking_click'].includes(e.event_type);
+    }).length;
+
     const summary = {
       booking: {
         today: bookingToday,
@@ -95,6 +126,14 @@ Deno.serve(async (req) => {
         lp_limit: lpLimit,
         published_site: publishedSite,
         published_lp: publishedLP,
+      },
+      analytics: {
+        access_today: accessToday,
+        access_monthly: accessMonthly,
+        page_view_today: pageViewToday,
+        page_view_monthly: pageViewMonthly,
+        booking_action_today: bookingActionToday,
+        booking_action_monthly: bookingActionMonthly,
       },
     };
 

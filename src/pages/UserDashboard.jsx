@@ -39,26 +39,26 @@ export default function UserDashboard() {
           <KPISection />
 
           {/* ようこそ エリア - コンパクト版 */}
-          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-5 text-white">
-            <h2 className="text-lg font-bold mb-3">ようこそ</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 text-white">
+            <h2 className="text-xl font-bold mb-4">ようこそ</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
-                <p className="text-amber-100 text-xs mb-1">サイト</p>
-                <p className="text-xl font-bold">{sites.length}</p>
-                <p className="text-xs text-amber-200">上限: ∞</p>
+                <p className="text-amber-100 text-sm font-medium mb-2">サイト</p>
+                <p className="text-2xl font-bold">{sites.length}</p>
+                <p className="text-sm text-amber-200 mt-1">上限: ∞</p>
               </div>
               <div>
-                <p className="text-amber-100 text-xs mb-1">公開中サイト</p>
-                <p className="text-xl font-bold">{publishedSites}</p>
+                <p className="text-amber-100 text-sm font-medium mb-2">公開中サイト</p>
+                <p className="text-2xl font-bold">{publishedSites}</p>
               </div>
               <div>
-                <p className="text-amber-100 text-xs mb-1">LP</p>
-                <p className="text-xl font-bold">{lps.length}</p>
-                <p className="text-xs text-amber-200">上限: ∞</p>
+                <p className="text-amber-100 text-sm font-medium mb-2">LP</p>
+                <p className="text-2xl font-bold">{lps.length}</p>
+                <p className="text-sm text-amber-200 mt-1">上限: ∞</p>
               </div>
               <div>
-                <p className="text-amber-100 text-xs mb-1">公開中LP</p>
-                <p className="text-xl font-bold">{publishedLPs}</p>
+                <p className="text-amber-100 text-sm font-medium mb-2">公開中LP</p>
+                <p className="text-2xl font-bold">{publishedLPs}</p>
               </div>
             </div>
           </div>
