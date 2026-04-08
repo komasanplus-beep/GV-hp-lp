@@ -54,6 +54,15 @@ Deno.serve(async (req) => {
     const plan_limits = plan?.limits || {};
     const limit = plan_limits[counter_type];
 
+    // limit が 0 = その機能は利用不可
+    if (limit === 0) {
+      return Response.json({
+        allowed: false, used: 0, limit: 0, remaining: 0,
+        counter_type, plan_code,
+        reason: 'Feature not enabled in this plan'
+      });
+    }
+
     // 上限が設定されていない場合は無制限
     if (limit === undefined || limit === null || limit === -1) {
       return Response.json({

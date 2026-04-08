@@ -42,7 +42,7 @@ export default function AILimitUpgradeModal({ open, onOpenChange, limitData, onC
 
   // ────────────── ① ソフト警告トースト（残り少ない） ──────────────
   useEffect(() => {
-    if (remaining > 0 && remaining <= 3 && !open) {
+    if (open && remaining > 0 && remaining <= 3) {
       toast(
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-500" />
@@ -248,7 +248,7 @@ function PricingOption({
 
         {/* チェックアイコン or ローディング */}
         <div className="mt-0.5 shrink-0">
-          {isProcessing && selectedOption === title ? (
+          {isProcessing && isSelected ? (
             <Loader2 className="w-4 h-4 text-violet-600 animate-spin" />
           ) : isSelected ? (
             <Check className="w-4 h-4 text-violet-600" />
@@ -272,7 +272,7 @@ function PricingOption({
 
       {/* CTA ボタン */}
       <div className="flex items-center gap-2 text-violet-600 font-semibold text-xs">
-        {isProcessing && selectedOption === title ? (
+        {isProcessing && isSelected ? (
           <>
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>処理中...</span>

@@ -1,6 +1,7 @@
 import './App.css'
 import MasterLPTemplates from './pages/MasterLPTemplates'
 import MasterAIControl from './pages/MasterAIControl'
+import MasterPlanLimits from './pages/MasterPlanLimits'
 import SiteView from './pages/SiteView'
 import LPView from './pages/LPView'
 import BlogPage from './pages/BlogPage'
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
       <Route path="/MasterAIControl" element={<MasterAIControl />} />
+      <Route path="/MasterPlanLimits" element={<MasterPlanLimits />} />
       <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="/AdminServices" element={<AdminServices />} />
       <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />

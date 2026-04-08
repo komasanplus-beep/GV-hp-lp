@@ -67,8 +67,20 @@ Deno.serve(async (req) => {
     let plans = [];
     try {
       plans = await base44.asServiceRole.entities.PlanMaster.filter({ code: plan_code });
-    } catch (_) { plans = []; }
+    } catch (e) {
+      console.warn('aiGuard: PlanMaster fetch error:', e.message);
+      plans = [];
+    }
     const plan = plans[0] || null;
+
+    if (!plan) {
+      await logAIUsage(base44, { user_id, site_id, feature_code, status: 'blocked', error_message: `plan not found: ${plan_code}` });
+      return Response.json({
+        allowed: false,
+        source: 'plan_not_found',
+        reason: `プラン設定が見つかりません: ${plan_code}`,
+      }, { status: 403 });
+    }
 
     // FeatureGrant の enable で個別許可されているか確認
     let enableGrants = [];
@@ -107,13 +119,14 @@ Deno.serve(async (req) => {
     const now = new Date();
     const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    // counter_type は常に 'ai_generation_count' で統一
+    // counter_type は feature_code に応じて決定
+    const counterType = feature_code || 'ai_generation_count';
     let counters = [];
     try {
       counters = await base44.asServiceRole.entities.UsageLimitCounter.filter({
         target_type: 'user',
         target_id: user_id,
-        counter_type: 'ai_generation_count',
+        counter_type: counterType,
         reset_cycle: 'monthly',
       });
     } catch (_) { counters = []; }
@@ -141,12 +154,30 @@ Deno.serve(async (req) => {
       }
     }
 
-    // プランの上限を確認（ai_generation_count で統一）
-    // -1 または undefined/null = 無制限
-    const rawLimit = plan?.limits?.['ai_generation_count'];
-    const limit = (rawLimit === undefined || rawLimit === null) ? null : rawLimit;
+    // ===== 3-B. PlanMaster.limits を参照 （正本） =====
+    // counter_type に応じて対応するlimitキーを決定
+    let limitKey = 'ai_generation_count'; // デフォルト
+    if (feature_code === 'ai_lp_generation') {
+      limitKey = 'ai_lp_generation';
+    } else if (feature_code === 'ai_post_generation') {
+      limitKey = 'ai_post_generation';
+    }
 
-    if (limit !== null && limit !== -1 && used >= limit) {
+    const rawLimit = plan?.limits?.[limitKey];
+    const limit = (rawLimit === undefined || rawLimit === null || rawLimit === -1) ? null : rawLimit;
+
+    // limit が 0 の場合はその機能が利用不可
+    if (limit === 0) {
+      await logAIUsage(base44, { user_id, site_id, feature_code, status: 'blocked', error_message: `feature not enabled in plan: ${plan_code}` });
+      return Response.json({
+        allowed: false,
+        source: 'feature_disabled',
+        reason: `このプラン（${plan_code}）では${feature_code}は利用できません`,
+      }, { status: 403 });
+    }
+
+    // limit に達したかチェック
+    if (limit !== null && used >= limit) {
       await logAIUsage(base44, { user_id, site_id, feature_code, status: 'limit_exceeded', error_message: `limit: ${limit}, used: ${used}` });
       return Response.json({
         allowed: false,
@@ -172,7 +203,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.UsageLimitCounter.create({
           target_type: 'user',
           target_id: user_id,
-          counter_type: 'ai_generation_count',
+          counter_type: counterType,
           reset_cycle: 'monthly',
           used_count: 1,
           last_reset_at: now.toISOString(),

@@ -177,14 +177,21 @@ export default function AIPostGeneratorPanel({ siteId, onApplyAll, onApplyTitle,
   return (
     <div className="flex flex-col gap-3">
       {/* ヘッダー */}
-      <div className="flex items-center gap-2">
-        <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-          <Sparkles className="w-4 h-4 text-white" />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800 text-sm leading-none">AI記事生成</h3>
+            <p className="text-xs text-slate-400 mt-0.5">3分で高品質なSEO記事を作成</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-bold text-slate-800 text-sm leading-none">AI記事生成</h3>
-          <p className="text-xs text-slate-400 mt-0.5">3分で高品質なSEO記事を作成</p>
-        </div>
+        {generated?.used !== undefined && generated?.limit && (
+          <Badge variant="outline" className="text-xs whitespace-nowrap">
+            残り <span className="font-bold text-violet-600">{generated.limit - (generated.used || 0)}</span> / {generated.limit}回
+          </Badge>
+        )}
       </div>
 
       {/* ━━━ ① 基本設定 ━━━ */}
