@@ -1,0 +1,97 @@
+{
+  "name": "UserPlan",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ユーザーID"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "PlanID（Plan.id）"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "suspended",
+        "canceled"
+      ],
+      "default": "trial",
+      "description": "プラン購読ステータス"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "購読開始日"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "購読終了日"
+    },
+    "trial_started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "試用期間開始日"
+    },
+    "trial_ends_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "試用期間終了日"
+    },
+    "auto_renew": {
+      "type": "boolean",
+      "default": true,
+      "description": "自動更新フラグ"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "card",
+        "bank_transfer",
+        "none"
+      ],
+      "default": "none",
+      "description": "支払い方法"
+    },
+    "notes": {
+      "type": "string",
+      "description": "備考"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "name": "UserFeatures",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ユーザーID"
+    },
+    "dashboard": {
+      "type": "boolean",
+      "default": true
+    },
+    "site_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "サイト管理"
+    },
+    "lp_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "LP管理"
+    },
+    "blog_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "ブログ管理"
+    },
+    "ai_generate": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI生成機能"
+    },
+    "seo_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "SEO管理"
+    },
+    "domain_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "ドメイン管理"
+    },
+    "reservation_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "予約管理"
+    },
+    "ec_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "EC管理"
+    },
+    "member_manage": {
+      "type": "boolean",
+      "default": false,
+      "description": "メンバー管理"
+    },
+    "analytics": {
+      "type": "boolean",
+      "default": false,
+      "description": "アナリティクス"
+    },
+    "settings": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
