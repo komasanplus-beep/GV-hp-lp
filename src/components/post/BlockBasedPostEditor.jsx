@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Plus, Grip, Trash2, Copy, ChevronUp, ChevronDown,
-  Heading2, Heading3, Heading4, Type, Image as ImageIcon, Minus as Separator, List
+  Heading2, Heading3, Heading4, Type, Image as ImageIcon, Minus as Separator, List, Quote
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
@@ -22,7 +22,7 @@ const BLOCK_TYPES = [
   { type: 'paragraph', label: '文章', icon: Type },
   { type: 'image', label: '画像', icon: ImageIcon },
   { type: 'list', label: 'リスト', icon: List },
-  { type: 'quote', label: '引用', icon: '"' },
+  { type: 'quote', label: '引用', icon: Quote },
   { type: 'separator', label: '区切り線', icon: Separator },
 ];
 
