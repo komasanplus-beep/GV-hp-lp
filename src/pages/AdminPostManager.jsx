@@ -2,7 +2,7 @@
  * AdminPostManager - 記事一覧管理ページ（専用ページ型・ポップアップ廃止）
  * /AdminPostManager?site_id=xxx
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link, useNavigate } from 'react-router-dom';
@@ -398,9 +398,16 @@ export default function AdminPostManager() {
   const { data: sites = [] } = useQuery({
     queryKey: ['sites'],
     queryFn: () => base44.entities.Site.list('-created_date', 20),
-    enabled: !siteId,
   });
-  const [selectedSiteId, setSelectedSiteId] = useState('');
+  const [selectedSiteId, setSelectedSiteId] = useState(siteId || '');
+
+  // sites取得後、未選択なら最初のサイトを自動選択
+  useEffect(() => {
+    if (!selectedSiteId && sites.length > 0) {
+      setSelectedSiteId(sites[0].id);
+    }
+  }, [sites, selectedSiteId]);
+
   const effectiveSiteId = siteId || selectedSiteId;
 
   return (
@@ -408,7 +415,7 @@ export default function AdminPostManager() {
       <UserLayout title="記事管理">
         <div className="max-w-6xl space-y-6">
 
-          {!siteId && (
+          {!siteId && sites.length > 0 && (
             <div className="flex items-center gap-3">
               <label className="text-sm font-medium text-slate-700 shrink-0">サイトを選択：</label>
               <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>

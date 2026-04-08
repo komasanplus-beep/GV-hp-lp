@@ -9,7 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { useNavigate } from 'react-router-dom';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Save, Loader2, ArrowLeft, ImageIcon, Eye, Globe, FileText, Clock } from 'lucide-react';
+import { Save, Loader2, ArrowLeft, ImageIcon, Eye, Globe, FileText, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,8 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import PostEditor from '@/components/post/PostEditor';
 import PostCategoryTagPanel from '@/components/post/PostCategoryTagPanel';
+import AIPostGeneratorPanel from '@/components/post/AIPostGeneratorPanel';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { format } from 'date-fns';
 
 const POST_TYPES = [
@@ -76,6 +78,12 @@ export default function AdminPostEdit() {
   const [form, setForm] = useState(defaultForm);
   const [isUploading, setIsUploading] = useState(false);
   const [showTocPreview, setShowTocPreview] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(false);
+
+  // AI機能アクセス権チェック（未設定=FeatureMaster未登録の場合は表示する）
+  const { data: aiAccess, isLoading: isCheckingAI } = useFeatureAccess('ai_post_generation', { siteId });
+  // allowed=falseが明示的に返った場合のみ非表示。未チェック中やエラーは表示する
+  const canUseAI = aiAccess?.allowed !== false;
 
   const { data: existingPost, isLoading: isLoadingPost } = useQuery({
     queryKey: ['post', postId],
@@ -198,6 +206,17 @@ export default function AdminPostEdit() {
                 {isPublished ? '公開中' : '下書き'}
               </span>
 
+              {/* AIで記事作成ボタン */}
+              {canUseAI && (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAIPanel(p => !p)}
+                  className="gap-1.5 border-violet-300 text-violet-700 hover:bg-violet-50"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />AIで記事作成
+                </Button>
+              )}
+
               {/* プレビュー */}
               {form.slug && (
                 <a
@@ -242,6 +261,27 @@ export default function AdminPostEdit() {
 
             {/* ── 左カラム: タイトル + 本文 ── */}
             <div className="space-y-5">
+
+              {/* AI生成パネル */}
+              {showAIPanel && canUseAI && (
+                <AIPostGeneratorPanel
+                  siteId={siteId}
+                  onClose={() => setShowAIPanel(false)}
+                  onGenerated={(generated) => {
+                    setForm(p => ({
+                      ...p,
+                      title: generated.title || p.title,
+                      excerpt: generated.excerpt || p.excerpt,
+                      content: generated.content || p.content,
+                      seo_title: generated.seo_title || p.seo_title,
+                      seo_description: generated.seo_description || p.seo_description,
+                      slug: p.slug || toSlug(generated.title || ''),
+                    }));
+                    setShowAIPanel(false);
+                  }}
+                />
+              )}
+
               {/* タイトル・スラッグ・抜粋 */}
               <Card>
                 <CardContent className="p-5 space-y-4">
@@ -438,6 +478,7 @@ export default function AdminPostEdit() {
                         tags={tags}
                         form={form}
                         setForm={setForm}
+                        siteId={siteId}
                       />
                     </TabsContent>
 
