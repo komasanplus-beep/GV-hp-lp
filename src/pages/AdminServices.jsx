@@ -120,12 +120,32 @@ export default function AdminServices() {
       toast.error('サービス名は必須です');
       return;
     }
+    if (!siteId) {
+      toast.error('サイトが選択されていません。URLにsite_idを指定してください。');
+      return;
+    }
     if (editingService) {
       updateMutation.mutate({ id: editingService.id, data: formData });
     } else {
       createMutation.mutate(formData);
     }
   };
+
+  if (!siteId) {
+    return (
+      <ProtectedRoute requiredRole="admin">
+        <UserLayout title="サービス管理">
+          <Card>
+            <CardContent className="py-16 text-center text-slate-400">
+              <p className="text-3xl mb-2">⚠️</p>
+              <p className="font-medium">サイトが指定されていません</p>
+              <p className="text-sm mt-1">URLに <code className="bg-slate-100 px-1 rounded">?site_id=...</code> を付けてアクセスしてください</p>
+            </CardContent>
+          </Card>
+        </UserLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRole="admin">
