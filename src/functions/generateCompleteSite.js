@@ -189,7 +189,7 @@ function generateBlocks(businessType, siteId, pageId, siteName) {
         sort_order: 1,
         data: {
           title: 'Experience Luxury & Comfort',
-          body: 'At Bawi Hotel, we offer premium accommodation with exceptional service.',
+          body: `At ${siteName}, we offer premium accommodation with exceptional service.`,
           image_url: 'https://images.unsplash.com/photo-1631049307038-da0ec89d4d0a?w=600&h=400&fit=crop',
         },
         animation_type: 'fade-up',
@@ -294,7 +294,7 @@ function generateBlocks(businessType, siteId, pageId, siteName) {
         sort_order: 1,
         data: {
           title: '「美しく」「心地よく」を大切にしたサロン',
-          body: 'Hair Salon Bawiでは、経験豊富なスタイリストがお客様一人ひとりに寄り添い、理想のスタイルを実現します。',
+          body: `${siteName}では、経験豊富なスタイリストがお客様一人ひとりに寄り添い、理想のスタイルを実現します。`,
           image_url: 'https://images.unsplash.com/photo-1595361984547-3d41b5e34d25?w=600&h=400&fit=crop',
         },
         animation_type: 'fade-up',
