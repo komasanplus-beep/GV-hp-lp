@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { Loader2, Image } from 'lucide-react';
+import FlowBlockEditor from './FlowBlockEditor';
 
 // ブロックごとのフィールド定義
 const BLOCK_FIELDS = {
@@ -44,7 +45,6 @@ const BLOCK_FIELDS = {
   ],
   Flow: [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '例: 施術の流れ' },
-    { key: 'steps', label: 'ステップ（1行1件）', type: 'textarea', placeholder: 'ご予約\nカウンセリング\n頭皮診断\n施術\nアフターケア' },
   ],
   Comparison: [
     { key: 'title', label: 'タイトル', type: 'text', placeholder: '例: 他店との違い' },
@@ -81,6 +81,23 @@ export default function BlockEditor({ block, onSave, onCancel }) {
     setData(d => ({ ...d, [key]: file_url }));
     setUploading(false);
   };
+
+  // Flow ブロック専用エディタ
+  if (block.block_type === 'Flow') {
+    return (
+      <div className="space-y-4">
+        <h3 className="font-semibold text-slate-800 text-lg">Flow ブロックを編集</h3>
+        <FlowBlockEditor
+          data={data}
+          onChange={setData}
+        />
+        <div className="flex gap-2 pt-4 border-t border-slate-200">
+          <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => onSave(data)}>保存</Button>
+          <Button variant="outline" onClick={onCancel}>キャンセル</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

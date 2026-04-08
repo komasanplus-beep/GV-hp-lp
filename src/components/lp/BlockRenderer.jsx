@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, CheckCircle, ChevronRight } from 'lucide-react';
+import { Star, CheckCircle } from 'lucide-react';
 
 const toText = (value) => {
   if (value == null) return '';
@@ -198,19 +198,47 @@ export default function BlockRenderer({ block, siteId }) {
 
   if (type === 'Flow') return (
     <section className="py-12 md:py-20 bg-white">
-      <div className="max-w-3xl mx-auto px-4 md:px-8">
-        {toText(d.title) && <h2 className="text-2xl md:text-3xl font-light text-slate-900 mb-8 md:mb-10 text-center" style={{ fontFamily: 'serif' }}>{toText(d.title)}</h2>}
-        <div className="space-y-3 md:space-y-4">
-          {toLines(d.steps).map((step, i) => (
-            <div key={i} className="flex items-center gap-3 md:gap-4 p-4 md:p-5 bg-slate-50 rounded-xl">
-              <div className="w-9 h-9 md:w-10 md:h-10 bg-amber-600 text-white rounded-full flex items-center justify-center font-light shrink-0 text-sm">
-                {i + 1}
-              </div>
-              <ChevronRight className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="text-slate-700 text-sm md:text-base">{step}</span>
+      <div className="max-w-4xl mx-auto px-4 md:px-8">
+        {toText(d.title) && <h2 className="text-3xl font-light text-slate-900 mb-12 text-center" style={{ fontFamily: 'serif' }}>{toText(d.title)}</h2>}
+        {Array.isArray(d.steps) && d.steps.length > 0 ? (
+          <div className="relative">
+            {/* 接続線 */}
+            {d.steps.length > 1 && (
+              <div className="absolute left-6 top-12 bottom-0 w-1 bg-gradient-to-b from-amber-300 to-amber-100 hidden md:block" />
+            )}
+            
+            {/* ステップ一覧 */}
+            <div className="space-y-8 relative z-10">
+              {d.steps.map((step, index) => (
+                <div key={step.id || index} className="flex gap-6 items-start">
+                  {/* ステップ番号 */}
+                  <div className="flex flex-col items-center flex-shrink-0">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-white font-bold text-lg shadow-lg">
+                      {index + 1}
+                    </div>
+                    {index < d.steps.length - 1 && (
+                      <div className="hidden md:block w-1 h-12 bg-gradient-to-b from-amber-300 to-amber-100 mt-2" />
+                    )}
+                  </div>
+                  
+                  {/* コンテンツ */}
+                  <div className="flex-1 pt-1">
+                    {step.heading && (
+                      <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                        {step.heading}
+                      </h3>
+                    )}
+                    {step.description && (
+                      <p className="text-slate-600 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
+                        {step.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
