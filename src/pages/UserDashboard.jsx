@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import PlanBanner from '@/components/plan/PlanBanner';
+import UsagePanel from '@/components/plan/UsagePanel';
+import { usePlan } from '@/components/plan/usePlan';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText, Eye } from 'lucide-react';
@@ -19,6 +21,8 @@ const cards = [
 ];
 
 export default function UserDashboard() {
+  const { plan, usage, userPlanCode } = usePlan();
+
   const { data: sites = [] } = useQuery({
     queryKey: ['sites'],
     queryFn: () => base44.entities.Site.list('-created_date', 5),
@@ -38,6 +42,9 @@ export default function UserDashboard() {
 
           {/* Plan Banner */}
           <PlanBanner />
+
+          {/* Usage Panel */}
+          <UsagePanel plan={plan} usage={usage} userPlanCode={userPlanCode} />
 
           {/* Stats Banner */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">

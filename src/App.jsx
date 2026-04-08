@@ -26,6 +26,7 @@ import AdminPostTags from './pages/AdminPostTags'
 import PostListPage from './pages/PostListPage'
 import PostDetailPage from './pages/PostDetailPage.jsx'
 import AdminLPAnalytics from './pages/AdminLPAnalytics'
+import PricingPage from './components/plan/PricingPage'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -129,6 +130,7 @@ const AuthenticatedApp = () => {
       <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
       <Route path="/AdminPostTags" element={<AdminPostTags />} />
       <Route path="/AdminLPAnalytics" element={<AdminLPAnalytics />} />
+      <Route path="/Pricing" element={<PricingPage />} />
       <Route path="/posts" element={<PostListPage />} />
       <Route path="/post/:slug" element={<PostDetailPage />} />
     </Routes>
