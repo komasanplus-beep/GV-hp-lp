@@ -3,9 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import PlanBanner from '@/components/plan/PlanBanner';
-import UsagePanel from '@/components/plan/UsagePanel';
-import { usePlan } from '@/components/plan/usePlan';
+import KPISection from '@/components/dashboard/KPISection';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText, Eye } from 'lucide-react';
@@ -17,12 +15,9 @@ const cards = [
   { name: 'AI生成', desc: 'AIでコンテンツを自動生成', icon: Sparkles, page: 'AdminAIGenerate', color: 'bg-amber-50 border-amber-200 text-amber-700' },
   { name: 'ドメイン設定', desc: '独自ドメイン・サブドメイン管理', icon: Link2, page: 'AdminDomainSettings', color: 'bg-slate-50 border-slate-200 text-slate-700' },
   { name: 'SEO設定', desc: '検索エンジン最適化の設定', icon: Search, page: 'SeoSettings', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
-  { name: 'アカウント設定', desc: 'サイト・店舗情報の設定', icon: Settings, page: 'AdminSettings', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
 ];
 
 export default function UserDashboard() {
-  const { plan, usage, userPlanCode } = usePlan();
-
   const { data: sites = [] } = useQuery({
     queryKey: ['sites'],
     queryFn: () => base44.entities.Site.list('-created_date', 5),
@@ -38,41 +33,50 @@ export default function UserDashboard() {
   return (
     <ProtectedRoute requiredRole="admin">
       <UserLayout title="ダッシュボード">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
 
-          {/* Plan Banner */}
-          <PlanBanner />
+          {/* KPI セクション */}
+          <KPISection />
 
-          {/* Usage Panel */}
-          <UsagePanel plan={plan} usage={usage} userPlanCode={userPlanCode} />
-
-          {/* Stats Banner */}
-          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white">
-            <h2 className="text-xl font-bold mb-1">ようこそ</h2>
-            <p className="text-amber-100 text-sm mb-4">管理パネルからサービスを管理できます</p>
-            <div className="flex flex-wrap gap-6">
-              <div><p className="text-2xl font-bold">{sites.length}</p><p className="text-xs text-amber-200">サイト総数</p></div>
-              <div><p className="text-2xl font-bold">{publishedSites}</p><p className="text-xs text-amber-200">公開中サイト</p></div>
-              <div><p className="text-2xl font-bold">{lps.length}</p><p className="text-xs text-amber-200">LP総数</p></div>
-              <div><p className="text-2xl font-bold">{publishedLPs}</p><p className="text-xs text-amber-200">公開中LP</p></div>
+          {/* ようこそ エリア - コンパクト版 */}
+          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-5 text-white">
+            <h2 className="text-lg font-bold mb-3">ようこそ</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <p className="text-amber-100 text-xs mb-1">サイト</p>
+                <p className="text-xl font-bold">{sites.length}</p>
+                <p className="text-xs text-amber-200">上限: ∞</p>
+              </div>
+              <div>
+                <p className="text-amber-100 text-xs mb-1">公開中サイト</p>
+                <p className="text-xl font-bold">{publishedSites}</p>
+              </div>
+              <div>
+                <p className="text-amber-100 text-xs mb-1">LP</p>
+                <p className="text-xl font-bold">{lps.length}</p>
+                <p className="text-xs text-amber-200">上限: ∞</p>
+              </div>
+              <div>
+                <p className="text-amber-100 text-xs mb-1">公開中LP</p>
+                <p className="text-xl font-bold">{publishedLPs}</p>
+              </div>
             </div>
           </div>
 
           {/* 機能カード */}
           <div>
             <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">機能一覧</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {cards.map((card) => (
                 <Link
                   key={card.name}
                   to={createPageUrl(card.page)}
-                  className={`border rounded-xl p-4 hover:shadow-md transition-all group ${card.color}`}
+                  className={`border rounded-lg p-3 hover:shadow-md transition-all group ${card.color} text-center`}
                 >
-                  <card.icon className="w-6 h-6 mb-2" />
-                  <p className="font-semibold text-sm">{card.name}</p>
-                  <p className="text-xs opacity-70 mt-0.5 leading-tight">{card.desc}</p>
-                  <div className="flex justify-end mt-2">
-                    <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <card.icon className="w-5 h-5 mb-1.5 mx-auto" />
+                  <p className="font-semibold text-xs">{card.name}</p>
+                  <div className="flex justify-center mt-1">
+                    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </Link>
               ))}
@@ -88,7 +92,7 @@ export default function UserDashboard() {
                   すべて見る <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100">
+              <div className="bg-white rounded-lg border border-slate-200 divide-y divide-slate-100">
                 {sites.slice(0, 3).map(site => (
                   <div key={site.id} className="flex items-center justify-between px-4 py-3">
                     <div>

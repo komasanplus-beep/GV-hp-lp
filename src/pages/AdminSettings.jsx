@@ -1,104 +1,278 @@
+/**
+ * AdminSettings - アカウント設定ページ（拡張版）
+ * ユーザーアカウント情報の表示・編集機能付き
+ */
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
-import { Save, Upload, Loader2, Store, X } from 'lucide-react';
 import UserLayout from '@/components/user/UserLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-const defaultSettings = {
-  logo_url: '',
-};
-
 export default function AdminSettings() {
-  const [formData, setFormData] = useState(defaultSettings);
-  const [isUploading, setIsUploading] = useState(false);
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
+  const [isEditing, setIsEditing] = useState(false);
 
-  const { data: settings = [], isLoading } = useQuery({
-    queryKey: ['salonSettings'],
-    queryFn: () => base44.entities.SalonSettings.list(),
+  // 現在のユーザー取得
+  const { data: currentUser, isLoading: isLoadingUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
   });
-  const current = settings[0];
 
-  useEffect(() => {
-    if (current) setFormData({ ...defaultSettings, ...current });
-  }, [current]);
-
-  const saveMutation = useMutation({
-    mutationFn: (data) => current?.id
-      ? base44.entities.SalonSettings.update(current.id, data)
-      : base44.entities.SalonSettings.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['salonSettings'] });
-      toast.success('設定を保存しました');
+  // アカウントプロファイル取得
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['accountProfile'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getAccountProfile', {});
+      return res.data || {};
     },
   });
 
-  const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
+  const [form, setForm] = useState({
+    account_name: '',
+    user_name: '',
+    contact_name: '',
+    email: '',
+    phone: '',
+    company_name: '',
+    address: '',
+    notes: '',
+  });
 
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    handleChange('logo_url', file_url);
-    setIsUploading(false);
+  // プロファイルデータをフォームに反映
+  useEffect(() => {
+    if (profile) {
+      setForm({
+        account_name: profile.account_name || '',
+        user_name: profile.user_name || '',
+        contact_name: profile.contact_name || currentUser?.full_name || '',
+        email: profile.email || currentUser?.email || '',
+        phone: profile.phone || '',
+        company_name: profile.company_name || '',
+        address: profile.address || '',
+        notes: profile.notes || '',
+      });
+    } else if (currentUser) {
+      setForm(prev => ({
+        ...prev,
+        contact_name: currentUser.full_name || '',
+        email: currentUser.email || '',
+      }));
+    }
+  }, [profile, currentUser]);
+
+  // 保存ミューテーション
+  const saveMutation = useMutation({
+    mutationFn: async (data) => {
+      const res = await base44.functions.invoke('saveAccountProfile', { profile: data });
+      return res.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['accountProfile'] });
+      setIsEditing(false);
+      toast.success('アカウント情報を保存しました');
+    },
+    onError: (err) => {
+      toast.error('保存に失敗しました: ' + err.message);
+    },
+  });
+
+  const handleSave = () => {
+    if (!form.account_name || !form.email) {
+      toast.error('アカウント名とメールアドレスは必須です');
+      return;
+    }
+    saveMutation.mutate(form);
   };
 
-
-
-  if (isLoading) return (
-    <ProtectedRoute><UserLayout title="設定">
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
-      </div>
-    </UserLayout></ProtectedRoute>
-  );
+  if (isLoadingUser || isLoadingProfile) {
+    return (
+      <ProtectedRoute requiredRole="admin">
+        <UserLayout title="アカウント設定">
+          <div className="flex justify-center py-24">
+            <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+          </div>
+        </UserLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <UserLayout title="設定">
-        <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(formData); }} className="max-w-4xl space-y-6">
+      <UserLayout title="アカウント設定">
+        <div className="max-w-2xl mx-auto space-y-6">
 
-          {/* ロゴのみ */}
-           <Card>
-             <CardHeader>
-               <CardTitle className="flex items-center gap-2"><Store className="w-5 h-5" />ロゴ</CardTitle>
-               <CardDescription>サイトに表示するロゴを設定してください</CardDescription>
-             </CardHeader>
-             <CardContent className="space-y-4">
-               <div className="flex items-center gap-4">
-                 {formData.logo_url ? (
-                   <div className="relative">
-                     <img src={formData.logo_url} alt="Logo" className="h-20 w-auto object-contain bg-slate-100 rounded-lg p-2" />
-                     <button type="button" onClick={() => handleChange('logo_url', '')} className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white">
-                       <X className="w-3 h-3" />
-                     </button>
-                   </div>
-                 ) : (
-                   <label className="flex items-center justify-center h-20 w-40 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:border-amber-400">
-                     {isUploading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : (
-                       <div className="text-center"><Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" /><span className="text-xs text-slate-500">ロゴをアップロード</span></div>
-                     )}
-                     <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={isUploading} />
-                   </label>
-                 )}
-               </div>
-               <p className="text-xs text-slate-500">連絡先情報はサイト構築の「Contact」で設定してください</p>
-             </CardContent>
-           </Card>
+          {/* 現在のユーザー情報（読み取り専用） */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">ログイン情報</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">ユーザー名</label>
+                <Input value={currentUser?.full_name || '-'} disabled className="bg-slate-50" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">ログインメール</label>
+                <Input value={currentUser?.email || '-'} disabled className="bg-slate-50" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="bg-amber-600 hover:bg-amber-700 px-8" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              設定を保存
-            </Button>
-          </div>
-        </form>
+          {/* アカウント情報（編集可能） */}
+          <Card>
+            <CardHeader className="flex items-center justify-between">
+              <CardTitle className="text-base">アカウント情報</CardTitle>
+              <Button
+                variant={isEditing ? 'destructive' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  if (isEditing) {
+                    setForm(prev => ({
+                      ...prev,
+                      account_name: profile?.account_name || '',
+                      user_name: profile?.user_name || '',
+                      contact_name: profile?.contact_name || currentUser?.full_name || '',
+                      email: profile?.email || currentUser?.email || '',
+                      phone: profile?.phone || '',
+                      company_name: profile?.company_name || '',
+                      address: profile?.address || '',
+                      notes: profile?.notes || '',
+                    }));
+                  }
+                  setIsEditing(!isEditing);
+                }}
+              >
+                {isEditing ? 'キャンセル' : '編集'}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">アカウント名 *</label>
+                  <Input
+                    value={form.account_name}
+                    onChange={e => setForm(p => ({ ...p, account_name: e.target.value }))}
+                    placeholder="例: 山田太郎"
+                    disabled={!isEditing}
+                    className={!isEditing ? 'bg-slate-50' : ''}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">ユーザー名</label>
+                  <Input
+                    value={form.user_name}
+                    onChange={e => setForm(p => ({ ...p, user_name: e.target.value }))}
+                    placeholder="例: yamada_taro"
+                    disabled={!isEditing}
+                    className={!isEditing ? 'bg-slate-50' : ''}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">担当者名</label>
+                <Input
+                  value={form.contact_name}
+                  onChange={e => setForm(p => ({ ...p, contact_name: e.target.value }))}
+                  placeholder="例: 山田太郎"
+                  disabled={!isEditing}
+                  className={!isEditing ? 'bg-slate-50' : ''}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">メールアドレス *</label>
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                    placeholder="例: yamada@example.com"
+                    disabled={!isEditing}
+                    className={!isEditing ? 'bg-slate-50' : ''}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-600 block mb-1">電話番号</label>
+                  <Input
+                    type="tel"
+                    value={form.phone}
+                    onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+                    placeholder="例: 090-1234-5678"
+                    disabled={!isEditing}
+                    className={!isEditing ? 'bg-slate-50' : ''}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">会社名 / 屋号</label>
+                <Input
+                  value={form.company_name}
+                  onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))}
+                  placeholder="例: 株式会社○○"
+                  disabled={!isEditing}
+                  className={!isEditing ? 'bg-slate-50' : ''}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">住所</label>
+                <Input
+                  value={form.address}
+                  onChange={e => setForm(p => ({ ...p, address: e.target.value }))}
+                  placeholder="例: 東京都渋谷区○○"
+                  disabled={!isEditing}
+                  className={!isEditing ? 'bg-slate-50' : ''}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-slate-600 block mb-1">備考</label>
+                <Textarea
+                  value={form.notes}
+                  onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                  placeholder="その他の情報があれば入力"
+                  disabled={!isEditing}
+                  className={`resize-none ${!isEditing ? 'bg-slate-50' : ''}`}
+                  rows={3}
+                />
+              </div>
+
+              {isEditing && (
+                <div className="flex gap-2 pt-2 border-t">
+                  <Button
+                    className="bg-amber-600 hover:bg-amber-700 gap-2"
+                    onClick={handleSave}
+                    disabled={saveMutation.isPending}
+                  >
+                    {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    保存
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 注意事項 */}
+          <Card className="bg-amber-50 border-amber-200">
+            <CardContent className="pt-4 flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-amber-800">
+                <p className="font-medium mb-1">ログインメールアドレスの変更</p>
+                <p className="text-xs">ログイン用メールアドレスを変更する場合は、サポートまでお問い合わせください。</p>
+              </div>
+            </CardContent>
+          </Card>
+
+        </div>
       </UserLayout>
     </ProtectedRoute>
   );

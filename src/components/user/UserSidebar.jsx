@@ -57,8 +57,13 @@ const menuGroups = [
     children: [
       { name: 'サイト設定', icon: Globe, page: 'AdminSiteList' },
       { name: 'ドメイン設定', icon: Link2, page: 'AdminDomainSettings' },
-      { name: 'アカウント設定', icon: Settings, page: 'AdminSettings' },
     ],
+  },
+  {
+    label: 'アカウント設定',
+    icon: Settings,
+    page: 'AdminSettings',
+    single: true,
   },
 ];
 
@@ -78,7 +83,7 @@ function getInitialOpenGroups(pathname) {
 const PAGE_FEATURE_MAP = {
   UserDashboard: null,           // ダッシュボードは常時
   AdminContent: null,            // コンテンツ管理は常時
-  AdminSettings: null,           // アカウント設定は常時
+  AdminSettings: null,           // アカウント設定は常時（独立メニュー）
   AdminAIGenerate: 'ai_package',
   SitePageManager: 'site_builder',
   AdminRooms: 'site_builder',
