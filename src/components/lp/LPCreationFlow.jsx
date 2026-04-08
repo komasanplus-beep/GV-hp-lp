@@ -13,6 +13,13 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
+      // 1. バックエンドで制限チェック
+      const checkRes = await base44.functions.invoke('validateLPCreation', { action: 'check' });
+      if (!checkRes.data.canCreate) {
+        throw new Error(`LP作成数の上限に達しています（${checkRes.data.limit}件）`);
+      }
+
+      // 2. LP作成
       const user = await base44.auth.me();
       const lp = await base44.entities.LandingPage.create({
         title: data.title || 'Untitled LP',
@@ -22,7 +29,7 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
         user_id: user.id,
       });
 
-      // 最小限のブロック（Heroのみ）を作成
+      // 3. 最小限のブロック（Heroのみ）を作成
       await base44.entities.LPBlock.create({
         lp_id: lp.id,
         block_type: 'Hero',
@@ -30,15 +37,8 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
         data: { headline: '', subheadline: '', cta_text: '詳しく見る' },
       });
 
-      // PlanUsage をインクリメント
-      const currentMonth = new Date().toISOString().slice(0, 7);
-      const usageList = await base44.entities.PlanUsage.filter({ user_id: user.id }).catch(() => []);
-      const monthUsage = usageList.find(u => u.month_year === currentMonth);
-      if (monthUsage) {
-        await base44.entities.PlanUsage.update(monthUsage.id, { lp_count: (monthUsage.lp_count || 0) + 1 });
-      } else {
-        await base44.entities.PlanUsage.create({ user_id: user.id, month_year: currentMonth, lp_count: 1 });
-      }
+      // 4. バックエンドで月度カウンターをインクリメント
+      await base44.functions.invoke('validateLPCreation', { action: 'increment' });
 
       return lp;
     },

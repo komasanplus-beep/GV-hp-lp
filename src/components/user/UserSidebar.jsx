@@ -45,10 +45,9 @@ const menuGroups = [
     ],
   },
   {
-    label: 'LP改善',
+    label: 'LP分析',
     icon: TrendingUp,
     children: [
-      { name: 'ABテスト', icon: GitBranch, page: 'AdminABTest' },
       { name: 'CV分析', icon: TrendingUp, page: 'AdminLPAnalytics' },
     ],
   },
