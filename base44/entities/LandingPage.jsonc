@@ -33,6 +33,16 @@
       "default": "template",
       "description": "\u4f5c\u6210\u65b9\u6cd5\uff08AI\u751f\u6210 / \u30b3\u30fc\u30c9\u8cbc\u308a\u4ed8\u3051 / \u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\uff09"
     },
+    "creation_method": {
+      "type": "string",
+      "enum": [
+        "ai_text",
+        "ai_template",
+        "code_import",
+        "manual"
+      ],
+      "description": "LP\u4f5c\u6210\u65b9\u5f0f"
+    },
     "template_type": {
       "type": "string",
       "enum": [
@@ -45,6 +55,20 @@
       ],
       "default": "custom",
       "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u7a2e\u5225"
+    },
+    "template_id": {
+      "type": "string",
+      "description": "\u4f7f\u7528\u3057\u305f\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8ID\uff08LPTemplate.id\uff09"
+    },
+    "ai_generated_initial": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI \u304c\u521d\u671f\u30b3\u30f3\u30c6\u30f3\u30c4\u3092\u751f\u6210\u3057\u305f\u304b"
+    },
+    "source_code_raw": {
+      "type": "string",
+      "maxLength": 10485760,
+      "description": "\u5143\u3068\u306a\u3063\u305f\u30bd\u30fc\u30b9\u30b3\u30fc\u30c9\uff08\u4fdd\u5b58\u7528\uff09"
     },
     "html_code": {
       "type": "string",
