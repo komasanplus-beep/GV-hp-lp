@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { business_type, site_name } = body;
+    const { business_type, site_name, template_type } = body;
 
     if (!business_type || !site_name) {
       return Response.json(
@@ -56,6 +56,7 @@ Deno.serve(async (req) => {
       user_id: user.id,
       site_name: site_name,
       business_type: business_type,
+      template_type: template_type || business_type,
       status: 'published',
       enabled_features: template.enabled_features || {
         booking: true,
@@ -68,6 +69,9 @@ Deno.serve(async (req) => {
         copyright_text: `© ${new Date().getFullYear()} ${site_name}. All rights reserved.`,
         show_site_name: true,
         show_year: true,
+        show_company_name: false,
+        footer_links: [],
+        social_links: [],
       },
       seo_config: {
         meta_title: site_name,
@@ -143,14 +147,16 @@ Deno.serve(async (req) => {
 
     return Response.json({
       status: 'success',
-      site_id: site.id,
+      site: {
+        id: site.id,
+        site_name: site.site_name,
+        template_type: site.template_type,
+      },
       template_key: template.template_key,
       template_name: template.name,
       pages_created: Object.keys(pageSlugToId).length,
       blocks_created: createdBlocks.length,
       services_created: createdServices.length,
-      site_name: site_name,
-      business_type: business_type,
       preview_url: `/site/${site.id}?preview=true`,
     });
   } catch (error) {

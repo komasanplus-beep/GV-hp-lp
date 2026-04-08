@@ -138,11 +138,36 @@ function SiteViewInner({ siteId, isPreview }) {
   }
 
   const navConfig = site?.navigation_config || {};
-  const menuItems = navConfig.menu_items?.filter(m => m.is_visible) || [];
-  const logoUrl = navConfig.logo_url || site?.logo_url;
+  
+  // ロゴ優先順位: アップロード画像 > URL > サイト名テキスト
+  const logoUrl = navConfig.logo_image_url || navConfig.logo_url || null;
+  const logoAlt = navConfig.logo_alt || navConfig.site_name_text || site?.site_name || 'Site Logo';
+  
+  // 自動メニュー+手動メニューをマージ（取得時にすべてのページをlists）
+  const autoMenuItems = navConfig.auto_menu_pages?.map(m => {
+    const pageData = data?.all_pages?.find(p => p.id === m.page_id);
+    return pageData ? {
+      label: m.label_override || pageData.title,
+      href: `/${pageData.slug}`,
+      is_visible: m.show_in_header !== false,
+      sort_order: m.sort_order,
+    } : null;
+  }).filter(Boolean) || [];
+  
+  const manualMenuItems = navConfig.menu_items?.filter(m => m.is_visible) || [];
+  const allMenuItems = [...autoMenuItems, ...manualMenuItems].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  
   const siteName = navConfig.site_name_text || site?.site_name || 'Site';
   const bookingText = navConfig.booking_button_text || 'ご予約';
   const bookingUrl = navConfig.booking_button_url || '#booking';
+  
+  // ヘッダー表示用SNS
+  const headerSocialLinks = navConfig.social_links?.filter(s => s.show_in_header && s.url) || [];
+  
+  // フッター設定
+  const footerConfig = site?.footer_config || {};
+  const footerSocialLinks = footerConfig.social_links?.filter(s => s.show_in_footer && s.url) || [];
+  const fixedPages = data?.all_pages?.filter(p => ['privacy', 'security', 'compliance'].includes(p.page_category) && p.status === 'published') || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -151,16 +176,17 @@ function SiteViewInner({ siteId, isPreview }) {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo/Site Name */}
           <div className="flex items-center gap-2">
-            {logoUrl
-              ? <img src={logoUrl} alt={siteName} className="h-8 w-auto" />
-              : <span className="text-lg font-bold text-stone-800">{siteName}</span>
-            }
+            {logoUrl ? (
+              <img src={logoUrl} alt={logoAlt} className="h-8 w-auto object-contain" />
+            ) : (
+              <span className="text-lg font-bold text-stone-800">{siteName}</span>
+            )}
           </div>
 
-          {/* Desktop Menu */}
+          {/* Desktop Menu + SNS */}
           <div className="hidden md:flex items-center gap-6 text-sm text-stone-600">
-            {menuItems.length > 0
-              ? menuItems.map(item => (
+            {allMenuItems.length > 0
+              ? allMenuItems.map(item => (
                   <a 
                     key={item.label} 
                     href={item.href}
@@ -178,6 +204,25 @@ function SiteViewInner({ siteId, isPreview }) {
                 ))
               : null
             }
+
+            {/* ヘッダーSNS */}
+            {headerSocialLinks.length > 0 && (
+              <div className="flex items-center gap-3">
+                {headerSocialLinks.map(link => (
+                  <a
+                    key={link.platform}
+                    href={link.url}
+                    target={link.open_new_tab ? '_blank' : '_self'}
+                    rel="noreferrer"
+                    className="text-stone-500 hover:text-stone-700 transition-colors"
+                    title={link.platform}
+                  >
+                    <span className="text-xs">{link.platform}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -211,8 +256,8 @@ function SiteViewInner({ siteId, isPreview }) {
             {/* Menu Panel */}
             <div className="fixed top-16 left-0 right-0 bg-white border-b border-stone-100 z-40 md:hidden shadow-lg">
               <div className="max-w-6xl mx-auto px-4 py-4 space-y-3">
-                {menuItems.length > 0
-                  ? menuItems.map(item => (
+                {allMenuItems.length > 0
+                  ? allMenuItems.map(item => (
                       <a
                         key={item.label}
                         href={item.href}
@@ -231,7 +276,23 @@ function SiteViewInner({ siteId, isPreview }) {
                     ))
                   : null
                 }
-                <div className="pt-2 border-t border-stone-100">
+                {headerSocialLinks.length > 0 && (
+                  <div className="pt-2 border-t border-stone-100 space-y-2">
+                    <p className="text-xs font-medium text-stone-600 px-4">SNS</p>
+                    {headerSocialLinks.map(link => (
+                      <a
+                        key={link.platform}
+                        href={link.url}
+                        target={link.open_new_tab ? '_blank' : '_self'}
+                        rel="noreferrer"
+                        className="block px-4 py-2.5 text-stone-700 hover:bg-stone-50 rounded-lg transition-colors"
+                      >
+                        {link.platform}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div className={headerSocialLinks.length > 0 ? 'border-t border-stone-100 pt-2' : ''}>
                   <button
                     onClick={() => {
                       const target = document.getElementById('contact');
@@ -259,29 +320,60 @@ function SiteViewInner({ siteId, isPreview }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-stone-900 text-stone-500 text-center py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 space-y-4">
+      <footer className="bg-stone-900 text-stone-500 text-center py-8 mt-auto">
+        <div className="max-w-6xl mx-auto px-4 space-y-6">
           {/* Copyright Text */}
           <p className="text-xs">
-            {site?.footer_config?.copyright_text || (
+            {footerConfig?.copyright_text || (
               <>
-                {site?.footer_config?.show_year !== false && <span>{new Date().getFullYear()} </span>}
-                {site?.footer_config?.show_site_name !== false && <span>{site?.site_name || 'Site'}</span>}
+                {footerConfig?.show_year !== false && <span>{new Date().getFullYear()} </span>}
+                {footerConfig?.show_company_name && footerConfig?.company_name && <span>{footerConfig.company_name} </span>}
+                {footerConfig?.show_site_name !== false && <span>{site?.site_name || 'Site'}</span>}
                 . All rights reserved.
               </>
             )}
           </p>
 
-          {/* Footer Links */}
-          {site?.footer_config?.footer_links && site.footer_config.footer_links.length > 0 && (
+          {/* Footer Links + Fixed Pages */}
+          {(footerConfig?.footer_links?.length > 0 || fixedPages.length > 0 || footerSocialLinks.length > 0) && (
             <div className="flex flex-wrap justify-center gap-4 text-xs">
-              {site.footer_config.footer_links.map((link, idx) => (
+              {/* 手動リンク */}
+              {footerConfig?.footer_links?.map((link, idx) => (
                 <a
-                  key={idx}
+                  key={`manual-${idx}`}
                   href={link.href}
                   className="hover:text-stone-300 transition-colors"
                 >
                   {link.label}
+                </a>
+              ))}
+
+              {/* 固定ページ */}
+              {fixedPages.map(page => (
+                <a
+                  key={`fixed-${page.id}`}
+                  href={`/${page.slug}`}
+                  className="hover:text-stone-300 transition-colors"
+                >
+                  {page.title}
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Footer SNS */}
+          {footerSocialLinks.length > 0 && (
+            <div className="flex justify-center gap-4">
+              {footerSocialLinks.map(link => (
+                <a
+                  key={link.platform}
+                  href={link.url}
+                  target={link.open_new_tab ? '_blank' : '_self'}
+                  rel="noreferrer"
+                  className="text-stone-500 hover:text-stone-300 transition-colors text-xs"
+                  title={link.platform}
+                >
+                  {link.platform}
                 </a>
               ))}
             </div>

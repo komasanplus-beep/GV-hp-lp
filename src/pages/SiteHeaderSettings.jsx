@@ -8,24 +8,40 @@ import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, Plus, Trash2, Loader2, Eye, ArrowUp, ArrowDown } from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Loader2, Eye, ArrowUp, ArrowDown, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
+
+const SNS_PLATFORMS = [
+  { key: 'x', label: 'X (Twitter)' },
+  { key: 'threads', label: 'Threads' },
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'line', label: 'LINE' },
+  { key: 'linkedin', label: 'LinkedIn' },
+  { key: 'note', label: 'note' },
+  { key: 'tiktok', label: 'TikTok' },
+];
 
 export default function SiteHeaderSettings() {
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get('site_id');
+  const queryClient = useQueryClient();
 
-  const [headerConfig, setHeaderConfig] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
   const [formData, setFormData] = useState({
     logo_url: '',
+    logo_image_url: '',
+    logo_alt: '',
     site_name_text: '',
     booking_button_text: 'ご予約',
     booking_button_url: '#booking',
     show_admin_link: false,
     menu_items: [],
+    auto_menu_pages: [],
+    social_links: [],
   });
-
-  const queryClient = useQueryClient();
+  const [pages, setPages] = useState([]);
+  const [newMenuItem, setNewMenuItem] = useState({ label: '', href: '', is_visible: true });
 
   const { data: site, isLoading: siteLoading } = useQuery({
     queryKey: ['site', siteId],
@@ -33,44 +49,84 @@ export default function SiteHeaderSettings() {
     enabled: !!siteId,
   });
 
+  const { data: sitePages = [] } = useQuery({
+    queryKey: ['sitePages', siteId],
+    queryFn: () => siteId ? base44.entities.SitePage.filter({ site_id: siteId }, 'sort_order') : Promise.resolve([]),
+    enabled: !!siteId,
+  });
+
+  useEffect(() => {
+    if (sitePages.length > 0) {
+      setPages(sitePages);
+    }
+  }, [sitePages]);
+
   useEffect(() => {
     if (site) {
       const navConfig = site.navigation_config || {};
       setFormData({
-        logo_url: navConfig.logo_url || site.logo_url || '',
+        logo_url: navConfig.logo_url || '',
+        logo_image_url: navConfig.logo_image_url || '',
+        logo_alt: navConfig.logo_alt || '',
         site_name_text: navConfig.site_name_text || site.site_name || '',
         booking_button_text: navConfig.booking_button_text || 'ご予約',
         booking_button_url: navConfig.booking_button_url || '#booking',
         show_admin_link: navConfig.show_admin_link ?? false,
         menu_items: navConfig.menu_items || [],
+        auto_menu_pages: navConfig.auto_menu_pages || [],
+        social_links: navConfig.social_links || [],
       });
     }
   }, [site]);
 
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
+      let finalData = { ...formData };
+
+      // ロゴ画像がアップロードされている場合は保存
+      if (logoFile) {
+        const uploadRes = await base44.integrations.Core.UploadFile({ file: logoFile });
+        finalData.logo_image_url = uploadRes.file_url;
+      }
+
+      // alt テキストが空の場合はサイト名を使用
+      if (!finalData.logo_alt) {
+        finalData.logo_alt = formData.site_name_text || site.site_name;
+      }
+
       const navConfig = {
-        logo_url: formData.logo_url,
-        site_name_text: formData.site_name_text,
-        booking_button_text: formData.booking_button_text,
-        booking_button_url: formData.booking_button_url,
-        show_admin_link: formData.show_admin_link,
-        menu_items: formData.menu_items,
+        logo_url: finalData.logo_url,
+        logo_image_url: finalData.logo_image_url,
+        logo_alt: finalData.logo_alt,
+        site_name_text: finalData.site_name_text,
+        booking_button_text: finalData.booking_button_text,
+        booking_button_url: finalData.booking_button_url,
+        show_admin_link: finalData.show_admin_link,
+        menu_items: finalData.menu_items,
+        auto_menu_pages: finalData.auto_menu_pages,
+        social_links: finalData.social_links,
       };
+
       return base44.entities.Site.update(siteId, { navigation_config: navConfig });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['site', siteId] });
       queryClient.invalidateQueries({ queryKey: ['siteViewData'] });
+      setLogoFile(null);
       toast.success('ヘッダー設定を保存しました');
+    },
+    onError: (err) => {
+      toast.error(`保存エラー: ${err.message}`);
     },
   });
 
   const addMenuItem = () => {
+    if (!newMenuItem.label || !newMenuItem.href) return;
     setFormData(p => ({
       ...p,
-      menu_items: [...p.menu_items, { label: '新項目', href: '#', sort_order: p.menu_items.length, is_visible: true }]
+      menu_items: [...p.menu_items, { ...newMenuItem, sort_order: p.menu_items.length }]
     }));
+    setNewMenuItem({ label: '', href: '', is_visible: true });
   };
 
   const updateMenuItem = (idx, field, value) => {
@@ -91,14 +147,40 @@ export default function SiteHeaderSettings() {
     const items = [...formData.menu_items];
     if (direction === -1 && idx === 0) return;
     if (direction === 1 && idx === items.length - 1) return;
-    
-    const newIdx = idx + direction;
-    [items[idx], items[newIdx]] = [items[newIdx], items[idx]];
-    
+    [items[idx], items[idx + direction]] = [items[idx + direction], items[idx]];
     setFormData(p => ({
       ...p,
       menu_items: items.map((item, i) => ({ ...item, sort_order: i }))
     }));
+  };
+
+  const toggleAutoMenuPage = (pageId, enabled) => {
+    setFormData(p => {
+      if (enabled) {
+        return {
+          ...p,
+          auto_menu_pages: p.auto_menu_pages.filter(m => m.page_id !== pageId)
+        };
+      } else {
+        return {
+          ...p,
+          auto_menu_pages: [...p.auto_menu_pages, { page_id: pageId, show_in_header: true, sort_order: p.auto_menu_pages.length }]
+        };
+      }
+    });
+  };
+
+  const updateSocialLink = (platform, field, value) => {
+    setFormData(p => {
+      const existing = p.social_links.find(s => s.platform === platform);
+      if (existing) {
+        return {
+          ...p,
+          social_links: p.social_links.map(s => s.platform === platform ? { ...s, [field]: value } : s)
+        };
+      }
+      return p;
+    });
   };
 
   if (!siteId || siteLoading) {
@@ -111,10 +193,12 @@ export default function SiteHeaderSettings() {
     );
   }
 
+  const publishedPages = pages.filter(p => p.status === 'published');
+
   return (
     <ProtectedRoute requiredRole="admin">
       <UserLayout title="ヘッダー設定">
-        <div className="max-w-3xl space-y-6">
+        <div className="max-w-4xl space-y-6">
           <div className="flex items-center gap-3">
             <Link to={`${createPageUrl('SitePageManager')}?site_id=${siteId}`}>
               <Button variant="outline" size="icon">
@@ -138,14 +222,58 @@ export default function SiteHeaderSettings() {
           <Card className="p-6">
             <h3 className="font-semibold text-slate-800 mb-4">ロゴ・サイト名</h3>
             <div className="space-y-4">
+              {/* ロゴアップロード */}
               <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">ロゴ URL</label>
+                <label className="text-sm font-medium text-slate-700 mb-2 block">ロゴ画像</label>
+                <div className="text-xs text-slate-500 mb-2">推奨サイズ: 240×80px | 推奨形式: PNG / SVG</div>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center">
+                  {formData.logo_image_url ? (
+                    <div className="space-y-3">
+                      <img src={formData.logo_image_url} alt="ロゴプレビュー" className="h-16 mx-auto" />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setFormData(p => ({ ...p, logo_image_url: '' }))}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />削除
+                      </Button>
+                    </div>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center gap-2">
+                      <Upload className="w-6 h-6 text-slate-400" />
+                      <span className="text-sm text-slate-600">クリックしてアップロード</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* ロゴURL */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ロゴ URL（アップロード未使用時）</label>
                 <Input
                   value={formData.logo_url}
                   onChange={e => setFormData(p => ({ ...p, logo_url: e.target.value }))}
                   placeholder="https://..."
                 />
               </div>
+
+              {/* ロゴAlt */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">ロゴ alt テキスト</label>
+                <Input
+                  value={formData.logo_alt}
+                  onChange={e => setFormData(p => ({ ...p, logo_alt: e.target.value }))}
+                  placeholder="空白の場合はサイト名を使用"
+                />
+              </div>
+
+              {/* サイト名 */}
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名</label>
                 <Input
@@ -157,10 +285,38 @@ export default function SiteHeaderSettings() {
             </div>
           </Card>
 
-          {/* メニュー項目 */}
+          {/* ページ連動メニュー */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-slate-800 mb-4">ページ連動メニュー</h3>
+            <div className="space-y-2">
+              {publishedPages.length === 0 ? (
+                <p className="text-sm text-slate-500">公開済みページがありません</p>
+              ) : (
+                publishedPages.map(page => {
+                  const isIncluded = formData.auto_menu_pages.some(m => m.page_id === page.id);
+                  return (
+                    <label key={page.id} className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                      <input
+                        type="checkbox"
+                        checked={isIncluded}
+                        onChange={(e) => toggleAutoMenuPage(page.id, isIncluded)}
+                        className="w-4 h-4 rounded"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm text-slate-700">{page.title}</p>
+                        <p className="text-xs text-slate-400">/{page.slug}</p>
+                      </div>
+                    </label>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+
+          {/* 手動リンク */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-800">メニュー項目</h3>
+              <h3 className="font-semibold text-slate-800">手動追加リンク</h3>
               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1" onClick={addMenuItem}>
                 <Plus className="w-4 h-4" />追加
               </Button>
@@ -174,26 +330,28 @@ export default function SiteHeaderSettings() {
                       <Input
                         value={item.label}
                         onChange={e => updateMenuItem(idx, 'label', e.target.value)}
-                        placeholder="例: About"
+                        placeholder="例: ブログ"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-slate-600 mb-1 block">リンク</label>
+                      <label className="text-xs font-medium text-slate-600 mb-1 block">URL</label>
                       <Input
                         value={item.href}
                         onChange={e => updateMenuItem(idx, 'href', e.target.value)}
-                        placeholder="例: #about or /page"
+                        placeholder="例: #about or /blog"
                       />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={item.is_visible}
-                      onChange={e => updateMenuItem(idx, 'is_visible', e.target.checked)}
-                      className="w-4 h-4 rounded"
-                    />
-                    <label className="text-sm text-slate-600">表示</label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={item.is_visible}
+                        onChange={e => updateMenuItem(idx, 'is_visible', e.target.checked)}
+                        className="w-4 h-4 rounded"
+                      />
+                      表示
+                    </label>
                     <div className="ml-auto flex gap-1">
                       <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveMenuItem(idx, -1)} disabled={idx === 0}>
                         <ArrowUp className="w-3 h-3" />
@@ -208,6 +366,61 @@ export default function SiteHeaderSettings() {
                   </div>
                 </div>
               ))}
+            </div>
+          </Card>
+
+          {/* SNS設定 */}
+          <Card className="p-6">
+            <h3 className="font-semibold text-slate-800 mb-4">SNS リンク</h3>
+            <div className="space-y-4">
+              {SNS_PLATFORMS.map(platform => {
+                const link = formData.social_links.find(s => s.platform === platform.key) || {
+                  platform: platform.key,
+                  url: '',
+                  show_in_header: false,
+                  show_in_footer: false,
+                  open_new_tab: true,
+                };
+                return (
+                  <div key={platform.key} className="border border-slate-200 rounded-lg p-4 space-y-3">
+                    <h4 className="font-medium text-slate-700">{platform.label}</h4>
+                    <Input
+                      value={link.url}
+                      onChange={e => updateSocialLink(platform.key, 'url', e.target.value)}
+                      placeholder={`${platform.label} URL`}
+                    />
+                    <div className="flex items-center gap-6 text-sm">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={link.show_in_header}
+                          onChange={e => updateSocialLink(platform.key, 'show_in_header', e.target.checked)}
+                          className="w-4 h-4 rounded"
+                        />
+                        ヘッダーに表示
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={link.show_in_footer}
+                          onChange={e => updateSocialLink(platform.key, 'show_in_footer', e.target.checked)}
+                          className="w-4 h-4 rounded"
+                        />
+                        フッターに表示
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={link.open_new_tab}
+                          onChange={e => updateSocialLink(platform.key, 'open_new_tab', e.target.checked)}
+                          className="w-4 h-4 rounded"
+                        />
+                        新規タブで開く
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Card>
 
@@ -231,15 +444,15 @@ export default function SiteHeaderSettings() {
                   placeholder="#booking"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.show_admin_link}
                   onChange={e => setFormData(p => ({ ...p, show_admin_link: e.target.checked }))}
                   className="w-4 h-4 rounded"
                 />
-                <label className="text-sm text-slate-600">管理者ログインリンクを表示</label>
-              </div>
+                <span className="text-sm text-slate-600">管理者ログインリンクを表示</span>
+              </label>
             </div>
           </Card>
 

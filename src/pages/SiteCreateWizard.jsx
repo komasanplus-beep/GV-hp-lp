@@ -56,15 +56,27 @@ export default function SiteCreateWizard() {
 
     setIsLoading(true);
     try {
-      const res = await base44.functions.invoke('generateCompleteSite', {
+      // サイト基本情報作成
+      const siteRes = await base44.functions.invoke('generateCompleteSite', {
         business_type: selectedType,
         site_name: siteName.trim(),
+        template_type: selectedType, // テンプレートタイプを指定
       });
 
-      if (res.data.status === 'success') {
-        // プレビューページへ自動遷移
-        window.location.href = res.data.preview_url;
+      if (siteRes.data.status !== 'success') {
+        throw new Error(siteRes.data.error || 'Site creation failed');
       }
+
+      const siteId = siteRes.data.site.id;
+
+      // テンプレートに応じた初期ページを生成
+      await base44.functions.invoke('createSiteWithTemplate', {
+        site_id: siteId,
+        template_type: selectedType,
+      });
+
+      // ページ管理画面へ遷移
+      window.location.href = `/SitePageManager?site_id=${siteId}`;
     } catch (error) {
       console.error('Site creation failed:', error);
       alert(`エラー: ${error.response?.data?.error || error.message}`);
