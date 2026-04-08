@@ -11,6 +11,7 @@ import BlogPage from './pages/BlogPage'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminServices from './pages/AdminServices'
 import AdminLPCodeCreator from './pages/AdminLPCodeCreator'
+import AdminLPList from './pages/AdminLPList'
 import SiteHeaderSettings from './pages/SiteHeaderSettings'
 import SiteFooterSettings from './pages/SiteFooterSettings'
 import SiteSeoSettings from './pages/SiteSeoSettings'
@@ -30,7 +31,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -111,6 +112,11 @@ const AuthenticatedApp = () => {
       <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="/AdminServices" element={<AdminServices />} />
       <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />
+      <Route path="/AdminLPList" element={<AdminLPList />} />
+      {/* Redirect legacy LP AI generation routes to LP management */}
+      <Route path="/AdminLPGenerate" element={<Navigate to="/AdminLPList" replace />} />
+      <Route path="/admin/lp-ai" element={<Navigate to="/AdminLPList" replace />} />
+      <Route path="/admin/lp/ai" element={<Navigate to="/AdminLPList" replace />} />
       <Route path="/SiteHeaderSettings" element={<SiteHeaderSettings />} />
       <Route path="/SiteFooterSettings" element={<SiteFooterSettings />} />
       <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
