@@ -39,7 +39,7 @@ const defaultForm = {
   category: 'salon',
   description: '',
   preview_image: '',
-  structure: JSON.stringify(DEFAULT_STRUCTURE, null, 2),
+  default_blocks: JSON.stringify(DEFAULT_STRUCTURE, null, 2),
   is_active: true,
 };
 
@@ -56,9 +56,9 @@ export default function MasterTemplates() {
 
   const saveMutation = useMutation({
     mutationFn: (data) => {
-      let structure;
-      try { structure = JSON.parse(data.structure); } catch { structure = {}; }
-      const payload = { ...data, structure };
+      let default_blocks;
+      try { default_blocks = JSON.parse(data.default_blocks); } catch { default_blocks = {}; }
+      const payload = { ...data, default_blocks };
       return editing?.id
         ? base44.entities.SiteTemplate.update(editing.id, payload)
         : base44.entities.SiteTemplate.create(payload);
@@ -86,7 +86,7 @@ export default function MasterTemplates() {
 
   const openEdit = (t) => {
     setEditing(t);
-    setForm({ name: t.name, category: t.category || 'salon', description: t.description || '', preview_image: t.preview_image || '', structure: JSON.stringify(t.structure || DEFAULT_STRUCTURE, null, 2), is_active: t.is_active !== false });
+    setForm({ name: t.name, category: t.category || 'salon', description: t.description || '', preview_image: t.preview_image || '', default_blocks: JSON.stringify(t.default_blocks || DEFAULT_STRUCTURE, null, 2), is_active: t.is_active !== false });
     setShowDialog(true);
   };
 
@@ -195,8 +195,8 @@ export default function MasterTemplates() {
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">ブロック構造（JSON）</label>
               <Textarea
-                value={form.structure}
-                onChange={e => setForm(p => ({ ...p, structure: e.target.value }))}
+                value={form.default_blocks}
+                onChange={e => setForm(p => ({ ...p, default_blocks: e.target.value }))}
                 rows={10}
                 className="font-mono text-xs"
                 placeholder='{"blocks": [...]}'
