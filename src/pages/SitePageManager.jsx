@@ -3,17 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search, AlertTriangle } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
-import PageBlocksList from '@/components/site/PageBlocksList';
+
 import BackupManager from '@/components/site/BackupManager';
 import { createBackup } from '@/lib/backup';
 
@@ -34,13 +34,14 @@ const PAGE_ICONS = {
 };
 
 export default function SitePageManager() {
+  const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get('site_id');
 
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ title: '', slug: '', page_type: 'custom', status: 'draft' });
-  const [expandedPageId, setExpandedPageId] = useState(null);
+
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetConfirmText, setResetConfirmText] = useState('');
   const [isResetting, setIsResetting] = useState(false);
@@ -105,7 +106,7 @@ export default function SitePageManager() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-slate-800">ページ管理</h2>
-              <p className="text-sm text-slate-500 mt-0.5">各ページのブロックを編集できます</p>
+              <p className="text-sm text-slate-500 mt-0.5">ページを管理・編集できます</p>
             </div>
             <div className="flex gap-3">
               {sites.length > 1 && (
@@ -199,15 +200,6 @@ export default function SitePageManager() {
                         <CardContent className="p-0">
                           {/* Page Header */}
                           <div className="py-4 px-5 flex items-center gap-4">
-                            <button
-                              onClick={() => setExpandedPageId(expandedPageId === page.id ? null : page.id)}
-                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
-                            >
-                              <ChevronDown className={cn(
-                                "w-5 h-5 transition-transform",
-                                expandedPageId === page.id ? 'rotate-180' : ''
-                              )} />
-                            </button>
                             <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-base flex-shrink-0">
                               {PAGE_ICONS[page.page_type] || '📄'}
                             </div>
@@ -224,8 +216,13 @@ export default function SitePageManager() {
                               <p className="text-xs text-slate-400 mt-0.5">/{page.slug}</p>
                             </div>
                             <div className="flex gap-2 flex-shrink-0">
-                              <Button variant="ghost" size="icon" onClick={() => openEdit(page)}>
-                                <Pencil className="w-4 h-4 text-slate-400" />
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => navigate(`/SiteBlockEditor?site_id=${selectedSiteId}&page_id=${page.id}`)}
+                                className="gap-1.5"
+                              >
+                                <Pencil className="w-4 h-4" />編集
                               </Button>
                               <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(page.id)}>
                                 <Trash2 className="w-4 h-4 text-red-400" />
@@ -233,16 +230,7 @@ export default function SitePageManager() {
                             </div>
                           </div>
 
-                          {/* Block List (Expanded) */}
-                          {expandedPageId === page.id && (
-                            <div className="border-t border-slate-200 py-4 px-5 bg-slate-50/50">
-                              <PageBlocksList
-                                pageId={page.id}
-                                siteId={selectedSiteId}
-                                onUpdate={() => queryClient.invalidateQueries({ queryKey: ['sitePages'] })}
-                              />
-                            </div>
-                          )}
+
                         </CardContent>
                       </Card>
                     ))}
