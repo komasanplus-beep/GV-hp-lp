@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, ArrowLeft, Eye, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import PostEditor from '@/components/post/PostEditor';
+import { useCallback } from 'react';
 import PostSeoPanel from '@/components/post/PostSeoPanel';
 import PostCategoryTagPanel from '@/components/post/PostCategoryTagPanel';
 import AIPostGeneratorPanel from '@/components/post/AIPostGeneratorPanel';
@@ -63,6 +64,13 @@ export default function AdminPostEdit() {
   });
   const [slugTouched, setSlugTouched] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
+
+  const handleContentChange = useCallback((newContent) => {
+    setForm(p => {
+      if (p.content === newContent) return p; // prevent loops
+      return { ...p, content: newContent };
+    });
+  }, [setForm]);
 
   // AI feature access
   const { data: aiAccess } = useFeatureAccess('ai_post_generation');
@@ -269,7 +277,7 @@ export default function AdminPostEdit() {
               <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <PostEditor
                   content={form.content}
-                  onChange={v => setForm(p => ({ ...p, content: v }))}
+                  onChange={handleContentChange}
                 />
               </div>
             </div>

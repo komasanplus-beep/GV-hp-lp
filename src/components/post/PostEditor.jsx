@@ -21,7 +21,7 @@ const FORMATS = [
   'link', 'image', 'video',
 ];
 
-export default function PostEditor({ value, onChange }) {
+export default function PostEditor({ content, onChange }) {
   const quillRef = useRef(null);
 
   // 画像アップロードハンドラ
@@ -53,7 +53,7 @@ export default function PostEditor({ value, onChange }) {
     <div className="post-editor-wrap">
       <ReactQuill
         ref={quillRef}
-        value={value || ''}
+        value={content || ''}
         onChange={onChange}
         modules={modules}
         formats={FORMATS}
