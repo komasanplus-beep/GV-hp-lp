@@ -42,7 +42,6 @@ const menuGroups = [
     icon: Layers,
     children: [
       { name: 'LP管理', icon: FileText, page: 'AdminLPList' },
-      { name: 'LP AI生成', icon: Sparkles, page: 'AdminLPGenerate' },
     ],
   },
   {
@@ -87,7 +86,6 @@ const PAGE_FEATURE_MAP = {
   AdminRooms: 'site_builder',
   AdminSiteList: 'site_builder',
   AdminLPList: 'lp_builder',
-  AdminLPGenerate: 'lp_builder',
   AdminABTest: 'lp_builder',
   AdminLPAnalytics: 'lp_builder',
   AdminDomainSettings: 'domain_manage',
