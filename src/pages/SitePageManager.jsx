@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search, ChevronDown } from 'lucide-react';
+import { Plus, FileText, Pencil, Trash2, Loader2, Layout, ArrowRight, Globe, Eye, Zap, Edit3, Search, ChevronDown, AlertTriangle } from 'lucide-react';
 import { toast as sonnerToast } from 'sonner';
 import { cn } from '@/lib/utils';
 import PageBlocksList from '@/components/site/PageBlocksList';
@@ -39,6 +39,9 @@ export default function SitePageManager() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ title: '', slug: '', page_type: 'custom', status: 'draft' });
   const [expandedPageId, setExpandedPageId] = useState(null);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: sites = [] } = useQuery({
@@ -137,22 +140,7 @@ export default function SitePageManager() {
                       <Eye className="w-3.5 h-3.5" />プレビュー
                     </Button>
                   </a>
-                  <Button 
-                    onClick={async () => {
-                      try {
-                        const res = await base44.functions.invoke('migrateHomeToSiteBlocks', { site_id: selectedSiteId });
-                        sonnerToast.success(`${res.data.blocks_created}個のブロックを移植しました`);
-                        queryClient.invalidateQueries({ queryKey: ['sitePages'] });
-                      } catch (err) {
-                        sonnerToast.error('移植に失敗しました: ' + err.message);
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5"
-                  >
-                    <Zap className="w-3.5 h-3.5" />データを初期化
-                  </Button>
+
                   <Button onClick={openNew} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
                     <Plus className="w-4 h-4" />ページ追加
                   </Button>
@@ -260,6 +248,108 @@ export default function SitePageManager() {
             </>
           )}
         </div>
+
+        {/* ── 危険ゾーン ── */}
+        {selectedSiteId && (
+          <div className="mt-10 border-2 border-red-200 bg-red-50/60 rounded-xl p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <h3 className="text-base font-semibold text-red-700">データ管理（危険操作）</h3>
+            </div>
+            <p className="text-sm text-red-600 leading-relaxed mb-4">
+              この操作を行うと、現在のサイトに登録されているページ・ブロック・サービス・記事などのデータがすべて削除され、初期状態に戻ります。<br />
+              <strong>この操作は元に戻すことができません。</strong><br /><br />
+              主に以下のような場合に使用します：<br />
+              ・サイトを作り直したい場合<br />
+              ・テンプレートを初期状態から再生成したい場合
+            </p>
+            <Button
+              variant="destructive"
+              className="gap-2"
+              onClick={() => { setResetConfirmText(''); setShowResetModal(true); }}
+            >
+              <AlertTriangle className="w-4 h-4" />データを初期化する
+            </Button>
+          </div>
+        )}
+
+        {/* ── 初期化確認モーダル ── */}
+        {showResetModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <h2 className="text-lg font-bold text-slate-900">本当に初期化しますか？</h2>
+              </div>
+              <p className="text-sm text-slate-600 mb-5 leading-relaxed">
+                この操作により、すべてのデータが削除されます。<br />
+                <strong className="text-red-600">元に戻すことはできません。</strong>
+              </p>
+              <div className="bg-slate-50 rounded-lg p-4 mb-5">
+                <p className="text-sm font-medium text-slate-700 mb-2">
+                  実行する場合は <code className="bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-mono">DELETE</code> と入力してください
+                </p>
+                <input
+                  type="text"
+                  value={resetConfirmText}
+                  onChange={e => setResetConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-400"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowResetModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                  disabled={isResetting}
+                >
+                  キャンセル
+                </button>
+                <button
+                  disabled={resetConfirmText !== 'DELETE' || isResetting}
+                  onClick={async () => {
+                    setIsResetting(true);
+                    try {
+                      // SitePage 全削除
+                      const pages = await base44.entities.SitePage.filter({ site_id: selectedSiteId });
+                      for (const p of pages) await base44.entities.SitePage.delete(p.id);
+
+                      // SiteBlock 全削除
+                      const blocks = await base44.entities.SiteBlock.filter({ site_id: selectedSiteId });
+                      for (const b of blocks) await base44.entities.SiteBlock.delete(b.id);
+
+                      // Service 全削除
+                      const services = await base44.entities.Service.filter({ site_id: selectedSiteId });
+                      for (const s of services) await base44.entities.Service.delete(s.id);
+
+                      // Post 全削除
+                      const posts = await base44.entities.Post.filter({ site_id: selectedSiteId });
+                      for (const po of posts) await base44.entities.Post.delete(po.id);
+
+                      queryClient.invalidateQueries({ queryKey: ['sitePages'] });
+                      setShowResetModal(false);
+                      sonnerToast.success('データを初期化しました');
+                    } catch (err) {
+                      sonnerToast.error('初期化に失敗しました: ' + err.message);
+                    } finally {
+                      setIsResetting(false);
+                      setResetConfirmText('');
+                    }
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                >
+                  {isResetting
+                    ? <><Loader2 className="w-4 h-4 animate-spin" />初期化中...</>
+                    : <><AlertTriangle className="w-4 h-4" />初期化を実行する</>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dialog */}
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
