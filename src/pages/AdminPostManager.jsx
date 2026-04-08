@@ -51,6 +51,7 @@ function PostsTab({ siteId }) {
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterTarget, setFilterTarget] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [deletePost, setDeletePost] = useState(null);
 
@@ -85,6 +86,12 @@ function PostsTab({ siteId }) {
     if (filterType !== 'all' && p.post_type !== filterType) return false;
     if (filterStatus !== 'all' && p.status !== filterStatus) return false;
     if (searchQuery && !p.title?.includes(searchQuery)) return false;
+    if (filterTarget !== 'all') {
+      const targets = p.display_targets || { show_on_home: true, show_on_lp: false };
+      if (filterTarget === 'home' && !targets.show_on_home) return false;
+      if (filterTarget === 'lp' && !targets.show_on_lp) return false;
+      if (filterTarget === 'both' && !(targets.show_on_home && targets.show_on_lp)) return false;
+    }
     return true;
   });
 
@@ -120,6 +127,17 @@ function PostsTab({ siteId }) {
               {STATUSES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
             </SelectContent>
           </Select>
+          <Select value={filterTarget} onValueChange={setFilterTarget}>
+            <SelectTrigger className="w-40 h-9">
+              <SelectValue placeholder="表示先" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">すべて</SelectItem>
+              <SelectItem value="home">ホームページのみ</SelectItem>
+              <SelectItem value="lp">LPのみ</SelectItem>
+              <SelectItem value="both">HP + LP</SelectItem>
+            </SelectContent>
+          </Select>
           <span className="text-xs text-slate-400">{filtered.length} 件</span>
         </div>
         <Button
@@ -151,11 +169,12 @@ function PostsTab({ siteId }) {
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           {/* ヘッダー */}
-          <div className="hidden md:grid grid-cols-[auto_1fr_120px_100px_130px_100px] gap-4 px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500">
+          <div className="hidden md:grid grid-cols-[auto_1fr_120px_100px_100px_130px_100px] gap-4 px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500">
             <span className="w-14">画像</span>
             <span>タイトル</span>
             <span>種別</span>
             <span>ステータス</span>
+            <span>表示先</span>
             <span>投稿日</span>
             <span>操作</span>
           </div>
@@ -163,8 +182,10 @@ function PostsTab({ siteId }) {
             {filtered.map(post => {
               const type = typeLabel(post.post_type);
               const status = statusLabel(post.status);
+              const targets = post.display_targets || { show_on_home: true, show_on_lp: false };
+              const targetText = targets.show_on_home && targets.show_on_lp ? 'HP+LP' : targets.show_on_home ? 'HP' : targets.show_on_lp ? 'LP' : '非表示';
               return (
-                <div key={post.id} className="grid md:grid-cols-[auto_1fr_120px_100px_130px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-50 transition-colors">
+                <div key={post.id} className="grid md:grid-cols-[auto_1fr_120px_100px_100px_130px_100px] gap-4 items-center px-4 py-3 hover:bg-slate-50 transition-colors">
                   {/* サムネ */}
                   <div className="w-14 h-10 bg-slate-100 rounded overflow-hidden flex-shrink-0">
                     {post.featured_image_url ? (
@@ -198,6 +219,12 @@ function PostsTab({ siteId }) {
                     >
                       {status.label}
                     </button>
+                  </div>
+                  {/* 表示先 */}
+                  <div>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
+                      {targetText}
+                    </span>
                   </div>
                   {/* 投稿日 */}
                   <div className="text-xs text-slate-400">

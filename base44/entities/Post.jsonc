@@ -50,7 +50,10 @@
               "image",
               "list",
               "quote",
-              "separator"
+              "separator",
+              "button",
+              "code",
+              "table"
             ],
             "description": "\u30d6\u30ed\u30c3\u30af\u7a2e\u985e"
           },
@@ -173,6 +176,61 @@
         "type": "string"
       },
       "description": "\u30bf\u30b0ID\u914d\u5217"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u30c8\u30c3\u30d7\u8868\u793a\u30d5\u30e9\u30b0"
+    },
+    "display_targets": {
+      "type": "object",
+      "default": {
+        "show_on_home": true,
+        "show_on_lp": false,
+        "home_page_ids": [],
+        "lp_ids": []
+      },
+      "description": "\u8868\u793a\u5148\u8a2d\u5b9a\uff08\u30db\u30fc\u30e0\u30da\u30fc\u30b8/LP\uff09",
+      "properties": {
+        "show_on_home": {
+          "type": "boolean",
+          "default": true,
+          "description": "\u30db\u30fc\u30e0\u30da\u30fc\u30b8\u306b\u8868\u793a"
+        },
+        "show_on_lp": {
+          "type": "boolean",
+          "default": false,
+          "description": "LP\u306b\u8868\u793a"
+        },
+        "home_page_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u30db\u30fc\u30e0\u30da\u30fc\u30b8\u306e\u8868\u793a\u5bfe\u8c61\u30da\u30fc\u30b8ID\u914d\u5217"
+        },
+        "lp_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u8868\u793a\u5bfe\u8c61LP\u306eID\u914d\u5217"
+        }
+      }
+    },
+    "generate_toc": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u76ee\u6b21\u751f\u6210\u30d5\u30e9\u30b0"
+    },
+    "ai_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI\u751f\u6210\u30d5\u30e9\u30b0"
+    },
+    "ai_prompt": {
+      "type": "string",
+      "description": "AI\u751f\u6210\u6642\u306e\u30d7\u30ed\u30f3\u30d7\u30c8"
     }
   },
   "required": [

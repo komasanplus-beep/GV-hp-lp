@@ -61,6 +61,13 @@ export default function AdminPostEdit() {
     noindex: false,
     category_ids: [],
     tag_ids: [],
+    featured: false,
+    display_targets: {
+      show_on_home: true,
+      show_on_lp: false,
+      home_page_ids: [],
+      lp_ids: [],
+    },
   });
   const [slugTouched, setSlugTouched] = useState(false);
   const [isImageUploading, setIsImageUploading] = useState(false);
@@ -104,6 +111,19 @@ export default function AdminPostEdit() {
     queryKey: ['postTags', siteId],
     queryFn: () => base44.entities.PostTag.filter({ site_id: siteId }),
     enabled: !!siteId,
+  });
+
+  // ホームページの取得（表示先設定用）
+  const { data: homePages = [] } = useQuery({
+    queryKey: ['sitePages', siteId],
+    queryFn: () => base44.entities.SitePage.filter({ site_id: siteId }, 'sort_order'),
+    enabled: !!siteId,
+  });
+
+  // LPの取得（表示先設定用）
+  const { data: lps = [] } = useQuery({
+    queryKey: ['landingPages'],
+    queryFn: () => base44.entities.LandingPage.list('-created_date'),
   });
 
   // タイトル変更時にスラッグ自動生成
@@ -406,6 +426,48 @@ export default function AdminPostEdit() {
                 </CardContent>
               </Card>
 
+              {/* 表示先設定 */}
+              <Card>
+                <CardHeader className="pb-3 pt-4 px-4">
+                  <CardTitle className="text-sm">表示先設定</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 space-y-4">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.display_targets?.show_on_home ?? true}
+                        onChange={e => setForm(p => ({
+                          ...p,
+                          display_targets: { ...p.display_targets, show_on_home: e.target.checked }
+                        }))}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-sm text-slate-700">ホームページに表示</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={form.display_targets?.show_on_lp ?? false}
+                        onChange={e => setForm(p => ({
+                          ...p,
+                          display_targets: { ...p.display_targets, show_on_lp: e.target.checked }
+                        }))}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-sm text-slate-700">LPに表示</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-slate-600">トップに表示</label>
+                    <Switch
+                      checked={form.featured ?? false}
+                      onCheckedChange={v => setForm(p => ({ ...p, featured: v }))}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* SEO設定 */}
               <Card>
                 <CardHeader className="pb-3 pt-4 px-4">
@@ -416,7 +478,7 @@ export default function AdminPostEdit() {
                 </CardContent>
               </Card>
 
-            </div>
+              </div>
           </div>
           </div>
         </div>
