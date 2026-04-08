@@ -9,7 +9,6 @@ import LPTemplateSelector from './LPTemplateSelector';
 export default function LPCreationFlow({ open, onOpenChange, disabled }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showMethodModal, setShowMethodModal] = useState(open);
   const [selectedMethod, setSelectedMethod] = useState(null);
 
   const createMutation = useMutation({
@@ -46,15 +45,13 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
     onSuccess: (lp) => {
       queryClient.invalidateQueries({ queryKey: ['landingPages'] });
       queryClient.invalidateQueries({ queryKey: ['planUsage'] });
-      setShowMethodModal(false);
       setSelectedMethod(null);
       onOpenChange(false);
       
       // 選択した方法に応じて遷移
       if (selectedMethod === 'ai_text') {
-        navigate(createPageUrl('AdminLPGenerate'));
+        navigate(createPageUrl('AdminLPList?method=ai_text&id=' + lp.id));
       } else if (selectedMethod === 'ai_template') {
-        // テンプレート選択画面へ遷移（別途実装）
         navigate(createPageUrl(`AdminLPEditor?id=${lp.id}&showTemplateSelector=true`));
       } else if (selectedMethod === 'code_import') {
         navigate(createPageUrl('AdminLPCodeCreator'));
@@ -72,19 +69,15 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
       // 手動作成 - すぐにLP作成
       createMutation.mutate({});
     } else if (method === 'ai_text') {
-      // テキストからAI生成 - AdminLPGenerate へ遷移
-      setShowMethodModal(false);
+      // テキストからAI生成 - LP管理へ戻る（新規作成フローで処理）
       onOpenChange(false);
-      navigate(createPageUrl('AdminLPGenerate'));
+      navigate(createPageUrl('AdminLPList?method=ai_text'));
     } else if (method === 'ai_template') {
-      // テンプレートからAI生成 - テンプレート選択モーダルを表示
-      // 別途モーダルを表示する場合はここで処理
-      setShowMethodModal(false);
+      // テンプレートからAI生成
       onOpenChange(false);
-      navigate(createPageUrl('AdminLPList?showTemplateCreation=true'));
+      navigate(createPageUrl('AdminLPList?method=ai_template'));
     } else if (method === 'code_import') {
       // コード貼り付け - AdminLPCodeCreator へ遷移
-      setShowMethodModal(false);
       onOpenChange(false);
       navigate(createPageUrl('AdminLPCodeCreator'));
     }
@@ -92,11 +85,8 @@ export default function LPCreationFlow({ open, onOpenChange, disabled }) {
 
   return (
     <LPCreationMethodModal
-      open={showMethodModal}
-      onOpenChange={(open) => {
-        setShowMethodModal(open);
-        if (!open) onOpenChange(false);
-      }}
+      open={open}
+      onOpenChange={onOpenChange}
       onSelectMethod={handleSelectMethod}
     />
   );
