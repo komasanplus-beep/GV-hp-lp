@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import BlockRenderer from '@/components/lp/BlockRenderer';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
+import { generateThemeCSS } from '@/lib/lpThemeRenderer';
 
 function LPViewInner({ slug, preview, token }) {
+  const [themeCSS, setThemeCSS] = useState('');
+
   const { data: pages = [], isLoading: lpLoading } = useQuery({
     queryKey: ['lpBySlug', slug],
     queryFn: () => base44.entities.LandingPage.filter({ slug }),
@@ -20,6 +23,25 @@ function LPViewInner({ slug, preview, token }) {
 
   // 公開状態チェック（下書きで preview=true の場合は表示可）
   const canView = !lp || lp.status === 'published' || (preview === 'true');
+
+  // テーマ取得
+  const { data: themeData } = useQuery({
+    queryKey: ['siteTheme', siteId],
+    queryFn: async () => {
+      if (!siteId) return null;
+      const res = await base44.functions.invoke('getSiteTheme', { site_id: siteId });
+      return res.data?.theme;
+    },
+    enabled: !!siteId && lp?.use_site_theme,
+  });
+
+  // テーマCSSを生成
+  useEffect(() => {
+    if (themeData && lp?.use_site_theme) {
+      const css = generateThemeCSS(themeData);
+      setThemeCSS(css);
+    }
+  }, [themeData, lp?.use_site_theme]);
 
   const { data: blocks = [], isLoading: blocksLoading } = useQuery({
     queryKey: ['lpBlocksView', lp?.id],
@@ -102,8 +124,15 @@ function LPViewInner({ slug, preview, token }) {
   // ブロック型LP の表示
   return (
     <div className="min-h-screen">
+      {themeCSS && <style>{themeCSS}</style>}
       {blocks.map((block) => (
-        <BlockRenderer key={block.id} block={block} siteId={siteId} />
+        <BlockRenderer 
+          key={block.id} 
+          block={block} 
+          siteId={siteId} 
+          theme={themeData}
+          useTheme={lp?.use_site_theme}
+        />
       ))}
     </div>
   );

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import AIRegenerateButton from '@/components/lp/AIRegenerateButton';
 import SEOAnalyzePanel from '@/components/lp/SEOAnalyzePanel';
+import LPThemePanel from '@/components/lp/LPThemePanel';
 
 const ALL_BLOCK_TYPES = ['Hero','Problem','Solution','Feature','Benefit','Evidence','Voice','CaseStudy','Flow','Comparison','FAQ','CTA','Future','Pricing','Profile','Gallery','Video','List','Campaign','Countdown','Contact'];
 
@@ -253,6 +254,8 @@ export default function AdminLPEditor() {
             </div>
 
             <SEOAnalyzePanel lpId={lpId} />
+
+            <LPThemePanel lp={lp} siteId={lp?.site_id} onUpdate={() => queryClient.invalidateQueries({ queryKey: ['landingPage', lpId] })} />
 
             <div className="bg-amber-50 rounded-xl border border-amber-200 p-4 text-sm text-amber-800">
               <p className="font-medium mb-1">使い方</p>

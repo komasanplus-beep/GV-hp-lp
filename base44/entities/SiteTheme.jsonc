@@ -1,0 +1,125 @@
+{
+  "name": "SiteTheme",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "\u30b5\u30a4\u30c8ID"
+    },
+    "font_family_heading": {
+      "type": "string",
+      "default": "sans-serif",
+      "description": "\u898b\u51fa\u3057\u30d5\u30a9\u30f3\u30c8"
+    },
+    "font_family_body": {
+      "type": "string",
+      "default": "sans-serif",
+      "description": "\u672c\u6587\u30d5\u30a9\u30f3\u30c8"
+    },
+    "font_size_h1": {
+      "type": "number",
+      "default": 32,
+      "description": "H1\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(px)"
+    },
+    "font_size_h2": {
+      "type": "number",
+      "default": 24,
+      "description": "H2\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(px)"
+    },
+    "font_size_h3": {
+      "type": "number",
+      "default": 18,
+      "description": "H3\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(px)"
+    },
+    "font_size_body": {
+      "type": "number",
+      "default": 14,
+      "description": "\u672c\u6587\u30d5\u30a9\u30f3\u30c8\u30b5\u30a4\u30ba(px)"
+    },
+    "line_height_body": {
+      "type": "number",
+      "default": 1.6,
+      "description": "\u672c\u6587\u884c\u9593"
+    },
+    "section_spacing": {
+      "type": "number",
+      "default": 80,
+      "description": "\u30bb\u30af\u30b7\u30e7\u30f3\u9593\u4f59\u767d(px)"
+    },
+    "container_width": {
+      "type": "number",
+      "default": 1200,
+      "description": "\u6700\u5927\u30b3\u30f3\u30c6\u30ca\u5e45(px)"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#000000",
+      "description": "\u4e3b\u8272"
+    },
+    "accent_color": {
+      "type": "string",
+      "default": "#FF6B6B",
+      "description": "\u30a2\u30af\u30bb\u30f3\u30c8\u8272"
+    },
+    "background_color": {
+      "type": "string",
+      "default": "#FFFFFF",
+      "description": "\u80cc\u666f\u8272"
+    },
+    "card_radius": {
+      "type": "number",
+      "default": 8,
+      "description": "\u30ab\u30fc\u30c9\u30dc\u30fc\u30c0\u30fc\u534a\u5f84(px)"
+    },
+    "button_style": {
+      "type": "string",
+      "enum": [
+        "solid",
+        "outline",
+        "ghost"
+      ],
+      "default": "solid",
+      "description": "\u30dc\u30bf\u30f3\u30b9\u30bf\u30a4\u30eb"
+    },
+    "icon_style": {
+      "type": "string",
+      "enum": [
+        "circle",
+        "square",
+        "none"
+      ],
+      "default": "circle",
+      "description": "\u30a2\u30a4\u30b3\u30f3\u30b9\u30bf\u30a4\u30eb"
+    },
+    "apply_to_lp": {
+      "type": "boolean",
+      "default": true,
+      "description": "LP\u306b\u81ea\u52d5\u9069\u7528\u3059\u308b\u304b"
+    }
+  },
+  "required": [
+    "site_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

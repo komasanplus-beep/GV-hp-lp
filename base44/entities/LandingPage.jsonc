@@ -93,6 +93,15 @@
       "type": "string",
       "format": "date-time",
       "description": "\u516c\u958b\u65e5\u6642"
+    },
+    "use_site_theme": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u30b5\u30a4\u30c8\u5171\u901a\u30c6\u30fc\u30de\u3092\u9069\u7528\u3059\u308b\u304b"
+    },
+    "custom_theme_overrides": {
+      "type": "object",
+      "description": "LP\u500b\u5225\u306e\u30c6\u30fc\u30de\u4e0a\u66f8\u304d\u8a2d\u5b9a"
     }
   },
   "required": [

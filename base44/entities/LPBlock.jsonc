@@ -1,0 +1,85 @@
+{
+  "name": "LPBlock",
+  "type": "object",
+  "properties": {
+    "lp_id": {
+      "type": "string",
+      "description": "LandingPage \u306e ID"
+    },
+    "block_type": {
+      "type": "string",
+      "enum": [
+        "Hero",
+        "Problem",
+        "Solution",
+        "Feature",
+        "Benefit",
+        "Evidence",
+        "Voice",
+        "CaseStudy",
+        "Flow",
+        "Comparison",
+        "FAQ",
+        "CTA",
+        "Future",
+        "Pricing",
+        "Profile",
+        "Gallery",
+        "Video",
+        "List",
+        "Campaign",
+        "Countdown",
+        "Contact"
+      ],
+      "description": "\u30d6\u30ed\u30c3\u30af\u7a2e\u5225"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "\u8868\u793a\u9806\u5e8f"
+    },
+    "data": {
+      "type": "object",
+      "description": "\u30d6\u30ed\u30c3\u30af\u306e\u30b3\u30f3\u30c6\u30f3\u30c4 JSON"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u7528\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "use_site_theme": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u30b5\u30a4\u30c8\u5171\u901a\u30c6\u30fc\u30de\u3092\u9069\u7528\u3059\u308b\u304b"
+    },
+    "style_variant_key": {
+      "type": "string",
+      "description": "\u30b9\u30bf\u30a4\u30eb\u5909\u7a2e\u30ad\u30fc\uff08\u4f8b: dark, accent, minimal\uff09"
+    },
+    "custom_styles": {
+      "type": "object",
+      "description": "\u30d6\u30ed\u30c3\u30af\u500b\u5225\u30ab\u30b9\u30bf\u30e0\u30b9\u30bf\u30a4\u30eb"
+    }
+  },
+  "required": [
+    "lp_id",
+    "block_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
