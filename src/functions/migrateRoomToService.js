@@ -14,7 +14,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
  * POST /api/functions/migrateRoomToService
  * { "site_id": "site123" }
  */
-// deno-lint-ignore no-undef
+/* global Deno */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);

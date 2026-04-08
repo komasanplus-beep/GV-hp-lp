@@ -3,8 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   LayoutDashboard, Settings, LogOut, Layout, Sparkles, X, Store,
-  Link2, Globe, Shield, FileText, Search, ChevronDown,
-  Calendar, Users, Rss, Image, TrendingUp, BookOpen,
+  Link2, Globe, Shield, FileText, ChevronDown,
+  Calendar, Users, TrendingUp, BookOpen,
   Layers, Building2, GitBranch, Eye
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -33,7 +33,7 @@ const menuGroups = [
     icon: Globe,
     children: [
       { name: 'ページ管理', icon: Layout, page: 'SitePageManager' },
-      { name: 'サービス管理', icon: Building2, page: 'AdminRooms' },
+      { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
     ],
   },
   {
@@ -58,7 +58,6 @@ const menuGroups = [
     children: [
       { name: 'サイト設定', icon: Globe, page: 'AdminSiteList' },
       { name: 'ドメイン設定', icon: Link2, page: 'AdminDomainSettings' },
-      { name: 'SEO設定', icon: Search, page: 'SeoSettings' },
       { name: 'アカウント設定', icon: Settings, page: 'AdminSettings' },
     ],
   },
@@ -91,7 +90,7 @@ const PAGE_FEATURE_MAP = {
   AdminABTest: 'lp_manage',
   AdminLPAnalytics: 'lp_manage',
   AdminDomainSettings: 'domain_manage',
-  SeoSettings: 'seo_manage',
+  AdminServices: 'site_manage',
   AdminBookings: 'reservation_manage',
   AdminGuests: 'reservation_manage',
 };
