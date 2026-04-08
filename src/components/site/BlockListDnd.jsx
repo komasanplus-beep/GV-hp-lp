@@ -22,7 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { arrayMove } from '@dnd-kit/sortable';
-import { GripVertical, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { GripVertical, Pencil, Trash2, Loader2, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -39,7 +39,7 @@ import { toast } from 'sonner';
 /**
  * BlockItem - ドラッグ可能な個別ブロック
  */
-function BlockItem({ block, onEdit, onDelete }) {
+function BlockItem({ block, onEdit, onDelete, onConvert, isConverting }) {
   const {
     attributes,
     listeners,
@@ -94,6 +94,16 @@ function BlockItem({ block, onEdit, onDelete }) {
       <Button
         size="sm"
         variant="ghost"
+        onClick={() => onConvert(block)}
+        disabled={isConverting}
+        title="ページ化"
+        className="h-8 w-8 p-0 text-amber-400 hover:text-amber-600 hover:bg-amber-50 flex-shrink-0"
+      >
+        {isConverting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
         onClick={() => onEdit(block)}
         className="h-8 w-8 p-0 text-slate-400 hover:text-slate-600 flex-shrink-0"
       >
@@ -116,6 +126,7 @@ function BlockItem({ block, onEdit, onDelete }) {
  */
 export default function BlockListDnd({ blocks, pageId, siteId, onBlocksChange }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [convertingId, setConvertingId] = useState(null);
   const [localBlocks, setLocalBlocks] = useState(blocks);
   const queryClient = useQueryClient();
 
@@ -161,6 +172,21 @@ export default function BlockListDnd({ blocks, pageId, siteId, onBlocksChange })
     onError: (error) => {
       setLocalBlocks(blocks); // ロールバック
       toast.error('保存に失敗しました');
+    },
+  });
+
+  // ページ化mutation
+  const convertMutation = useMutation({
+    mutationFn: (blockId) => base44.functions.invoke('convertBlockToPage', { block_id: blockId }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['blocks', pageId] });
+      setConvertingId(null);
+      toast.success(`ページ化しました: /${res.data?.new_page_slug}`);
+      onBlocksChange?.();
+    },
+    onError: (error) => {
+      setConvertingId(null);
+      toast.error('ページ化に失敗しました: ' + error.message);
     },
   });
 
@@ -217,6 +243,11 @@ export default function BlockListDnd({ blocks, pageId, siteId, onBlocksChange })
                   );
                 }}
                 onDelete={setDeleteTarget}
+                onConvert={(b) => {
+                  setConvertingId(b.id);
+                  convertMutation.mutate(b.id);
+                }}
+                isConverting={convertingId === block.id}
               />
             ))}
           </div>

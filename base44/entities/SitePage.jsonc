@@ -24,6 +24,10 @@
         "custom"
       ]
     },
+    "parent_page_id": {
+      "type": "string",
+      "description": "\u89aa\u30da\u30fc\u30b8ID\uff08\u968e\u5c64\u69cb\u9020\uff09"
+    },
     "status": {
       "type": "string",
       "enum": [

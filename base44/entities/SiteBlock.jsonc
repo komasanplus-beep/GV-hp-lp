@@ -26,6 +26,7 @@
         "Campaign",
         "News",
         "Blog",
+        "Link",
         "Custom"
       ]
     },
@@ -39,6 +40,10 @@
     },
     "user_id": {
       "type": "string"
+    },
+    "linked_page_id": {
+      "type": "string",
+      "description": "\u30ea\u30f3\u30af\u5148\u30da\u30fc\u30b8ID\uff08\u30da\u30fc\u30b8\u5316\u6e08\u307f\u30d6\u30ed\u30c3\u30af\uff09"
     },
     "animation_type": {
       "type": "string",
