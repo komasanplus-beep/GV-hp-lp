@@ -31,7 +31,10 @@ Deno.serve(async (req) => {
     let subscriptions = [];
     try {
       subscriptions = await base44.asServiceRole.entities.Subscription.filter({ user_id });
-    } catch (_) { subscriptions = []; }
+    } catch (e) {
+      console.warn('resolveFeatureAccess: Subscription filter error:', e.message);
+      subscriptions = [];
+    }
     const subscription = subscriptions[0] || null;
 
     // ===== 2. PlanMaster から plan 情報を取得 =====
@@ -39,14 +42,20 @@ Deno.serve(async (req) => {
     let plans = [];
     try {
       plans = await base44.asServiceRole.entities.PlanMaster.filter({ code: plan_code });
-    } catch (_) { plans = []; }
+    } catch (e) {
+      console.warn('resolveFeatureAccess: PlanMaster filter error:', e.message);
+      plans = [];
+    }
     const plan = plans[0] || null;
 
     // ===== 3. FeatureMaster から feature 定義を取得 =====
     let featureDefs = [];
     try {
       featureDefs = await base44.asServiceRole.entities.FeatureMaster.filter({ code: feature_code });
-    } catch (_) { featureDefs = []; }
+    } catch (e) {
+      console.warn('resolveFeatureAccess: FeatureMaster filter error:', e.message);
+      featureDefs = [];
+    }
     const feature = featureDefs[0] || null;
 
     // ===== 4. 課金状態による強制ブロック判定 =====
@@ -95,7 +104,10 @@ Deno.serve(async (req) => {
       disableGrants = await base44.asServiceRole.entities.FeatureGrant.filter({
         feature_code, grant_type: 'disable', status: 'active'
       });
-    } catch (_) { disableGrants = []; }
+    } catch (e) {
+      console.warn('resolveFeatureAccess: FeatureGrant disable filter error:', e.message);
+      disableGrants = [];
+    }
 
     for (const grant of disableGrants) {
       if (grant.end_at && new Date(grant.end_at) < new Date()) continue;
@@ -118,7 +130,10 @@ Deno.serve(async (req) => {
       enableGrants = await base44.asServiceRole.entities.FeatureGrant.filter({
         feature_code, grant_type: 'enable', status: 'active'
       });
-    } catch (_) { enableGrants = []; }
+    } catch (e) {
+      console.warn('resolveFeatureAccess: FeatureGrant enable filter error:', e.message);
+      enableGrants = [];
+    }
 
     for (const grant of enableGrants) {
       if (grant.end_at && new Date(grant.end_at) < new Date()) continue;
@@ -140,7 +155,10 @@ Deno.serve(async (req) => {
       let sites = [];
       try {
         sites = await base44.asServiceRole.entities.Site.filter({ id: site_id });
-      } catch (_) { sites = []; }
+      } catch (e) {
+        console.warn('resolveFeatureAccess: Site filter error:', e.message);
+        sites = [];
+      }
       if (sites.length > 0) {
         const siteFeatures = sites[0].enabled_features || {};
         const feature_to_site_key = {

@@ -37,7 +37,10 @@ Deno.serve(async (req) => {
         grant_type: 'disable',
         status: 'active',
       });
-    } catch (_) { disableGrants = []; }
+    } catch (e) {
+      console.warn('aiGuard: FeatureGrant filter error:', e.message);
+      disableGrants = [];
+    }
 
     for (const grant of disableGrants) {
       if (grant.end_at && new Date(grant.end_at) < new Date()) continue;
@@ -75,7 +78,10 @@ Deno.serve(async (req) => {
         grant_type: 'enable',
         status: 'active',
       });
-    } catch (_) { enableGrants = []; }
+    } catch (e) {
+      console.warn('aiGuard: FeatureGrant enable filter error:', e.message);
+      enableGrants = [];
+    }
 
     const hasEnableGrant = enableGrants.some(g => {
       if (g.end_at && new Date(g.end_at) < new Date()) return false;

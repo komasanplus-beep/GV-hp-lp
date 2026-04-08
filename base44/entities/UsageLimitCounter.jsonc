@@ -26,6 +26,8 @@
         "lp_count",
         "page_count",
         "ai_generation_count",
+        "ai_post_generation",
+        "ai_lp_generation",
         "campaign_send_count",
         "guest_count",
         "reservation_count"

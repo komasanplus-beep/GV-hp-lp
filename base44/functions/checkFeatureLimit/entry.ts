@@ -35,14 +35,20 @@ Deno.serve(async (req) => {
     let subscriptions = [];
     try {
       subscriptions = await base44.asServiceRole.entities.Subscription.filter({ user_id });
-    } catch (_) { subscriptions = []; }
+    } catch (e) {
+      console.warn('checkFeatureLimit: Subscription filter error:', e.message);
+      subscriptions = [];
+    }
     const subscription = subscriptions[0] || null;
     const plan_code = subscription?.plan_code || 'free';
 
     let plans = [];
     try {
       plans = await base44.asServiceRole.entities.PlanMaster.filter({ code: plan_code });
-    } catch (_) { plans = []; }
+    } catch (e) {
+      console.warn('checkFeatureLimit: PlanMaster filter error:', e.message);
+      plans = [];
+    }
     const plan = plans[0] || null;
 
     const plan_limits = plan?.limits || {};
@@ -63,27 +69,36 @@ Deno.serve(async (req) => {
       let sites = [];
       try {
         sites = await base44.asServiceRole.entities.Site.filter({ user_id });
-      } catch (_) { sites = []; }
+      } catch (e) {
+        console.warn('checkFeatureLimit: Site filter error:', e.message);
+        sites = [];
+      }
       used = sites.length;
 
     } else if (counter_type === 'lp_count') {
       let lps = [];
       try {
         lps = await base44.asServiceRole.entities.LandingPage.filter({ user_id });
-      } catch (_) { lps = []; }
+      } catch (e) {
+        console.warn('checkFeatureLimit: LandingPage filter error:', e.message);
+        lps = [];
+      }
       used = lps.length;
 
-    } else if (counter_type === 'ai_generation_count') {
+    } else if (counter_type === 'ai_generation_count' || counter_type === 'ai_post_generation' || counter_type === 'ai_lp_generation') {
       // 月間 AI 生成数 (UsageLimitCounter から)
       let counters = [];
       try {
         counters = await base44.asServiceRole.entities.UsageLimitCounter.filter({
           target_type: 'user',
           target_id: user_id,
-          counter_type: 'ai_generation_count',
+          counter_type,
           reset_cycle: 'monthly'
         });
-      } catch (_) { counters = []; }
+      } catch (e) {
+        console.warn(`checkFeatureLimit: UsageLimitCounter filter error (${counter_type}):`, e.message);
+        counters = [];
+      }
 
       if (counters.length > 0) {
         const lastReset = counters[0].last_reset_at ? new Date(counters[0].last_reset_at) : null;
@@ -99,7 +114,10 @@ Deno.serve(async (req) => {
         counters = await base44.asServiceRole.entities.UsageLimitCounter.filter({
           target_type: 'user', target_id: user_id, counter_type
         });
-      } catch (_) { counters = []; }
+      } catch (e) {
+        console.warn(`checkFeatureLimit: UsageLimitCounter filter error (${counter_type}):`, e.message);
+        counters = [];
+      }
       used = counters[0]?.used_count || 0;
     }
 
