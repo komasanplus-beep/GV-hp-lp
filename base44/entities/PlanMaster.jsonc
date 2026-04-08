@@ -1,0 +1,103 @@
+{
+  "name": "PlanMaster",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9\uff08free, starter, business, enterprise\uff09"
+    },
+    "name": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u540d"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u8aac\u660e"
+    },
+    "monthly_price": {
+      "type": "number",
+      "default": 0,
+      "description": "\u6708\u984d\u6599\u91d1\uff08\u5186\uff09"
+    },
+    "yearly_price": {
+      "type": "number",
+      "default": 0,
+      "description": "\u5e74\u984d\u6599\u91d1\uff08\u5186\uff09"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active",
+      "description": "\u30d7\u30e9\u30f3\u72b6\u614b"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "\u8868\u793a\u9806"
+    },
+    "included_features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u542b\u307e\u308c\u308b\u6a5f\u80fd\u30b3\u30fc\u30c9\u4e00\u89a7"
+    },
+    "trial_days": {
+      "type": "number",
+      "default": 0,
+      "description": "\u7121\u6599\u8a66\u7528\u671f\u9593\uff08\u65e5\u6570\uff09"
+    },
+    "limits": {
+      "type": "object",
+      "description": "\u5229\u7528\u5236\u9650",
+      "properties": {
+        "site_count": {
+          "type": "number"
+        },
+        "page_count": {
+          "type": "number"
+        },
+        "lp_count": {
+          "type": "number"
+        },
+        "ai_generation_count": {
+          "type": "number"
+        },
+        "guest_count": {
+          "type": "number"
+        },
+        "reservation_count": {
+          "type": "number"
+        },
+        "campaign_send_count": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "required": [
+    "code",
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

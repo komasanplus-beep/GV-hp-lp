@@ -1,0 +1,91 @@
+{
+  "name": "UsageLimitCounter",
+  "type": "object",
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "site",
+        "tenant"
+      ],
+      "description": "\u5bfe\u8c61\u306e\u7a2e\u985e"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "\u5bfe\u8c61\u306eID"
+    },
+    "feature_code": {
+      "type": "string",
+      "description": "\u6a5f\u80fd\u30b3\u30fc\u30c9\uff08ai_generation_count\u7b49\uff09"
+    },
+    "counter_type": {
+      "type": "string",
+      "enum": [
+        "site_count",
+        "lp_count",
+        "page_count",
+        "ai_generation_count",
+        "campaign_send_count",
+        "guest_count",
+        "reservation_count"
+      ],
+      "description": "\u30ab\u30a6\u30f3\u30bf\u30fc\u7a2e\u985e"
+    },
+    "used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u4f7f\u7528\u6570"
+    },
+    "reset_cycle": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "monthly",
+        "yearly",
+        "none"
+      ],
+      "default": "none",
+      "description": "\u30ea\u30bb\u30c3\u30c8\u5468\u671f"
+    },
+    "last_reset_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u6700\u5f8c\u306e\u30ea\u30bb\u30c3\u30c8\u65e5\u6642"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "counter_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "target_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

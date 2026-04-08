@@ -75,54 +75,73 @@ function getInitialOpenGroups(pathname) {
   return open;
 }
 
-// ページ名 → UserFeatures フィールド名（完全一致）
-// null = 常時表示, undefined = マッピングなし（表示）
+// ページ名 → FeatureMaster.code（完全一致）
+// null = 常時表示
 const PAGE_FEATURE_MAP = {
-  UserDashboard: null,       // ダッシュボードは常時
-  AdminContent: null,        // コンテンツ管理は常時
-  AdminSettings: null,       // アカウント設定は常時
-  AdminBlog: 'blog_manage',
-  AdminAIGenerate: 'ai_generate',
-  SitePageManager: 'site_manage',
-  AdminRooms: 'site_manage',
-  AdminSiteList: 'site_manage',
-  AdminLPList: 'lp_manage',
-  AdminLPGenerate: 'lp_manage',
-  AdminABTest: 'lp_manage',
-  AdminLPAnalytics: 'lp_manage',
+  UserDashboard: null,           // ダッシュボードは常時
+  AdminContent: null,            // コンテンツ管理は常時
+  AdminSettings: null,           // アカウント設定は常時
+  AdminBlog: 'blog_management',
+  AdminAIGenerate: 'ai_package',
+  SitePageManager: 'site_builder',
+  AdminRooms: 'site_builder',
+  AdminSiteList: 'site_builder',
+  AdminLPList: 'lp_builder',
+  AdminLPGenerate: 'lp_builder',
+  AdminABTest: 'lp_builder',
+  AdminLPAnalytics: 'lp_builder',
   AdminDomainSettings: 'domain_manage',
-  AdminServices: 'site_manage',
-  AdminPostManager: 'site_manage',
-  AdminBookings: 'reservation_manage',
-  AdminGuests: 'reservation_manage',
+  AdminServices: 'site_builder',
+  AdminPostManager: 'blog_management',
+  AdminBookings: 'booking_form',
+  AdminGuests: 'customer_management',
 };
 
 export default function UserSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [features, setFeatures] = useState({});
+  const [userId, setUserId] = useState(null);
+  const [allowedFeatures, setAllowedFeatures] = useState(null); // null = まだ未取得
   const [openGroups, setOpenGroups] = useState(() => getInitialOpenGroups(location.pathname));
 
   useEffect(() => {
     base44.auth.me().then(async (user) => {
       if (!user) return;
-      setIsAdmin(user.role === 'admin' || user.role === 'master');
-      // adminは全機能表示
-      if (user.role === 'admin' || user.role === 'master') {
-        setFeatures({ __all: true });
+      const admin = user.role === 'admin' || user.role === 'master';
+      setIsAdmin(admin);
+      setUserId(user.id);
+
+      // admin / master は全機能表示（API 呼び出し不要）
+      if (admin) {
+        setAllowedFeatures('__all');
         return;
       }
-      const featuresList = await base44.entities.UserFeatures.filter({ user_id: user.id }).catch(() => []);
-      setFeatures(featuresList[0] || {});
+
+      // feature_code 一覧を並列チェック
+      const codes = [...new Set(Object.values(PAGE_FEATURE_MAP).filter(v => v !== null))];
+      const results = await Promise.all(
+        codes.map(async (code) => {
+          try {
+            const res = await base44.functions.invoke('resolveFeatureAccess', { feature_code: code });
+            return { code, allowed: res.data?.allowed === true };
+          } catch {
+            return { code, allowed: false };
+          }
+        })
+      );
+      const map = {};
+      results.forEach(({ code, allowed }) => { map[code] = allowed; });
+      setAllowedFeatures(map);
     }).catch(() => {});
   }, []);
 
   const isFeatureEnabled = (pageName) => {
-    if (features.__all) return true;
+    if (allowedFeatures === '__all') return true;
+    if (allowedFeatures === null) return true; // 取得中は表示（ちらつき防止）
     const key = PAGE_FEATURE_MAP[pageName];
     if (key === null) return true; // 常時表示
     if (!key) return true; // マッピングなし=表示
-    return !!features[key];
+    return !!allowedFeatures[key];
   };
 
   const toggleGroup = (idx) => {

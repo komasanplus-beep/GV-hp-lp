@@ -58,11 +58,24 @@ export default function AdminGuests() {
   const [deleteGuest, setDeleteGuest] = useState(null);
   const [formData, setFormData] = useState(defaultGuest);
   const [searchQuery, setSearchQuery] = useState('');
+  const [accessDenied, setAccessDenied] = useState(false);
 
   const queryClient = useQueryClient();
   
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get('site_id');
+
+  // API レベルで顧客管理機能のアクセス権確認
+  const { data: accessCheck, isLoading: isCheckingAccess } = useQuery({
+    queryKey: ['featureAccess', 'customer_management'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('resolveFeatureAccess', {
+        feature_code: 'customer_management',
+        site_id: siteId,
+      });
+      return res.data;
+    },
+  });
 
   const { data: guests = [], isLoading } = useQuery({
     queryKey: ['guests', siteId],
@@ -143,6 +156,26 @@ export default function AdminGuests() {
     guest.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     guest.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // アクセス拒否の場合
+  if (!isCheckingAccess && accessCheck && accessCheck.allowed === false) {
+    return (
+      <ProtectedRoute requiredRole="admin">
+        <UserLayout title="ゲスト管理">
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <User className="w-8 h-8 text-red-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">アクセスできません</h3>
+            <p className="text-slate-500 text-sm max-w-sm">
+              顧客管理機能はご利用のプランに含まれていません。<br />
+              オプション「顧客管理」をご契約ください。
+            </p>
+          </div>
+        </UserLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRole="admin">

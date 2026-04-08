@@ -1,0 +1,112 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u5951\u7d04\u8005\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "\u30c6\u30ca\u30f3\u30c8ID\uff08\u30aa\u30d7\u30b7\u30e7\u30f3\uff09"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "\u73fe\u5728\u306e\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "yearly"
+      ],
+      "default": "monthly",
+      "description": "\u8ab2\u91d1\u5468\u671f"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "canceled",
+        "expired"
+      ],
+      "default": "trialing",
+      "description": "\u5951\u7d04\u72b6\u614b"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u5951\u7d04\u958b\u59cb\u65e5"
+    },
+    "current_period_start": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u73fe\u5728\u306e\u8ab2\u91d1\u671f\u9593\u958b\u59cb"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u73fe\u5728\u306e\u8ab2\u91d1\u671f\u9593\u7d42\u4e86"
+    },
+    "trial_end": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u8a66\u7528\u671f\u9593\u7d42\u4e86\u65e5"
+    },
+    "canceled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u30ad\u30e3\u30f3\u30bb\u30eb\u65e5"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "manual",
+        "none"
+      ],
+      "default": "none",
+      "description": "\u652f\u6255\u3044\u30d7\u30ed\u30d0\u30a4\u30c0"
+    },
+    "external_subscription_id": {
+      "type": "string",
+      "description": "\u5916\u90e8\uff08Stripe\u7b49\uff09\u306e\u5951\u7d04ID"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

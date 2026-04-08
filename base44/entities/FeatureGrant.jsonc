@@ -1,0 +1,87 @@
+{
+  "name": "FeatureGrant",
+  "type": "object",
+  "properties": {
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "site",
+        "tenant"
+      ],
+      "description": "\u4ed8\u4e0e\u5bfe\u8c61\u306e\u7a2e\u985e"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "\u4ed8\u4e0e\u5bfe\u8c61\u306eID"
+    },
+    "feature_code": {
+      "type": "string",
+      "description": "\u6a5f\u80fd\u30b3\u30fc\u30c9\uff08FeatureMaster.code \u3068\u4e00\u81f4\uff09"
+    },
+    "grant_type": {
+      "type": "string",
+      "enum": [
+        "enable",
+        "disable"
+      ],
+      "description": "\u4ed8\u4e0e\u306e\u7a2e\u985e\uff08\u6709\u52b9\u5316 / \u7121\u52b9\u5316\uff09"
+    },
+    "reason": {
+      "type": "string",
+      "description": "\u4ed8\u4e0e\u7406\u7531"
+    },
+    "start_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u958b\u59cb\u65e5\u6642"
+    },
+    "end_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u7d42\u4e86\u65e5\u6642"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "revoked"
+      ],
+      "default": "active",
+      "description": "\u4ed8\u4e0e\u72b6\u614b"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "\u4ed8\u4e0e\u8005\u30e6\u30fc\u30b6\u30fcID"
+    }
+  },
+  "required": [
+    "target_type",
+    "target_id",
+    "feature_code",
+    "grant_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
