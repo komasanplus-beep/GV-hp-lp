@@ -1,0 +1,60 @@
+{
+  "name": "InquiryAIKnowledge",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "ナレッジタイトル"
+    },
+    "category": {
+      "type": "string",
+      "description": "カテゴリ（問い合わせカテゴリに対応）"
+    },
+    "content": {
+      "type": "string",
+      "description": "ナレッジ本文"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["faq", "manual", "inquiry_history", "service_info"],
+      "description": "ソース種別"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "ソース元ID（inquiry_id等）"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "有効フラグ"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "AI回答で使用された回数"
+    }
+  },
+  "required": ["title", "content"],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

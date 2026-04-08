@@ -1,0 +1,60 @@
+{
+  "name": "InquiryAIResponseLog",
+  "type": "object",
+  "properties": {
+    "inquiry_id": {
+      "type": "string",
+      "description": "問い合わせID"
+    },
+    "message_id": {
+      "type": "string",
+      "description": "InquiryMessageのID"
+    },
+    "prompt_snapshot": {
+      "type": "string",
+      "description": "送信時のプロンプトスナップショット"
+    },
+    "knowledge_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "参照したナレッジID一覧"
+    },
+    "response_text": {
+      "type": "string",
+      "description": "AI回答テキスト"
+    },
+    "is_helpful": {
+      "type": ["boolean", "null"],
+      "default": null,
+      "description": "ユーザーの有用性評価（null=未評価）"
+    },
+    "eval_comment": {
+      "type": "string",
+      "description": "評価時のコメント"
+    }
+  },
+  "required": ["inquiry_id", "response_text"],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "inquiry_user_condition": "inquiry.user_id == {{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {},
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

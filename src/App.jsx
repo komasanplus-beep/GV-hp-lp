@@ -24,6 +24,10 @@ import PostListPage from './pages/PostListPage'
 import PostDetailPage from './pages/PostDetailPage.jsx'
 import AdminLPAnalytics from './pages/AdminLPAnalytics'
 import AdminSiteAnalytics from './pages/AdminSiteAnalytics'
+import AdminNoticeManager from './pages/AdminNoticeManager'
+import AdminInquiryManager from './pages/AdminInquiryManager'
+import UserNoticeList from './pages/UserNoticeList'
+import UserInquiryList from './pages/UserInquiryList'
 import PricingPage from './components/plan/PricingPage'
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -126,9 +130,13 @@ const AuthenticatedApp = () => {
       <Route path="/AdminPostTags" element={<AdminPostTags />} />
       <Route path="/AdminLPAnalytics" element={<AdminLPAnalytics />} />
       <Route path="/AdminSiteAnalytics" element={<AdminSiteAnalytics />} />
+      <Route path="/AdminNoticeManager" element={<AdminNoticeManager />} />
+      <Route path="/AdminInquiryManager" element={<AdminInquiryManager />} />
       <Route path="/Pricing" element={<PricingPage />} />
       <Route path="/posts" element={<PostListPage />} />
       <Route path="/post/:slug" element={<PostDetailPage />} />
+      <Route path="/MyNotices" element={<UserNoticeList />} />
+      <Route path="/MyInquiries" element={<UserInquiryList />} />
     </Routes>
   );
 };

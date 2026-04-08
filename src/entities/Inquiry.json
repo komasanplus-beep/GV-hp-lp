@@ -1,0 +1,70 @@
+{
+  "name": "Inquiry",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "問い合わせユーザーID"
+    },
+    "subject": {
+      "type": "string",
+      "description": "件名"
+    },
+    "category": {
+      "type": "string",
+      "description": "問い合わせカテゴリ"
+    },
+    "body": {
+      "type": "string",
+      "description": "問い合わせ本文"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "ai_answered", "in_progress", "resolved", "closed"],
+      "default": "new",
+      "description": "問い合わせステータス"
+    },
+    "is_resolved_by_ai": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI回答で解決したフラグ"
+    },
+    "assigned_admin_id": {
+      "type": "string",
+      "description": "担当管理者ID"
+    }
+  },
+  "required": ["user_id", "subject", "body"],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

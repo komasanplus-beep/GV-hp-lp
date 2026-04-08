@@ -1,0 +1,67 @@
+{
+  "name": "Notice",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "お知らせタイトル"
+    },
+    "body": {
+      "type": "string",
+      "description": "お知らせ本文"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "サムネイル画像URL"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "scheduled", "sent"],
+      "default": "draft",
+      "description": "お知らせ状態"
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "固定表示フラグ"
+    },
+    "is_important": {
+      "type": "boolean",
+      "default": false,
+      "description": "重要表示フラグ"
+    },
+    "scheduled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "予定配信日時"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "実配信日時"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "作成者ユーザーID"
+    }
+  },
+  "required": ["title", "body"],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

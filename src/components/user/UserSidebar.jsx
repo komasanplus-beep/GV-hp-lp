@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Settings, LogOut, Layout, Sparkles, X, Store,
   Link2, Globe, Shield, FileText, ChevronDown,
   Calendar, Users, TrendingUp, BookOpen,
-  Layers, Building2, GitBranch, Eye, PenSquare
+  Layers, Building2, GitBranch, Eye, PenSquare, Bell, MessageSquare
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -26,6 +26,8 @@ const menuGroups = [
       { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
       { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
       { name: 'アクセス分析', icon: TrendingUp, page: 'AdminSiteAnalytics' },
+      { name: 'お知らせ管理', icon: Bell, page: 'AdminNoticeManager' },
+      { name: '問い合わせ管理', icon: MessageSquare, page: 'AdminInquiryManager' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
       { name: 'AI生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
@@ -98,6 +100,8 @@ const PAGE_FEATURE_MAP = {
   AdminBookings: 'booking_form',
   AdminGuests: 'customer_management',
   AdminSiteAnalytics: 'site_builder',
+  AdminNoticeManager: null,
+  AdminInquiryManager: null,
 };
 
 export default function UserSidebar({ isOpen, onClose }) {

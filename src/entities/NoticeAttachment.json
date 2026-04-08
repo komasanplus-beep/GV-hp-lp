@@ -1,0 +1,45 @@
+{
+  "name": "NoticeAttachment",
+  "type": "object",
+  "properties": {
+    "notice_id": {
+      "type": "string",
+      "description": "お知らせID"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "ファイル名"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "ファイルURL"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "ファイル種別（image, pdf, document等）"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "ファイルサイズ（バイト）"
+    }
+  },
+  "required": ["notice_id", "file_name", "file_url"],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

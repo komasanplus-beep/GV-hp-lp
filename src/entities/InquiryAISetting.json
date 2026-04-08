@@ -1,0 +1,68 @@
+{
+  "name": "InquiryAISetting",
+  "type": "object",
+  "properties": {
+    "is_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "問い合わせAI有効化フラグ"
+    },
+    "system_prompt": {
+      "type": "string",
+      "description": "AIシステムプロンプト"
+    },
+    "response_tone": {
+      "type": "string",
+      "enum": ["formal", "friendly", "casual"],
+      "default": "friendly",
+      "description": "AI回答トーン"
+    },
+    "max_answer_length": {
+      "type": "number",
+      "default": 1000,
+      "description": "回答上限文字数"
+    },
+    "allowed_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "回答対象カテゴリ一覧"
+    },
+    "escalation_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "管理者へのエスカレーションキーワード"
+    },
+    "confidence_threshold": {
+      "type": "number",
+      "default": 0.7,
+      "description": "AI回答信頼度閾値"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

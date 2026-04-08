@@ -1,0 +1,48 @@
+{
+  "name": "NoticeTargetRule",
+  "type": "object",
+  "properties": {
+    "notice_id": {
+      "type": "string",
+      "description": "お知らせID"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": ["all", "site_user", "lp_user", "both_user", "template_category", "plan", "site_owner", "lp_owner", "specific_user"],
+      "description": "配信対象タイプ"
+    },
+    "target_value": {
+      "type": "string",
+      "description": "対象値（カテゴリ、プラン、ユーザーID等）"
+    },
+    "operator": {
+      "type": "string",
+      "enum": ["eq", "in", "gte", "lte"],
+      "default": "eq",
+      "description": "演算子"
+    }
+  },
+  "required": ["notice_id", "target_type"],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

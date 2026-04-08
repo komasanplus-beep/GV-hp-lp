@@ -1,0 +1,46 @@
+{
+  "name": "NoticeRecipient",
+  "type": "object",
+  "properties": {
+    "notice_id": {
+      "type": "string",
+      "description": "お知らせID"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "受信ユーザーID"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "既読フラグ"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "既読日時"
+    }
+  },
+  "required": ["notice_id", "user_id"],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {},
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
