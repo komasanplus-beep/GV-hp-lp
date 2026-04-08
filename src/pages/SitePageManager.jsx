@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 
 import BackupManager from '@/components/site/BackupManager';
 import { createBackup } from '@/lib/backup';
+import PageTypeHelpIcon from '@/components/help/PageTypeHelpIcon';
 
 const PAGE_TYPES = [
   { value: 'home', label: 'HOME' },
@@ -193,7 +194,10 @@ export default function SitePageManager() {
                           🏠
                         </div>
                         <div>
-                          <h3 className="font-semibold text-slate-800">トップページ</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-slate-800">トップページ</h3>
+                            <PageTypeHelpIcon type="top" size="sm" />
+                          </div>
                           <p className="text-xs text-slate-500 mt-0.5">サイトのメイン構成（LP）</p>
                         </div>
                       </div>
@@ -220,7 +224,10 @@ export default function SitePageManager() {
                 </Card>
               ) : (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-600 mb-3">通常ページ</h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <h3 className="text-sm font-semibold text-slate-600">通常ページ</h3>
+                    <PageTypeHelpIcon type="regular" size="sm" />
+                  </div>
                   <div className="grid gap-3">
                     {pages.filter(p => p.slug !== 'home').map(page => (
                       <Card key={page.id} className="hover:shadow-md transition-shadow">
