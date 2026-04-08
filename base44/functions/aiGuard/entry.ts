@@ -155,6 +155,8 @@ Deno.serve(async (req) => {
         used,
         limit,
         remaining: 0,
+        plan_code,
+        limitData: { used, limit, remaining: 0, plan_code },
       }, { status: 429 });
     }
 

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import AILimitUpgradeModal from '@/components/ai/AILimitUpgradeModal';
 import {
   Loader2, Sparkles, Globe, FileText, Upload, X, RefreshCw,
   ChevronDown, ChevronUp, CheckCircle2, Wand2, Copy
@@ -72,6 +73,10 @@ export default function AIPostGeneratorPanel({ siteId, onApplyAll, onApplyTitle,
   const [usedWebSearch, setUsedWebSearch] = useState(false);
   const [openSection, setOpenSection]   = useState({ basic: true, content: true, refs: false, sources: false, seo: false });
 
+  // ━━━ AI利用上限到達時の課金モーダル ━━━
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [limitData, setLimitData] = useState(null);
+
   const toggle = (key) => setOpenSection(p => ({ ...p, [key]: !p[key] }));
 
   const handleFileUpload = async (e) => {
@@ -125,6 +130,18 @@ export default function AIPostGeneratorPanel({ siteId, onApplyAll, onApplyTitle,
 
       if (res.data?.blocked) {
         toast.error(res.data?.error || 'AI記事生成が利用できません');
+        return;
+      }
+
+      // 利用上限到達時：課金誘導モーダル表示
+      if (res.data?.source === 'limit_exceeded' || res.status === 429) {
+        setLimitData(res.data?.limitData || {
+          used: res.data?.used,
+          limit: res.data?.limit,
+          remaining: res.data?.remaining,
+          plan_code: res.data?.plan_code,
+        });
+        setLimitModalOpen(true);
         return;
       }
 
@@ -383,6 +400,16 @@ export default function AIPostGeneratorPanel({ siteId, onApplyAll, onApplyTitle,
           onRegenerate={handleGenerate}
         />
       )}
+
+      {/* ━━━ AI利用上限到達時の課金誘導モーダル ━━━ */}
+      <AILimitUpgradeModal
+        open={limitModalOpen}
+        onOpenChange={setLimitModalOpen}
+        limitData={limitData}
+        onConfirm={() => {
+          setLimitData(null);
+        }}
+      />
     </div>
   );
 }
