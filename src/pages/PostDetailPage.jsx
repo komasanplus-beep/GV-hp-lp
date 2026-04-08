@@ -7,7 +7,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import BlockBasedPostRenderer from '@/components/post/BlockBasedPostRenderer';
-import TableOfContents from '@/components/blog/TableOfContents';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { Loader2, ChevronUp } from 'lucide-react';

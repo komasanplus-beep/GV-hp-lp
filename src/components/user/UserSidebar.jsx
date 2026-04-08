@@ -23,6 +23,8 @@ const menuGroups = [
     children: [
       { name: '予約管理', icon: Calendar, page: 'AdminBookings' },
       { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
+      { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
+      { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
       { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
@@ -32,8 +34,7 @@ const menuGroups = [
     icon: Globe,
     children: [
       { name: 'ページ管理', icon: Layout, page: 'SitePageManager' },
-      { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
-      { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
+      { name: 'ブロック編集', icon: Layers, page: 'SiteBlockEditor' },
     ],
   },
   {

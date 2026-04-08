@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
 import { Loader2, ImageIcon, GripVertical } from 'lucide-react';
 import SiteBlockAnimationForm from './SiteBlockAnimationForm';
@@ -89,9 +90,15 @@ const SITE_BLOCK_FIELDS = {
   ],
 };
 
+// データソース参照可能なブロック
+const CONTENT_REFERABLE_BLOCKS = ['Service', 'Contact', 'Feature', 'CTA', 'Hero'];
+
 export default function SiteBlockEditForm({ block, onSave, onCancel }) {
   const [data, setData] = useState(block.data || {});
   const [uploading, setUploading] = useState({});
+  const [sourceMode, setSourceMode] = useState(block.source_mode || 'manual');
+  const [contentSourceType, setContentSourceType] = useState(block.content_source_type || null);
+  const [contentSourceIds, setContentSourceIds] = useState(block.content_source_ids || []);
   const [animationSettings, setAnimationSettings] = useState({
     animation_type: block.animation_type || 'fade-up',
     animation_trigger: block.animation_trigger || 'on-scroll',
@@ -112,6 +119,8 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
     setUploading(u => ({ ...u, [key]: false }));
   };
 
+  const canUseContentReference = CONTENT_REFERABLE_BLOCKS.includes(block.block_type);
+
   return (
     <div className="space-y-4">
       <div className="border-b pb-3 mb-4">
@@ -123,6 +132,55 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
           </p>
         )}
       </div>
+
+      {/* データソース選択（参照可能なブロック） */}
+      {canUseContentReference && (
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 space-y-3">
+          <Label className="text-sm font-semibold text-blue-900">データソース</Label>
+          <div className="flex gap-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={sourceMode === 'manual'}
+                onChange={() => {
+                  setSourceMode('manual');
+                  setContentSourceType(null);
+                  setContentSourceIds([]);
+                }}
+                className="w-4 h-4"
+              />
+              <span className="text-sm text-blue-800">手入力</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                checked={sourceMode === 'content'}
+                onChange={() => setSourceMode('content')}
+                className="w-4 h-4"
+              />
+              <span className="text-sm text-blue-800">コンテンツ選択</span>
+            </label>
+          </div>
+
+          {sourceMode === 'content' && (
+            <div className="mt-3 pt-3 border-t border-blue-200 space-y-2">
+              <Select value={contentSourceType || ''} onValueChange={setContentSourceType}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="コンテンツ種別を選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="service">サービス管理</SelectItem>
+                  <SelectItem value="article">記事管理</SelectItem>
+                  <SelectItem value="shared_content">共通コンテンツ</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-blue-700">
+                選択したコンテンツ種別から、このブロックに表示する項目を選びます。
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {block.block_type === 'Hero' && (
         <HeroEditForm
@@ -291,6 +349,9 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
           onClick={() => onSave({
             ...data,
             ...animationSettings,
+            source_mode: sourceMode,
+            content_source_type: contentSourceType,
+            content_source_ids: contentSourceIds,
           })}
         >
           保存

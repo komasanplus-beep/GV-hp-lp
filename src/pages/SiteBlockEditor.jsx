@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SiteBlockEditForm from '@/components/site/SiteBlockEditForm';
+import BlockEditHelpIcon from '@/components/site/BlockEditHelpIcon';
 import { Plus, Trash2, Pencil, Loader2, ChevronLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -79,7 +80,7 @@ export default function SiteBlockEditor() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.SiteBlock.update(id, { data }),
+    mutationFn: ({ id, updateData }) => base44.entities.SiteBlock.update(id, updateData),
     onSuccess: () => {
       // 複数の query を無効化してキャッシュを確実にリフレッシュ
       queryClient.invalidateQueries({ queryKey: ['siteBlocks'] });
@@ -121,11 +122,14 @@ export default function SiteBlockEditor() {
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
               </Link>
-              <div>
-                <h2 className="text-xl font-bold text-slate-800">
-                  {page ? page.title : 'ブロック編集'}
-                </h2>
-                <p className="text-sm text-slate-400 mt-0.5">ブロックを並べてページを構成します</p>
+              <div className="flex items-center gap-2">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">
+                    {page ? page.title : 'ブロック編集'}
+                  </h2>
+                  <p className="text-sm text-slate-400 mt-0.5">ブロックを並べてページを構成します</p>
+                </div>
+                <BlockEditHelpIcon />
               </div>
             </div>
             <Button
@@ -243,7 +247,7 @@ export default function SiteBlockEditor() {
             <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
               <SiteBlockEditForm
                 block={editingBlock}
-                onSave={(data) => updateMutation.mutate({ id: editingBlock.id, data })}
+                onSave={(updateData) => updateMutation.mutate({ id: editingBlock.id, updateData })}
                 onCancel={() => setEditingBlock(null)}
               />
             </DialogContent>
