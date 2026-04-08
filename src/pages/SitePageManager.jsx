@@ -106,7 +106,7 @@ export default function SitePageManager() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-slate-800">ページ管理</h2>
-              <p className="text-sm text-slate-500 mt-0.5">ページを管理・編集できます</p>
+                <p className="text-sm text-slate-500 mt-0.5">トップページと通常ページを管理できます</p>
             </div>
             <div className="flex gap-3">
               {sites.length > 1 && (
@@ -183,9 +183,34 @@ export default function SitePageManager() {
                 </div>
               )}
 
+              {/* ── トップページ専用セクション ── */}
+              {pages.find(p => p.slug === 'home') && (
+                <Card className="border-2 border-amber-200 bg-amber-50/50">
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-200 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
+                          🏠
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-slate-800">トップページ</h3>
+                          <p className="text-xs text-slate-500 mt-0.5">サイトのメイン構成（LP）</p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => navigate(`/SiteBlockEditor?site_id=${selectedSiteId}&page_id=${pages.find(p => p.slug === 'home')?.id}`)}
+                        className="gap-1.5 bg-amber-600 hover:bg-amber-700 flex-shrink-0"
+                      >
+                        <Pencil className="w-4 h-4" />トップページを編集
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {isLoading ? (
                 <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>
-              ) : pages.length === 0 ? (
+              ) : pages.filter(p => p.slug !== 'home').length === 0 ? (
                 <Card>
                   <CardContent className="py-16 text-center text-slate-400">
                     <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -194,8 +219,10 @@ export default function SitePageManager() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-3">
-                    {pages.map(page => (
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-600 mb-3">通常ページ</h3>
+                  <div className="grid gap-3">
+                    {pages.filter(p => p.slug !== 'home').map(page => (
                       <Card key={page.id} className="hover:shadow-md transition-shadow">
                         <CardContent className="p-0">
                           {/* Page Header */}
@@ -234,8 +261,9 @@ export default function SitePageManager() {
                         </CardContent>
                       </Card>
                     ))}
-                  </div>
-              )}
+                    </div>
+                    </div>
+                    )}
             </>
           )}
         </div>
