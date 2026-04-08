@@ -22,6 +22,12 @@
         "other"
       ]
     },
+    "template_type": {
+      "type": "string",
+      "enum": ["salon", "hotel", "default"],
+      "default": "default",
+      "description": "テンプレート種別（初期ページ生成時に使用）"
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -62,7 +68,78 @@
     },
     "navigation_config": {
       "type": "object",
-      "description": "ヘッダーナビゲーション設定"
+      "description": "ヘッダーナビゲーション設定",
+      "properties": {
+        "logo_url": {
+          "type": "string",
+          "description": "ロゴURL"
+        },
+        "logo_image_url": {
+          "type": "string",
+          "description": "アップロード済みロゴ画像URL"
+        },
+        "logo_alt": {
+          "type": "string",
+          "description": "ロゴaltテキスト"
+        },
+        "site_name_text": {
+          "type": "string",
+          "description": "ヘッダーに表示するサイト名"
+        },
+        "booking_button_text": {
+          "type": "string",
+          "description": "予約ボタンのテキスト"
+        },
+        "booking_button_url": {
+          "type": "string",
+          "description": "予約ボタンのリンク"
+        },
+        "show_admin_link": {
+          "type": "boolean",
+          "default": false
+        },
+        "menu_items": {
+          "type": "array",
+          "description": "メニュー項目（手動設定分）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "href": { "type": "string" },
+              "sort_order": { "type": "number" },
+              "is_visible": { "type": "boolean", "default": true }
+            }
+          }
+        },
+        "auto_menu_pages": {
+          "type": "array",
+          "description": "ページ自動連動メニュー設定",
+          "items": {
+            "type": "object",
+            "properties": {
+              "page_id": { "type": "string", "description": "SitePage ID" },
+              "show_in_header": { "type": "boolean", "default": true },
+              "label_override": { "type": "string", "description": "ラベル上書き（空白時はページタイトル使用）" },
+              "sort_order": { "type": "number", "default": 0 }
+            }
+          }
+        },
+        "social_links": {
+          "type": "array",
+          "description": "SNSリンク（ヘッダー用）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "platform": { "type": "string", "enum": ["x", "threads", "instagram", "facebook", "line", "linkedin", "note", "tiktok"] },
+              "url": { "type": "string" },
+              "show_in_header": { "type": "boolean", "default": false },
+              "show_in_footer": { "type": "boolean", "default": false },
+              "open_new_tab": { "type": "boolean", "default": true },
+              "sort_order": { "type": "number", "default": 0 }
+            }
+          }
+        }
+      }
     },
     "footer_config": {
       "type": "object",
@@ -103,6 +180,50 @@
           "type": "boolean",
           "default": true,
           "description": "年号を表示するか"
+        },
+        "show_company_name": {
+          "type": "boolean",
+          "default": false,
+          "description": "会社名/店舗名を表示するか"
+        },
+        "company_name": {
+          "type": "string",
+          "description": "会社名/店舗名"
+        },
+        "address": {
+          "type": "string",
+          "description": "住所"
+        },
+        "phone": {
+          "type": "string",
+          "description": "電話番号"
+        },
+        "email": {
+          "type": "string",
+          "description": "メールアドレス"
+        },
+        "business_hours": {
+          "type": "string",
+          "description": "営業時間"
+        },
+        "show_fixed_pages": {
+          "type": "boolean",
+          "default": true,
+          "description": "固定ページ（プライバシーポリシー等）をフッターに表示するか"
+        },
+        "social_links": {
+          "type": "array",
+          "description": "SNSリンク（フッター用）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "platform": { "type": "string", "enum": ["x", "threads", "instagram", "facebook", "line", "linkedin", "note", "tiktok"] },
+              "url": { "type": "string" },
+              "show_in_footer": { "type": "boolean", "default": true },
+              "open_new_tab": { "type": "boolean", "default": true },
+              "sort_order": { "type": "number", "default": 0 }
+            }
+          }
         }
       }
     },

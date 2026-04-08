@@ -24,6 +24,17 @@
         "custom"
       ]
     },
+    "page_category": {
+      "type": "string",
+      "enum": [
+        "regular",
+        "privacy_policy",
+        "security_management",
+        "compliance"
+      ],
+      "default": "regular",
+      "description": "ページカテゴリ（固定ページを区別するため）"
+    },
     "parent_page_id": {
       "type": "string",
       "description": "親ページID（階層構造）"
@@ -39,21 +50,6 @@
     "sort_order": {
       "type": "number",
       "default": 0
-    },
-    "use_common_contact": {
-      "type": "boolean",
-      "default": true,
-      "description": "共通接触情報を使用するか（false時はカスタム設定を使用）"
-    },
-    "custom_contact": {
-      "type": "object",
-      "description": "ページ個別の接触情報（use_common_contact=falseの時のみ有効）",
-      "properties": {
-        "phone": { "type": "string" },
-        "email": { "type": "string" },
-        "address": { "type": "string" },
-        "map_url": { "type": "string" }
-      }
     },
     "use_common_contact": {
       "type": "boolean",
