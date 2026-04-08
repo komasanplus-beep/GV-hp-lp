@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import LPTemplateSelector from '@/components/lp/LPTemplateSelector';
 
 const BUILTIN_TEMPLATES = [
   { value: 'new_service', label: '新規サービス', description: 'Hero → Problem → Solution → Feature → Flow → Future → CTA', blocks: ['Hero','Problem','Solution','Feature','Flow','Future','CTA'] },
@@ -24,6 +25,7 @@ export default function AdminLPList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showCreate, setShowCreate] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [form, setForm] = useState({ title: '', slug: '', template_type: 'new_service' });
   const [selectedLPTemplate, setSelectedLPTemplate] = useState(null); // DBテンプレート
   const [templateTab, setTemplateTab] = useState('builtin'); // 'builtin' | 'custom'
@@ -121,7 +123,7 @@ export default function AdminLPList() {
                 <Eye className="w-4 h-4 mr-1" />プレビュー
               </a>
             </Button>
-            <Button onClick={() => setShowCreate(true)} className="bg-amber-600 hover:bg-amber-700" disabled={atLimit}
+            <Button onClick={() => setShowTemplateSelector(true)} className="bg-amber-600 hover:bg-amber-700" disabled={atLimit}
               title={atLimit ? 'LP作成数の上限に達しています' : ''}>
               <Plus className="w-4 h-4 mr-2" />新規作成
             </Button>
@@ -182,7 +184,18 @@ export default function AdminLPList() {
           </div>
         )}
 
-        {/* 新規作成ダイアログ */}
+        {/* テンプレート選択 */}
+        <LPTemplateSelector
+          open={showTemplateSelector}
+          onOpenChange={setShowTemplateSelector}
+          siteId={null}
+          onCreated={(lp) => {
+            queryClient.invalidateQueries({ queryKey: ['landingPages'] });
+            navigate(createPageUrl(`AdminLPEditor?id=${lp.id}`));
+          }}
+        />
+
+        {/* 既存の新規作成ダイアログ */}
         <Dialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) { setSelectedLPTemplate(null); setTemplateTab('builtin'); } }}>
           <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
