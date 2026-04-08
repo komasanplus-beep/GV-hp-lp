@@ -1,0 +1,80 @@
+{
+  "name": "BillingGlobalSetting",
+  "type": "object",
+  "properties": {
+    "default_monthly_cycle_days": {
+      "type": "number",
+      "default": 30,
+      "description": "\u30c7\u30d5\u30a9\u30eb\u30c8\u6708\u984d\u5229\u7528\u65e5\u6570"
+    },
+    "default_trial_days": {
+      "type": "number",
+      "default": 14,
+      "description": "\u30c7\u30d5\u30a9\u30eb\u30c8\u7121\u6599\u4f53\u9a13\u65e5\u6570"
+    },
+    "default_yearly_access_days": {
+      "type": "number",
+      "default": 365,
+      "description": "\u30c7\u30d5\u30a9\u30eb\u30c8\u5e74\u984d\u5229\u7528\u65e5\u6570"
+    },
+    "default_grace_days": {
+      "type": "number",
+      "default": 3,
+      "description": "\u652f\u6255\u3044\u5931\u6557\u6642\u306e\u7336\u4e88\u671f\u9593\u65e5\u6570"
+    },
+    "suspend_public_site_on_unpaid": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u672a\u6255\u3044\u6642\u306b\u516c\u958b\u30b5\u30a4\u30c8\u3092\u505c\u6b62\u3059\u308b\u304b"
+    },
+    "allow_manual_override_by_admin": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u7ba1\u7406\u8005\u306b\u3088\u308b\u624b\u52d5\u4e0a\u66f8\u304d\u3092\u8a31\u53ef\u3059\u308b\u304b"
+    },
+    "notify_before_trial_end_days": {
+      "type": "number",
+      "default": 3,
+      "description": "\u7121\u6599\u4f53\u9a13\u7d42\u4e86\u306e\u4f55\u65e5\u524d\u306b\u901a\u77e5\u3059\u308b\u304b"
+    },
+    "notify_before_paid_end_days": {
+      "type": "number",
+      "default": 7,
+      "description": "\u5951\u7d04\u7d42\u4e86\u306e\u4f55\u65e5\u524d\u306b\u901a\u77e5\u3059\u308b\u304b"
+    },
+    "notify_on_payment_failed": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u6c7a\u6e08\u5931\u6557\u6642\u306b\u901a\u77e5\u3059\u308b\u304b"
+    },
+    "notify_on_suspend": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u5229\u7528\u505c\u6b62\u6642\u306b\u901a\u77e5\u3059\u308b\u304b"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u8a2d\u5b9a\u304c\u6709\u52b9\u304b"
+    }
+  },
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  },
+  "required": []
+}

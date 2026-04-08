@@ -2,6 +2,9 @@ import './App.css'
 import MasterLPTemplates from './pages/MasterLPTemplates'
 import MasterAIControl from './pages/MasterAIControl'
 import MasterPlanLimits from './pages/MasterPlanLimits'
+import MasterBillingSettings from './pages/MasterBillingSettings'
+import MasterBillingPlans from './pages/MasterBillingPlans'
+import MasterSubscriptionManagement from './pages/MasterSubscriptionManagement'
 import SiteView from './pages/SiteView'
 import LPView from './pages/LPView'
 import BlogPage from './pages/BlogPage'
@@ -101,6 +104,9 @@ const AuthenticatedApp = () => {
       <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
       <Route path="/MasterAIControl" element={<MasterAIControl />} />
       <Route path="/MasterPlanLimits" element={<MasterPlanLimits />} />
+      <Route path="/MasterBillingSettings" element={<MasterBillingSettings />} />
+      <Route path="/MasterBillingPlans" element={<MasterBillingPlans />} />
+      <Route path="/MasterSubscriptionManagement" element={<MasterSubscriptionManagement />} />
       <Route path="/AdminInquiries" element={<AdminInquiries />} />
       <Route path="/AdminServices" element={<AdminServices />} />
       <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />

@@ -1,0 +1,94 @@
+{
+  "name": "SubscriptionUsageSnapshot",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "\u30c6\u30ca\u30f3\u30c8ID"
+    },
+    "snapshot_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u65e5"
+    },
+    "current_plan_code": {
+      "type": "string",
+      "description": "\u73fe\u5728\u306e\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "ai_article_used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "AI\u8a18\u4e8b\u751f\u6210\u4f7f\u7528\u56de\u6570"
+    },
+    "ai_article_limit_count": {
+      "type": "number",
+      "default": 0,
+      "description": "AI\u8a18\u4e8b\u751f\u6210\u4e0a\u9650\u56de\u6570"
+    },
+    "lp_used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "LP\u4f5c\u6210\u6e08\u307f\u6570"
+    },
+    "lp_limit_count": {
+      "type": "number",
+      "default": 0,
+      "description": "LP\u4f5c\u6210\u4e0a\u9650\u6570"
+    },
+    "site_used_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30b5\u30a4\u30c8\u4f5c\u6210\u6e08\u307f\u6570"
+    },
+    "site_limit_count": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30b5\u30a4\u30c8\u4f5c\u6210\u4e0a\u9650\u6570"
+    },
+    "can_use_service": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u30b5\u30fc\u30d3\u30b9\u5229\u7528\u53ef\u80fd\u304b"
+    },
+    "can_edit_service": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u7de8\u96c6\u53ef\u80fd\u304b"
+    },
+    "can_generate_ai": {
+      "type": "boolean",
+      "default": true,
+      "description": "AI\u751f\u6210\u53ef\u80fd\u304b"
+    },
+    "can_create_lp": {
+      "type": "boolean",
+      "default": true,
+      "description": "LP\u4f5c\u6210\u53ef\u80fd\u304b"
+    }
+  },
+  "required": [
+    "user_id",
+    "snapshot_date"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {},
+    "delete": {}
+  }
+}

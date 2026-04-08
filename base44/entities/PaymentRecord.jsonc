@@ -1,0 +1,112 @@
+{
+  "name": "PaymentRecord",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "\u30c6\u30ca\u30f3\u30c8ID"
+    },
+    "user_subscription_id": {
+      "type": "string",
+      "description": "UserSubscriptionID"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "amount": {
+      "type": "number",
+      "description": "\u6c7a\u6e08\u91d1\u984d"
+    },
+    "currency": {
+      "type": "string",
+      "default": "JPY",
+      "description": "\u901a\u8ca8\u30b3\u30fc\u30c9"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "failed",
+        "refunded",
+        "canceled"
+      ],
+      "default": "pending",
+      "description": "\u6c7a\u6e08\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "billing_period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "\u8acb\u6c42\u671f\u9593\u958b\u59cb\u65e5"
+    },
+    "billing_period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "\u8acb\u6c42\u671f\u9593\u7d42\u4e86\u65e5"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u652f\u6255\u3044\u5b8c\u4e86\u65e5\u6642"
+    },
+    "failed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u652f\u6255\u3044\u5931\u6557\u65e5\u6642"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "manual",
+        "other"
+      ],
+      "default": "manual",
+      "description": "\u6c7a\u6e08\u30d7\u30ed\u30d0\u30a4\u30c0"
+    },
+    "payment_provider_payment_id": {
+      "type": "string",
+      "description": "Stripe\u652f\u6255\u3044ID"
+    },
+    "payment_provider_invoice_id": {
+      "type": "string",
+      "description": "Stripe\u30a4\u30f3\u30dc\u30a4\u30b9ID"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "\u30a8\u30e9\u30fc\u30e1\u30c3\u30bb\u30fc\u30b8"
+    },
+    "raw_payload": {
+      "type": "object",
+      "description": "\u5143\u306e\u30da\u30a4\u30ed\u30fc\u30c9\uff08JSON\uff09"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_code",
+    "amount"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

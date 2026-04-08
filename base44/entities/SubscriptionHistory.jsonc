@@ -1,0 +1,90 @@
+{
+  "name": "SubscriptionHistory",
+  "type": "object",
+  "properties": {
+    "user_subscription_id": {
+      "type": "string",
+      "description": "UserSubscriptionID"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "create",
+        "trial_start",
+        "trial_end",
+        "activate",
+        "renew",
+        "payment_failed",
+        "grace_start",
+        "suspend",
+        "resume",
+        "cancel",
+        "expire",
+        "plan_change",
+        "manual_update",
+        "campaign_apply"
+      ],
+      "description": "\u30a2\u30af\u30b7\u30e7\u30f3\u7a2e\u5225"
+    },
+    "before_status": {
+      "type": "string",
+      "description": "\u5909\u66f4\u524d\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "after_status": {
+      "type": "string",
+      "description": "\u5909\u66f4\u5f8c\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "before_plan_code": {
+      "type": "string",
+      "description": "\u5909\u66f4\u524d\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "after_plan_code": {
+      "type": "string",
+      "description": "\u5909\u66f4\u5f8c\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "action_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u30a2\u30af\u30b7\u30e7\u30f3\u5b9f\u65bd\u65e5\u6642"
+    },
+    "note": {
+      "type": "string",
+      "description": "\u5099\u8003"
+    },
+    "operator_user_id": {
+      "type": "string",
+      "description": "\u64cd\u4f5c\u8005\u30e6\u30fc\u30b6\u30fcID\uff08\u7ba1\u7406\u8005\uff09"
+    },
+    "raw_payload": {
+      "type": "object",
+      "description": "\u5143\u306e\u30da\u30a4\u30ed\u30fc\u30c9\uff08JSON\uff09"
+    }
+  },
+  "required": [
+    "user_subscription_id",
+    "user_id",
+    "action_type"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

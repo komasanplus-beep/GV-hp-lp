@@ -1,0 +1,159 @@
+{
+  "name": "UserSubscription",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "\u30c6\u30ca\u30f3\u30c8ID"
+    },
+    "current_plan_code": {
+      "type": "string",
+      "description": "\u73fe\u5728\u306e\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "subscription_type": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "monthly",
+        "yearly",
+        "manual"
+      ],
+      "description": "\u30b5\u30d6\u30b9\u30af\u985e\u578b"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trialing",
+        "active",
+        "grace",
+        "suspended",
+        "canceled",
+        "expired"
+      ],
+      "default": "trialing",
+      "description": "\u5951\u7d04\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u5951\u7d04\u958b\u59cb\u65e5"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u5951\u7d04\u7d42\u4e86\u65e5"
+    },
+    "next_billing_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u6b21\u56de\u8ab2\u91d1\u65e5"
+    },
+    "trial_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u7121\u6599\u4f53\u9a13\u958b\u59cb\u65e5"
+    },
+    "trial_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u7121\u6599\u4f53\u9a13\u7d42\u4e86\u65e5"
+    },
+    "grace_start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u7336\u4e88\u671f\u9593\u958b\u59cb\u65e5"
+    },
+    "grace_end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u7336\u4e88\u671f\u9593\u7d42\u4e86\u65e5"
+    },
+    "canceled_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u89e3\u7d04\u65e5\u6642"
+    },
+    "suspended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u505c\u6b62\u65e5\u6642"
+    },
+    "payment_provider": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "manual",
+        "other"
+      ],
+      "default": "manual",
+      "description": "\u6c7a\u6e08\u30d7\u30ed\u30d0\u30a4\u30c0"
+    },
+    "payment_provider_customer_id": {
+      "type": "string",
+      "description": "Stripe\u9867\u5ba2ID"
+    },
+    "payment_provider_subscription_id": {
+      "type": "string",
+      "description": "Stripe\u30b5\u30d6\u30b9\u30af\u5951\u7d04ID"
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "\u9069\u7528\u30ad\u30e3\u30f3\u30da\u30fc\u30f3ID"
+    },
+    "manual_override_by": {
+      "type": "string",
+      "description": "\u624b\u52d5\u4e0a\u66f8\u304d\u3092\u5b9f\u65bd\u3057\u305f\u7ba1\u7406\u8005"
+    },
+    "manual_override_reason": {
+      "type": "string",
+      "description": "\u624b\u52d5\u4e0a\u66f8\u304d\u306e\u7406\u7531"
+    },
+    "public_site_visible": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u516c\u958b\u30b5\u30a4\u30c8\u304c\u8868\u793a\u53ef\u80fd\u304b"
+    },
+    "admin_memo": {
+      "type": "string",
+      "description": "\u7ba1\u7406\u30e1\u30e2"
+    }
+  },
+  "required": [
+    "user_id",
+    "current_plan_code",
+    "subscription_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

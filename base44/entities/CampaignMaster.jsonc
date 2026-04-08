@@ -1,0 +1,117 @@
+{
+  "name": "CampaignMaster",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u540d"
+    },
+    "code": {
+      "type": "string",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u30b3\u30fc\u30c9\uff08\u30e6\u30cb\u30fc\u30af\uff09"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u6709\u52b9\u304b"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u958b\u59cb\u65e5"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u7d42\u4e86\u65e5"
+    },
+    "description": {
+      "type": "string",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u8aac\u660e"
+    },
+    "target_plan_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u5bfe\u8c61\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9"
+    },
+    "special_trial_days": {
+      "type": "number",
+      "description": "\u7279\u5225\u7121\u6599\u4f53\u9a13\u65e5\u6570"
+    },
+    "special_monthly_price": {
+      "type": "number",
+      "description": "\u7279\u5225\u6708\u984d\u4fa1\u683c"
+    },
+    "special_yearly_price": {
+      "type": "number",
+      "description": "\u7279\u5225\u5e74\u984d\u4fa1\u683c"
+    },
+    "special_access_days": {
+      "type": "number",
+      "description": "\u7279\u5225\u5229\u7528\u671f\u9593\u65e5\u6570"
+    },
+    "special_grace_days": {
+      "type": "number",
+      "description": "\u7279\u5225\u7336\u4e88\u671f\u9593\u65e5\u6570"
+    },
+    "special_ai_article_included_count": {
+      "type": "number",
+      "description": "\u7279\u5225AI\u8a18\u4e8b\u56de\u6570"
+    },
+    "special_lp_limit": {
+      "type": "number",
+      "description": "\u7279\u5225LP\u4e0a\u9650"
+    },
+    "coupon_code": {
+      "type": "string",
+      "description": "\u30af\u30fc\u30dd\u30f3\u30b3\u30fc\u30c9"
+    },
+    "max_apply_count": {
+      "type": "number",
+      "description": "\u30ad\u30e3\u30f3\u30da\u30fc\u30f3\u6700\u5927\u9069\u7528\u6570"
+    },
+    "per_user_limit": {
+      "type": "number",
+      "default": 1,
+      "description": "\u30e6\u30fc\u30b6\u30fc\u3042\u305f\u308a\u306e\u9069\u7528\u4e0a\u9650"
+    },
+    "priority": {
+      "type": "number",
+      "default": 0,
+      "description": "\u512a\u5148\u5ea6\uff08\u9ad8\u3044\u307b\u3069\u512a\u5148\uff09"
+    },
+    "auto_apply": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u81ea\u52d5\u9069\u7528\u3059\u308b\u304b"
+    },
+    "notes": {
+      "type": "string",
+      "description": "\u5099\u8003"
+    }
+  },
+  "required": [
+    "name",
+    "code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
