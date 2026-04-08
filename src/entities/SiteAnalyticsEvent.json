@@ -1,0 +1,72 @@
+{
+  "name": "SiteAnalyticsEvent",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string",
+      "description": "サイトID"
+    },
+    "page_id": {
+      "type": "string",
+      "description": "ページID（site_pageテーブルのID）"
+    },
+    "page_path": {
+      "type": "string",
+      "description": "ページパス（例: /service）"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "page_view",
+        "site_visit",
+        "booking_submit",
+        "booking_click",
+        "external_booking_click"
+      ],
+      "description": "イベント種別"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "セッションID"
+    },
+    "visitor_id": {
+      "type": "string",
+      "description": "訪問者ID"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "リファラー"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "desktop",
+        "mobile",
+        "tablet",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "デバイス種別"
+    }
+  },
+  "required": [
+    "site_id",
+    "event_type",
+    "session_id",
+    "visitor_id"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {},
+    "delete": {}
+  }
+}

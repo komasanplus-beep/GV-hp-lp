@@ -11,6 +11,7 @@ import RecentPostsBlock from './RecentPostsBlock';
 import ImageSlider from './ImageSlider';
 import ServiceListByType from '@/components/service/ServiceListByType';
 import { getUIConfig } from '@/lib/uiConfig';
+import { trackBookingSubmit } from '@/lib/siteAnalyticsTracker';
 
 const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
 const parsePairs = (text) => parseLines(text).map(line => {
@@ -34,6 +35,7 @@ function BookingBlock({ d, siteId }) {
       message: form.message,
       status: 'pending',
     });
+    trackBookingSubmit(siteId);
     setStatus('done');
   };
 

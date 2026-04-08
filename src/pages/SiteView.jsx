@@ -11,6 +11,7 @@ import { base44 } from '@/api/base44Client';
 import SiteBlockRenderer from '@/components/site/SiteBlockRenderer.jsx';
 import { Loader2, Menu, X } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
+import { trackPageView, trackBookingClick } from '@/lib/siteAnalyticsTracker';
 
 function SiteViewInner({ siteId, isPreview }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,6 +60,13 @@ function SiteViewInner({ siteId, isPreview }) {
     canonicalUrl: seo?.canonical_url,
     keywords: seo?.seo_keywords,
   });
+
+  // Track page view on mount
+  useEffect(() => {
+    if (siteId && homePage?.id) {
+      trackPageView(siteId, homePage.id, '/');
+    }
+  }, [siteId, homePage?.id]);
 
   if (isLoading) {
     return (
@@ -226,6 +234,7 @@ function SiteViewInner({ siteId, isPreview }) {
             <button
               onClick={(e) => {
                 e.preventDefault();
+                trackBookingClick(siteId);
                 const target = document.getElementById('contact');
                 if (target) target.scrollIntoView({ behavior: 'smooth' });
               }}
@@ -295,6 +304,7 @@ function SiteViewInner({ siteId, isPreview }) {
                 <div className={headerSocialLinks.length > 0 ? 'border-t border-stone-100 pt-2' : ''}>
                   <button
                     onClick={() => {
+                      trackBookingClick(siteId);
                       const target = document.getElementById('contact');
                       if (target) target.scrollIntoView({ behavior: 'smooth' });
                       setMobileMenuOpen(false);

@@ -25,6 +25,7 @@ const menuGroups = [
       { name: 'ゲスト管理', icon: Users, page: 'AdminGuests' },
       { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
       { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
+      { name: 'アクセス分析', icon: TrendingUp, page: 'AdminSiteAnalytics' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
       { name: 'AIコンテンツ生成', icon: Sparkles, page: 'AdminAIGenerate' },
     ],
@@ -96,6 +97,7 @@ const PAGE_FEATURE_MAP = {
   AdminPostManager: 'blog_management',
   AdminBookings: 'booking_form',
   AdminGuests: 'customer_management',
+  AdminSiteAnalytics: 'site_builder',
 };
 
 export default function UserSidebar({ isOpen, onClose }) {
