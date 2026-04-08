@@ -1,5 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+/* global Deno */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -8,7 +9,19 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { business_type, service, target, region, features, content_type } = await req.json();
+    const { business_type, service, target, region, features, content_type, site_id } = await req.json();
+
+    // ===== AI ガードチェック =====
+    const guardRes = await base44.functions.invoke('aiGuard', {
+      feature_code: 'ai_copywriting',
+      site_id: site_id || null,
+    });
+    if (!guardRes.data?.allowed) {
+      return Response.json(
+        { error: guardRes.data?.reason || 'AI機能が無効です', blocked: true },
+        { status: 403 }
+      );
+    }
 
     // AISettings を取得
     const aiSettingsList = await base44.asServiceRole.entities.AISettings.filter({ user_id: user.id });

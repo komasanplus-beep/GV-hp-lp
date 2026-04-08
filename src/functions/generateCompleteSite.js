@@ -25,6 +25,18 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { business_type, site_name } = body;
 
+    // AI ガードチェック
+    const guardRes = await base44.functions.invoke('aiGuard', {
+      feature_code: 'ai_site_generation',
+      site_id: null,
+    });
+    if (!guardRes.data?.allowed) {
+      return Response.json(
+        { error: guardRes.data?.reason || 'AI機能が無効です' },
+        { status: 403 }
+      );
+    }
+
     if (!business_type || !site_name) {
       return Response.json(
         { error: 'business_type and site_name are required' },
@@ -44,7 +56,7 @@ Deno.serve(async (req) => {
         inquiry: true,
         customer: false,
       },
-      navigation_config: getNavigationConfig(business_type),
+      navigation_config: getNavigationConfig(business_type, site_name),
       footer_config: {
         copyright_text: `© ${new Date().getFullYear()} ${site_name}. All rights reserved.`,
         show_site_name: true,
@@ -67,7 +79,7 @@ Deno.serve(async (req) => {
     });
 
     // ===== 3. SiteBlock 一括作成 =====
-    const blocks = generateBlocks(business_type, site.id, page.id);
+    const blocks = generateBlocks(business_type, site.id, page.id, site_name);
     const createdBlocks = [];
     for (const block of blocks) {
       const blockData = {
@@ -105,10 +117,10 @@ Deno.serve(async (req) => {
   }
 });
 
-function getNavigationConfig(businessType) {
+function getNavigationConfig(businessType, siteName) {
   const navConfigs = {
     hotel: {
-      site_name_text: 'Bawi Hotel',
+      site_name_text: siteName || 'Hotel',
       logo_url: null,
       booking_button_text: 'ご予約',
       booking_button_url: '#contact',
@@ -122,7 +134,7 @@ function getNavigationConfig(businessType) {
       ],
     },
     salon: {
-      site_name_text: 'Hair Salon Bawi',
+      site_name_text: siteName || 'Hair Salon',
       logo_url: null,
       booking_button_text: 'ご予約',
       booking_button_url: '#contact',
@@ -141,7 +153,7 @@ function getNavigationConfig(businessType) {
   return navConfigs[businessType] || navConfigs.hotel;
 }
 
-function generateBlocks(businessType, siteId, pageId) {
+function generateBlocks(businessType, siteId, pageId, siteName) {
   if (businessType === 'hotel') {
     return [
       {
@@ -151,7 +163,7 @@ function generateBlocks(businessType, siteId, pageId) {
         sort_order: 0,
         data: {
           hero_mode: 'slider',
-          headline: 'Bawi Hotel',
+          headline: siteName || 'Bawi Hotel',
           subheadline: 'Luxury Accommodation & Unforgettable Experiences',
           eyebrow: 'Welcome to',
           cta_text: 'Book Your Stay',
@@ -256,7 +268,7 @@ function generateBlocks(businessType, siteId, pageId) {
         sort_order: 0,
         data: {
           hero_mode: 'slider',
-          headline: 'Hair Salon Bawi',
+          headline: siteName || 'Hair Salon Bawi',
           subheadline: 'あなたの理想のスタイルを実現する',
           eyebrow: 'Welcome to',
           cta_text: 'ご予約はこちら',

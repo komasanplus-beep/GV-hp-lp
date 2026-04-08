@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import MasterLayout from '@/components/master/MasterLayout';
-import { Users, ToggleLeft, Settings, BookOpen, FileText, ArrowRight, CreditCard, Globe, Layout, Layers, LayoutDashboard, Plus, Pencil, Trash2, StickyNote, X, Check } from 'lucide-react';
+import { Users, ToggleLeft, Settings, BookOpen, FileText, ArrowRight, CreditCard, Globe, Layout, Layers, LayoutDashboard, Plus, Pencil, Trash2, StickyNote, X, Check, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
@@ -19,6 +19,7 @@ const cards = [
   { name: 'テンプレート', desc: 'サイトテンプレート管理', icon: LayoutDashboard, page: 'MasterTemplates', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
   { name: 'AI設定', desc: 'AIモデル・プロンプト設定', icon: Settings, page: 'MasterAISettings', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { name: 'AIナレッジ', desc: 'ナレッジ登録・管理', icon: BookOpen, page: 'MasterAIKnowledge', color: 'bg-cyan-50 border-cyan-200 text-cyan-700' },
+  { name: 'AI機能制御', desc: 'AI機能ON/OFF・利用ログ管理', icon: Bot, page: 'MasterAIControl', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { name: 'システムログ', desc: 'システムログの確認', icon: FileText, page: 'MasterSystemLogs', color: 'bg-slate-50 border-slate-200 text-slate-700' },
 ];
 
