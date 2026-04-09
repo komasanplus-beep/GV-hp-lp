@@ -1,0 +1,46 @@
+{
+  "name": "UserTelemetryLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "event_name": {
+      "type": "string",
+      "description": "\u30a4\u30d9\u30f3\u30c8\u540d\uff08dashboard_view, site_create\u7b49\uff09"
+    },
+    "page_name": {
+      "type": "string",
+      "description": "\u30da\u30fc\u30b8\u540d\uff08UserDashboard, AdminSiteList\u7b49\uff09"
+    },
+    "request_key": {
+      "type": "string",
+      "description": "\u91cd\u8907\u9632\u6b62\u30ad\u30fc\uff08user_id:event_name:page_name:time_bucket\uff09"
+    }
+  },
+  "required": [
+    "user_id",
+    "event_name",
+    "page_name",
+    "request_key"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

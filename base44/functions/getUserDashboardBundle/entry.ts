@@ -4,6 +4,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 Deno.serve(async (req) => {
   try {
+    console.log('[getUserDashboardBundle] Request start - no logging calls inside this function');
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -105,6 +106,7 @@ Deno.serve(async (req) => {
     const canCreateLp = lpCount < (plan.lp_limit || 1);
     const canUseAi = (plan.can_use_ai !== false) && aiUsed < (plan.ai_limit || 10);
 
+    console.log('[getUserDashboardBundle] Bundle prepared - returning response');
     return Response.json({
       user: {
         id: user.id,
@@ -141,7 +143,7 @@ Deno.serve(async (req) => {
       },
     });
   } catch (error) {
-    console.error('getUserDashboardBundle error:', error);
+    console.error('[getUserDashboardBundle] error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
