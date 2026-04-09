@@ -18,7 +18,8 @@ export default function NavigationTracker() {
         }, '*');
     }, [location]);
 
-    // Log user activity when navigating to a page
+    // [DISABLED] Log user activity when navigating to a page
+    // ナビゲーション連打による429ループを停止（無限ループ検証中）
     useEffect(() => {
         // Extract page name from pathname
         const pathname = location.pathname;
@@ -39,11 +40,11 @@ export default function NavigationTracker() {
             pageName = matchedKey || null;
         }
 
-        if (isAuthenticated && pageName) {
-            base44.appLogs.logUserInApp(pageName).catch(() => {
-                // Silently fail - logging shouldn't break the app
-            });
-        }
+        // [DISABLED] if (isAuthenticated && pageName) {
+        //     base44.appLogs.logUserInApp(pageName).catch(() => {
+        //         // Silently fail - logging shouldn't break the app
+        //     });
+        // }
     }, [location, isAuthenticated, Pages, mainPageKey]);
 
     return null;

@@ -70,13 +70,16 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors (only for protected routes)
+  // [MODIFIED] Handle authentication errors (only for protected routes)
+  // navigateToLogin() の呼び出しをコメント化（リダイレクトループを防止）
   if (!isPublicRoute && authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
+      // [DISABLED] navigateToLogin() は何度も呼ばれてリダイレクトループを引き起こすため一時停止
+      // navigateToLogin();
+      console.log('[App] Auth required - redirect disabled (infinite loop prevention)');
+      return <div className="fixed inset-0 flex items-center justify-center"><div className="text-center"><div className="animate-spin">認証中...</div></div></div>;
     }
   }
 
