@@ -8,6 +8,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader2, ImageIcon, GripVertical } from 'lucide-react';
 import SiteBlockAnimationForm from './SiteBlockAnimationForm';
 import HeroEditForm from './HeroEditForm';
+import ContentSourceSelector from './ContentSourceSelector';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const SITE_BLOCK_FIELDS = {
@@ -163,8 +164,14 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
           </div>
 
           {sourceMode === 'content' && (
-            <div className="mt-3 pt-3 border-t border-blue-200 space-y-2">
-              <Select value={contentSourceType || ''} onValueChange={setContentSourceType}>
+            <div className="mt-3 pt-3 border-t border-blue-200 space-y-3">
+              <Select
+                value={contentSourceType || ''}
+                onValueChange={(v) => {
+                  setContentSourceType(v);
+                  setContentSourceIds([]);
+                }}
+              >
                 <SelectTrigger className="h-9 text-sm">
                   <SelectValue placeholder="コンテンツ種別を選択" />
                 </SelectTrigger>
@@ -174,9 +181,17 @@ export default function SiteBlockEditForm({ block, onSave, onCancel }) {
                   <SelectItem value="shared_content">共通コンテンツ</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-blue-700">
-                選択したコンテンツ種別から、このブロックに表示する項目を選びます。
-              </p>
+              {contentSourceType && (
+                <ContentSourceSelector
+                  siteId={block.site_id}
+                  sourceType={contentSourceType}
+                  selectedIds={contentSourceIds}
+                  onChange={setContentSourceIds}
+                />
+              )}
+              {!contentSourceType && (
+                <p className="text-xs text-blue-700">コンテンツ種別を選択してください</p>
+              )}
             </div>
           )}
         </div>

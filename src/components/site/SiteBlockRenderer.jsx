@@ -9,8 +9,6 @@ import { useQuery } from '@tanstack/react-query';
 import AnimatedBlock from './AnimatedBlock';
 import RecentPostsBlock from './RecentPostsBlock';
 import ImageSlider from './ImageSlider';
-import ServiceListByType from '@/components/service/ServiceListByType';
-import { getUIConfig } from '@/lib/uiConfig';
 import { trackBookingSubmit } from '@/lib/siteAnalyticsTracker';
 
 const parseLines = (text) => (text || '').split('\n').map(s => s.trim()).filter(Boolean);
@@ -97,74 +95,96 @@ function BookingBlock({ d, siteId }) {
   );
 }
 
-function ServiceBlock({ d, siteId, businessType = 'other' }) {
-  const { data: services = [] } = React.useQuery({
-    queryKey: ['services', siteId],
+function ServiceBlock({ d, siteId, businessType = 'other', block = {} }) {
+  const sourceMode = block.source_mode || 'manual';
+  const contentSourceType = block.content_source_type || null;
+  const contentSourceIds = block.content_source_ids || [];
+
+  // 手入力モード: site_id のServiceを全件取得
+  const { data: allServices = [] } = useQuery({
+    queryKey: ['svcBlock', siteId],
     queryFn: () => siteId
       ? base44.entities.Service.filter({ site_id: siteId }, 'sort_order')
       : Promise.resolve([]),
+    enabled: sourceMode === 'manual',
+  });
+
+  // コンテンツ選択モード: 候補を取得して selectedIds でフィルタ
+  const { data: candidatesRes } = useQuery({
+    queryKey: ['blockCandidates', siteId, contentSourceType],
+    queryFn: () => base44.functions.invoke('getBlockContentCandidates', {
+      site_id: siteId,
+      content_source_type: contentSourceType,
+    }).then(r => r.data?.candidates || []),
+    enabled: sourceMode === 'content' && !!contentSourceType,
   });
 
   const [searchParams] = React.useState(new URLSearchParams(window.location.search));
   const isPreview = searchParams.get('preview') === 'true';
 
-  // 業種別UI
-  const { getServiceLabel, BUSINESS_TYPE_LABELS } = React.useMemo(() => {
-    const labels = {
-      hotel: { service_label: '客室', icon: '🏨' },
-      salon: { service_label: 'メニュー', icon: '💇' },
-      clinic: { service_label: '診療科目', icon: '🏥' },
-      gym: { service_label: 'コース', icon: '💪' },
-      school: { service_label: 'レッスン', icon: '🎓' },
-      restaurant: { service_label: 'メニュー', icon: '🍽️' },
-      beauty: { service_label: '施術', icon: '💄' },
-      wellness: { service_label: 'プログラム', icon: '🧘' },
-      other: { service_label: 'サービス', icon: '⭐' }
-    };
-    return { BUSINESS_TYPE_LABELS: labels, getServiceLabel: (t) => labels[t]?.service_label || 'サービス' };
-  }, []);
-
-  const typeLabel = BUSINESS_TYPE_LABELS[businessType] || BUSINESS_TYPE_LABELS.other;
   const isHotel = businessType === 'hotel';
+
+  // 表示するアイテムを決定
+  let displayItems = [];
+  if (sourceMode === 'content' && contentSourceIds.length > 0 && candidatesRes) {
+    displayItems = contentSourceIds
+      .map(id => candidatesRes.find(c => c.id === id))
+      .filter(Boolean);
+  } else if (sourceMode === 'content' && contentSourceIds.length === 0 && candidatesRes) {
+    displayItems = candidatesRes; // 全件
+  } else {
+    // manual: 既存Service エンティティ形式
+    displayItems = allServices.map(svc => ({
+      id: svc.id,
+      title: svc.name || svc.title,
+      subtitle: svc.duration || '',
+      description: svc.description,
+      image_url: svc.image_url,
+      price: svc.price > 0 ? `¥${Number(svc.price).toLocaleString()}` : '',
+      _raw: svc,
+    }));
+  }
+
+  const BUSINESS_TYPE_ICONS = { hotel: '🏨', salon: '💇', clinic: '🏥', gym: '💪', school: '🎓', restaurant: '🍽️', beauty: '💄', wellness: '🧘', other: '⭐' };
+  const typeIcon = BUSINESS_TYPE_ICONS[businessType] || '⭐';
 
   return (
     <section className="py-20 bg-white">
       <div className="max-w-5xl mx-auto px-6">
         {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-4 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
         {d.subtitle && <p className="text-slate-500 text-center mb-12">{d.subtitle}</p>}
-        {services.length > 0 ? (
+        {displayItems.length > 0 ? (
           <div className={isHotel ? "grid md:grid-cols-2 lg:grid-cols-3 gap-8" : "grid md:grid-cols-2 lg:grid-cols-3 gap-6"}>
-            {services.map(svc => (
-              <a
-                key={svc.id}
-                href={`/service/${svc.id}?site_id=${siteId}${isPreview ? '&preview=true' : ''}`}
-                className={`rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer ${
-                  isHotel 
-                    ? 'bg-white border border-slate-200 hover:border-amber-400' 
-                    : 'bg-white hover:scale-105 transform'
-                }`}
-              >
-                {svc.image_url && (
-                  <img src={svc.image_url} alt={svc.name} className={`w-full ${isHotel ? 'h-48' : 'h-40'} object-cover`} />
-                )}
-                <div className={`p-6 ${isHotel ? '' : 'p-5'}`}>
-                  <h3 className={`${isHotel ? 'text-lg font-medium' : 'font-semibold'} text-slate-800 mb-2`}>{svc.name}</h3>
-                  {svc.description && <p className="text-sm text-slate-600 mb-4 line-clamp-2">{svc.description}</p>}
-                  <div className={`flex items-center ${isHotel ? 'flex-col gap-3' : 'justify-between'}`}>
-                    {svc.price > 0 && <span className={`${isHotel ? 'text-xl font-light' : 'font-medium'} text-amber-600`}>¥{svc.price.toLocaleString()}</span>}
-                    {svc.duration && <span className="text-xs text-slate-500">{svc.duration}</span>}
-                  </div>
-                  {isHotel && (
-                    <button className="w-full mt-4 px-4 py-2.5 border border-amber-600 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors text-sm font-medium">
-                      View Details
-                    </button>
+            {displayItems.map(item => {
+              const href = (sourceMode === 'manual' && item._raw)
+                ? `/service/${item.id}?site_id=${siteId}${isPreview ? '&preview=true' : ''}`
+                : null;
+              const CardTag = href ? 'a' : 'div';
+              return (
+                <CardTag
+                  key={item.id}
+                  href={href || undefined}
+                  className={`rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ${href ? 'cursor-pointer' : ''} ${
+                    isHotel ? 'bg-white border border-slate-200 hover:border-amber-400' : 'bg-white hover:scale-105 transform'
+                  }`}
+                >
+                  {item.image_url && (
+                    <img src={item.image_url} alt={item.title} className={`w-full ${isHotel ? 'h-48' : 'h-40'} object-cover`} />
                   )}
-                </div>
-              </a>
-            ))}
+                  <div className="p-5">
+                    <h3 className={`${isHotel ? 'text-lg font-medium' : 'font-semibold'} text-slate-800 mb-2`}>{item.title}</h3>
+                    {item.description && <p className="text-sm text-slate-600 mb-4 line-clamp-2">{item.description}</p>}
+                    <div className={`flex items-center ${isHotel ? 'flex-col gap-3' : 'justify-between'}`}>
+                      {item.price && <span className={`${isHotel ? 'text-xl font-light' : 'font-medium'} text-amber-600`}>{item.price}</span>}
+                      {item.subtitle && <span className="text-xs text-slate-500">{item.subtitle}</span>}
+                    </div>
+                  </div>
+                </CardTag>
+              );
+            })}
           </div>
         ) : (
-          <div className="text-center text-slate-300 py-16 text-5xl">{typeLabel.icon}</div>
+          <div className="text-center text-slate-300 py-16 text-5xl">{typeIcon}</div>
         )}
       </div>
     </section>
@@ -603,17 +623,7 @@ export default function SiteBlockRenderer({ block }) {
       </section>
     );
   } else if (type === 'Service') {
-    const config = getUIConfig(block.business_type || 'other');
-    content = (
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-6">
-          {d.title && <h2 className="text-3xl md:text-4xl font-light text-slate-900 mb-4 text-center" style={{ fontFamily: 'serif' }}>{d.title}</h2>}
-          <p className="text-center text-slate-500 mb-10">{config.icon}</p>
-          {d.subtitle && <p className="text-slate-500 text-center mb-10">{d.subtitle}</p>}
-          <ServiceListByType siteId={block.site_id} businessType={block.business_type || 'other'} />
-        </div>
-      </section>
-    );
+    content = <ServiceBlock d={d} siteId={block.site_id} businessType={block.business_type || 'other'} block={block} />;
   } else if (type === 'Contact') {
     content = <ContactBlock d={d} siteId={block.site_id} />;
   } else if (type === 'Booking') {
