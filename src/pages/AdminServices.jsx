@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
+import { createPageUrl } from '@/utils';
 import { Plus, Pencil, Trash2, Loader2, ImageIcon } from 'lucide-react';
 import { getServiceLabel, getPriceLabel, getDurationLabel, getCapacityLabel, BUSINESS_TYPE_LABELS } from '@/lib/businessTypeLabels';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ const defaultService = {
 
 export default function AdminServices() {
   const urlParams = new URLSearchParams(window.location.search);
-  const siteId = urlParams.get('site_id');
+  let siteId = urlParams.get('site_id');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
@@ -46,6 +47,17 @@ export default function AdminServices() {
   const [formData, setFormData] = useState(defaultService);
   const [isUploading, setIsUploading] = useState(false);
   const queryClient = useQueryClient();
+
+  // 全サイト取得 → site_id未指定時に自動選択
+  const { data: allSites = [] } = useQuery({
+    queryKey: ['allSites'],
+    queryFn: () => base44.entities.Site.list('-created_date'),
+  });
+
+  // site_idが未指定なら最初のサイトを自動選択
+  if (!siteId && allSites.length > 0) {
+    siteId = allSites[0].id;
+  }
 
   const { data: site } = useQuery({
     queryKey: ['site', siteId],
@@ -137,9 +149,24 @@ export default function AdminServices() {
         <UserLayout title="サービス管理">
           <Card>
             <CardContent className="py-16 text-center text-slate-400">
-              <p className="text-3xl mb-2">⚠️</p>
-              <p className="font-medium">サイトが指定されていません</p>
-              <p className="text-sm mt-1">URLに <code className="bg-slate-100 px-1 rounded">?site_id=...</code> を付けてアクセスしてください</p>
+              <p className="text-3xl mb-2">🏢</p>
+              <p className="font-medium">サイトを選択してください</p>
+              <p className="text-sm mt-3 mb-6">サービスを管理するサイトを選んでください</p>
+              {allSites.length === 0 ? (
+                <p className="text-sm text-slate-400">サイトがありません。先にサイトを作成してください</p>
+              ) : (
+                <div className="space-y-2">
+                  {allSites.map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => window.location.href = `${createPageUrl('AdminServices')}?site_id=${s.id}`}
+                      className="w-full px-4 py-2.5 text-left bg-slate-100 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 rounded-lg transition-colors text-slate-700 font-medium text-sm"
+                    >
+                      {s.site_name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </UserLayout>

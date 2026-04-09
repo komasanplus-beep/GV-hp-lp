@@ -251,10 +251,14 @@ export default function UserSidebar({ isOpen, onClose }) {
                       <ul className="mt-1 ml-3 pl-3 border-l border-slate-700 space-y-0.5">
                         {group.children.filter(item => isFeatureEnabled(item.page)).map(item => {
                           const isActive = location.pathname.includes(item.page);
+                          // AdminServices は site_id 必須なので、クエリを付与
+                          const linkUrl = item.page === 'AdminServices'
+                            ? `${createPageUrl(item.page)}?site_id=auto`  // フロントで自動選択
+                            : createPageUrl(item.page);
                           return (
                             <li key={item.name}>
                               <Link
-                                to={createPageUrl(item.page)}
+                                to={linkUrl}
                                 onClick={onClose}
                                 className={cn(
                                   "flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm",
