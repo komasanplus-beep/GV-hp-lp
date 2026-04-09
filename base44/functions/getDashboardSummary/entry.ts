@@ -12,14 +12,20 @@ Deno.serve(async (req) => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // 並列取得
-    const [sites, lps, analyticsEvents, aiUsageLogs, lpEventLogs] = await Promise.all([
-      base44.entities.Site.list('-created_date', 200).catch(() => []),
-      base44.entities.LandingPage.list('-created_date', 200).catch(() => []),
-      base44.entities.SiteAnalyticsEvent.list('-created_date', 10000).catch(() => []),
-      base44.entities.AIUsageLog.list('-created_date', 500).catch(() => []),
-      base44.entities.LpEventLog.list('-created_date', 10000).catch(() => []),
-    ]);
+    // 順次取得（レート制限対策）
+    let sites = [];
+    try {
+      sites = await base44.entities.Site.list('-created_date', 50);
+    } catch (e) {
+      console.warn('Site list error:', e.message);
+    }
+
+    let lps = [];
+    try {
+      lps = await base44.entities.LandingPage.list('-created_date', 50);
+    } catch (e) {
+      console.warn('LP list error:', e.message);
+    }
 
     // site_name
     const primarySite = (sites || []).find(s => s.status === 'published') || (sites || [])[0];
@@ -31,7 +37,14 @@ Deno.serve(async (req) => {
     const lpCount = (lps || []).length;
     const publishedLPCount = (lps || []).filter(l => l.status === 'published').length;
 
-    // 今月イベント集計
+    // 今月イベント集計（エラー時は空配列）
+    let analyticsEvents = [];
+    try {
+      analyticsEvents = await base44.entities.SiteAnalyticsEvent.list('-created_date', 1000);
+    } catch (e) {
+      console.warn('Analytics events error:', e.message);
+    }
+
     const events = analyticsEvents || [];
     const monthlyEvents = events.filter(e => new Date(e.created_date) >= monthStart);
 
@@ -47,6 +60,13 @@ Deno.serve(async (req) => {
     ).length;
 
     // monthly_usage_summary
+    let aiUsageLogs = [];
+    try {
+      aiUsageLogs = await base44.entities.AIUsageLog.list('-created_date', 100);
+    } catch (e) {
+      console.warn('AI usage logs error:', e.message);
+    }
+
     const aiLimit = 50;
     const aiUsed = (aiUsageLogs || []).filter(a => new Date(a.created_date) >= monthStart).length;
     const aiRate = aiLimit > 0 ? Math.round((aiUsed / aiLimit) * 100) : 0;
@@ -54,7 +74,14 @@ Deno.serve(async (req) => {
     const storageLimit = 1000;
     const storageRate = storageLimit > 0 ? Math.round((storageUsed / storageLimit) * 100) : 0;
 
-    // lp_kpi_summary — LpEventLog から今月分を集計
+    // lp_kpi_summary
+    let lpEventLogs = [];
+    try {
+      lpEventLogs = await base44.entities.LpEventLog.list('-created_date', 1000);
+    } catch (e) {
+      console.warn('LP event logs error:', e.message);
+    }
+
     const monthlyLpLogs = (lpEventLogs || []).filter(e => new Date(e.created_date) >= monthStart);
     const finalLpPV = monthlyLpLogs.filter(e => e.event_type === 'view').length;
     const finalLpCTA = monthlyLpLogs.filter(e => e.event_type === 'click').length;

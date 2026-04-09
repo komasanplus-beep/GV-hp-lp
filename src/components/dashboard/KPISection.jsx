@@ -25,16 +25,19 @@ function SectionHeader({ title, linkLabel, linkTo }) {
   );
 }
 
-export default function KPISection() {
-  const { data: summary, isLoading } = useQuery({
+export default function KPISection({ summary: externalSummary }) {
+  const { data: fetchedSummary, isLoading } = useQuery({
     queryKey: ['dashboardSummary'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getDashboardSummary', {});
       return res.data;
     },
+    enabled: !externalSummary, // 外部からsummaryが渡された場合はfetchしない
   });
 
-  if (isLoading) {
+  const summary = externalSummary || fetchedSummary;
+
+  if (isLoading && !externalSummary) {
     return (
       <div className="flex justify-center py-6">
         <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
