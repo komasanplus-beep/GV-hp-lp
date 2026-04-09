@@ -21,7 +21,16 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, error: 'siteId is required' }, { status: 400 });
     }
 
-    console.log(`[deleteSiteById] Admin user ${user.id} attempting to delete site ${siteId}`);
+    // Check if user is the site owner or has admin/master role
+    const site = await base44.asServiceRole.entities.Site.get(siteId).catch(() => null);
+    const isOwner = site && site.user_id === user.id;
+    const isAdmin = user?.role === 'admin' || user?.role === 'master';
+    
+    if (!isOwner && !isAdmin) {
+      return Response.json({ error: 'Forbidden: You can only delete your own sites' }, { status: 403 });
+    }
+
+    console.log(`[deleteSiteById] User ${user.id} (owner=${isOwner}, admin=${isAdmin}) attempting to delete site ${siteId}`);
 
     // Delete associated SitePage and SiteBlock entities first
     const pages = await base44.asServiceRole.entities.SitePage.filter({ site_id: siteId }).catch(() => []);
