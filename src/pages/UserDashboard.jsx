@@ -22,10 +22,11 @@ export default function UserDashboard() {
   });
 
   // Dashboard bundle: 認証確定後かつ初回のみ取得
-  const shouldFetchBundle = authUser?.id && !hasRequestedRef.current;
+  // Bundle取得判定: auth済み && 初回リクエスト未実行
+  const shouldFetchBundle = Boolean(authUser?.id) && !hasRequestedRef.current;
 
   const { data: bundleData, error: bundleError, isLoading: bundleLoading } = useQuery({
-    queryKey: ['userDashboardBundle', authUser?.id],
+    queryKey: ['userDashboardBundle'],
     queryFn: async () => {
       console.log('[UserDashboard] Bundle fetch start');
       const res = await base44.functions.invoke('getUserDashboardBundle', {});
@@ -50,22 +51,27 @@ export default function UserDashboard() {
   });
 
   // 初回リクエスト完了フラグ設定（重複防止）
+  // dependency: authUser.id に依存（authUser変更時のみ実行）
   useEffect(() => {
     if (shouldFetchBundle) {
+      console.log('[UserDashboard] Mark bundle as requested');
       hasRequestedRef.current = true;
     }
-  }, [shouldFetchBundle]);
+  }, [authUser?.id]);
 
   // 準備完了判定（ロード完了したら ready にする）
+  // dependency 最小化: bundleData のみ（bundleData 取得時のみ実行）
   useEffect(() => {
-    if (!authLoading && authUser && bundleData && !hasRequestedRef.current === false) {
+    if (bundleData && !authLoading && authUser) {
       setIsReady(true);
-      // 非ブロッキング: ログ送信は後で（UI表示を阻害しない）
-      sendDashboardViewLog().catch(e => console.warn('[UserDashboard] Log send error (ignored):', e.message));
+      console.log('[UserDashboard] Ready');
+      // [TEMP] ログ送信を一旦無効化（無限ループ検証中）
+      // sendDashboardViewLog().catch(e => console.warn('[UserDashboard] Log send error (ignored):', e.message));
     }
-  }, [authUser, bundleData, authLoading]);
+  }, [bundleData]);
 
-  // ログ送信は非ブロッキング（失敗してもUIに影響なし）
+  // [DISABLED] ログ送信は非ブロッキング（失敗してもUIに影響なし）
+  // 無限ループ検証後、以下を useCallback + enabled フラグで再有効化
   const sendDashboardViewLog = async () => {
     try {
       if (!authUser?.id) return;
