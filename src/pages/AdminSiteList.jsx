@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
@@ -8,8 +8,8 @@ import { createPageUrl } from '@/utils';
 import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight, Eye, Calendar, BookOpen, MessageSquare, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import SiteCreateWizard from '@/components/site/SiteCreateWizard';
 import { toast } from 'sonner';
 import { usePlan } from '@/components/plan/usePlan';
@@ -115,7 +115,7 @@ export default function AdminSiteList() {
             </Card>
           ) : (
             <div className="grid gap-4">
-              {sites.map(site => (
+              {sites.map((site) => (
                 <Card key={site.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="py-4 px-5">
                     <div className="flex items-center gap-4">
@@ -167,71 +167,57 @@ export default function AdminSiteList() {
         </div>
 
         {/* Wizard Dialog — ローディング中は外側クリックで閉じない */}
-        <Dialog open={showWizard} onOpenChange={(open) => { if (!wizardLoading) setShowWizard(open); }}>
-          <DialogContent className="max-w-lg" onPointerDownOutside={(e) => { if (wizardLoading) e.preventDefault(); }} onEscapeKeyDown={(e) => { if (wizardLoading) e.preventDefault(); }}>
-            <DialogHeader>
-              <DialogTitle>新規サイト作成</DialogTitle>
-            </DialogHeader>
-            <SiteCreateWizard
-              onLoadingChange={setWizardLoading}
-              onComplete={(site) => {
-                queryClient.invalidateQueries({ queryKey: ['sites'] });
-                queryClient.invalidateQueries({ queryKey: ['planUsage'] });
-                setShowWizard(false);
-                setWizardLoading(false);
-              }}
-              onCancel={() => { if (!wizardLoading) setShowWizard(false); }}
-            />
-          </DialogContent>
-        </Dialog>
+        {showWizard && (
+          <Dialog open={showWizard} onOpenChange={(open) => { if (!wizardLoading) setShowWizard(open); }}>
+            <DialogContent className="max-w-lg" onPointerDownOutside={(e) => { if (wizardLoading) e.preventDefault(); }} onEscapeKeyDown={(e) => { if (wizardLoading) e.preventDefault(); }}>
+              <DialogHeader>
+                <DialogTitle>新規サイト作成</DialogTitle>
+                <DialogDescription>テンプレートを選択してサイトを作成します</DialogDescription>
+              </DialogHeader>
+              <SiteCreateWizard
+                onLoadingChange={setWizardLoading}
+                onComplete={(site) => {
+                  queryClient.invalidateQueries({ queryKey: ['sites'] });
+                  queryClient.invalidateQueries({ queryKey: ['planUsage'] });
+                  setShowWizard(false);
+                  setWizardLoading(false);
+                }}
+                onCancel={() => { if (!wizardLoading) setShowWizard(false); }}
+              />
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Edit Dialog */}
-        <Dialog open={!!editSite} onOpenChange={() => setEditSite(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>サイトを編集</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名</label>
-                <input
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
-                  value={editForm.site_name || ''}
-                  onChange={e => setEditForm(p => ({ ...p, site_name: e.target.value }))}
-                />
+        {editSite && (
+          <Dialog open={!!editSite} onOpenChange={() => setEditSite(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>サイトを編集</DialogTitle>
+                <DialogDescription>サイト情報を変更します</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名</label>
+                  <Input
+                    value={editForm.site_name || ''}
+                    onChange={e => setEditForm(p => ({ ...p, site_name: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setEditSite(null)}>キャンセル</Button>
+                  <Button
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => updateMutation.mutate({ id: editSite.id, data: { site_name: editForm.site_name } })}
+                    disabled={updateMutation.isPending}
+                  >
+                    {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : '更新'}
+                  </Button>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">業種</label>
-                <Select value={editForm.business_type} onValueChange={val => setEditForm(p => ({ ...p, business_type: val }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {BUSINESS_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-1 block">ステータス</label>
-                <Select value={editForm.status} onValueChange={val => setEditForm(p => ({ ...p, status: val }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">下書き</SelectItem>
-                    <SelectItem value="published">公開</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setEditSite(null)}>キャンセル</Button>
-                <Button
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => updateMutation.mutate({ id: editSite.id, data: editForm })}
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : '更新'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </UserLayout>
     </ProtectedRoute>
   );
