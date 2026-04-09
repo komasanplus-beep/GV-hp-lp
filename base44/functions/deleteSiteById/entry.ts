@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    // Only allow admin or master users to delete sites via this function
-    if (user?.role !== 'admin' && user?.role !== 'master') {
-      return Response.json({ error: 'Forbidden: Admin or Master access required' }, { status: 403 });
+    // Only master users can delete sites
+    if (user?.role !== 'master') {
+      return Response.json({ error: 'Forbidden: Master access required' }, { status: 403 });
     }
 
     const body = await req.json();
@@ -19,11 +19,6 @@ Deno.serve(async (req) => {
 
     if (!siteId) {
       return Response.json({ success: false, error: 'siteId is required' }, { status: 400 });
-    }
-
-    // Only master role can delete sites
-    if (user?.role !== 'master') {
-      return Response.json({ error: 'Forbidden: Master access required' }, { status: 403 });
     }
 
     console.log(`[deleteSiteById] Master user ${user.id} attempting to delete site ${siteId}`);
