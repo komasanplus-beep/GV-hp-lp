@@ -45,7 +45,8 @@ function AdminSiteListContent() {
     queryFn: async () => {
       if (!currentUser) return [];
       try {
-        return await base44.functions.invoke('getAdminSiteList', {});
+        const res = await base44.functions.invoke('getAdminSiteList', {});
+        return res.data?.items || [];
       } catch (err) {
         console.error('[AdminSiteList] getAdminSiteList failed:', err);
         return [];
