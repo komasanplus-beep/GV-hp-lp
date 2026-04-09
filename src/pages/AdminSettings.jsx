@@ -1,7 +1,3 @@
-/**
- * AdminSettings - アカウント設定ページ（拡張版）
- * ユーザーアカウント情報の表示・編集機能付き
- */
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -14,17 +10,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+const EMPTY_FORM = {
+  account_name: '',
+  user_name: '',
+  contact_name: '',
+  email: '',
+  phone: '',
+  company_name: '',
+  address: '',
+  notes: '',
+};
+
 export default function AdminSettings() {
   const qc = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [saveError, setSaveError] = useState('');
 
-  // 現在のユーザー取得
-  const { data: currentUser, isLoading: isLoadingUser } = useQuery({
+  const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  // アカウントプロファイル取得
+  // isFetching でなく isLoading(初回のみ)を使用して、再フェッチ時にローディング画面へ切り替わらないようにする
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['accountProfile'],
     queryFn: async () => {
@@ -33,64 +41,87 @@ export default function AdminSettings() {
     },
   });
 
-  const [form, setForm] = useState({
-    account_name: '',
-    user_name: '',
-    contact_name: '',
-    email: '',
-    phone: '',
-    company_name: '',
-    address: '',
-    notes: '',
-  });
-
-  // プロファイルデータをフォームに反映
+  // プロファイルデータをフォームに反映（編集中は上書きしない）
   useEffect(() => {
-    if (profile) {
+    if (!isEditing) {
+      const p = profile || {};
+      const u = currentUser || {};
       setForm({
-        account_name: profile.account_name || '',
-        user_name: profile.user_name || '',
-        contact_name: profile.contact_name || currentUser?.full_name || '',
-        email: profile.email || currentUser?.email || '',
-        phone: profile.phone || '',
-        company_name: profile.company_name || '',
-        address: profile.address || '',
-        notes: profile.notes || '',
+        account_name: p.account_name || '',
+        user_name: p.user_name || '',
+        contact_name: p.contact_name || u.full_name || '',
+        email: p.email || u.email || '',
+        phone: p.phone || '',
+        company_name: p.company_name || '',
+        address: p.address || '',
+        notes: p.notes || '',
       });
-    } else if (currentUser) {
-      setForm(prev => ({
-        ...prev,
-        contact_name: currentUser.full_name || '',
-        email: currentUser.email || '',
-      }));
     }
-  }, [profile, currentUser]);
+  }, [profile, currentUser, isEditing]);
 
-  // 保存ミューテーション
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       const res = await base44.functions.invoke('saveAccountProfile', { profile: data });
+      if (!res.data?.success) throw new Error(res.data?.error || '保存に失敗しました');
       return res.data;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['accountProfile'] });
+    onSuccess: (data) => {
+      setSaveError('');
+      // 保存成功時はサーバー返却値でフォームを更新（再フェッチで画面が壊れるのを防ぐ）
+      if (data?.profile) {
+        const p = data.profile;
+        setForm({
+          account_name: p.account_name || '',
+          user_name: p.user_name || '',
+          contact_name: p.contact_name || '',
+          email: p.email || '',
+          phone: p.phone || '',
+          company_name: p.company_name || '',
+          address: p.address || '',
+          notes: p.notes || '',
+        });
+        // キャッシュを手動更新（再フェッチはしない）
+        qc.setQueryData(['accountProfile'], p);
+      }
       setIsEditing(false);
       toast.success('アカウント情報を保存しました');
     },
     onError: (err) => {
+      setSaveError(err.message || '保存に失敗しました');
       toast.error('保存に失敗しました: ' + err.message);
     },
   });
 
   const handleSave = () => {
-    if (!form.account_name || !form.email) {
-      toast.error('アカウント名とメールアドレスは必須です');
+    if (saveMutation.isPending) return;
+    if (!form.account_name?.trim() || !form.email?.trim()) {
+      setSaveError('アカウント名とメールアドレスは必須です');
       return;
     }
+    setSaveError('');
     saveMutation.mutate(form);
   };
 
-  if (isLoadingUser || isLoadingProfile) {
+  const handleCancelEdit = () => {
+    // キャンセル時はキャッシュ済みのプロフィールに戻す
+    const p = profile || {};
+    const u = currentUser || {};
+    setForm({
+      account_name: p.account_name || '',
+      user_name: p.user_name || '',
+      contact_name: p.contact_name || u.full_name || '',
+      email: p.email || u.email || '',
+      phone: p.phone || '',
+      company_name: p.company_name || '',
+      address: p.address || '',
+      notes: p.notes || '',
+    });
+    setSaveError('');
+    setIsEditing(false);
+  };
+
+  // 初回ローディングのみスピナー表示
+  if (isLoadingProfile) {
     return (
       <ProtectedRoute requiredRole="admin">
         <UserLayout title="アカウント設定">
@@ -107,7 +138,7 @@ export default function AdminSettings() {
       <UserLayout title="アカウント設定">
         <div className="max-w-2xl mx-auto space-y-6">
 
-          {/* 現在のユーザー情報（読み取り専用） */}
+          {/* ログイン情報（読み取り専用） */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">ログイン情報</CardTitle>
@@ -115,41 +146,30 @@ export default function AdminSettings() {
             <CardContent className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 block mb-1">ユーザー名</label>
-                <Input value={currentUser?.full_name || '-'} disabled className="bg-slate-50" />
+                <Input value={currentUser?.full_name || '-'} disabled className="bg-slate-50" readOnly />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-600 block mb-1">ログインメール</label>
-                <Input value={currentUser?.email || '-'} disabled className="bg-slate-50" />
+                <Input value={currentUser?.email || '-'} disabled className="bg-slate-50" readOnly />
               </div>
             </CardContent>
           </Card>
 
           {/* アカウント情報（編集可能） */}
           <Card>
-            <CardHeader className="flex items-center justify-between">
-              <CardTitle className="text-base">アカウント情報</CardTitle>
-              <Button
-                variant={isEditing ? 'destructive' : 'outline'}
-                size="sm"
-                onClick={() => {
-                  if (isEditing) {
-                    setForm(prev => ({
-                      ...prev,
-                      account_name: profile?.account_name || '',
-                      user_name: profile?.user_name || '',
-                      contact_name: profile?.contact_name || currentUser?.full_name || '',
-                      email: profile?.email || currentUser?.email || '',
-                      phone: profile?.phone || '',
-                      company_name: profile?.company_name || '',
-                      address: profile?.address || '',
-                      notes: profile?.notes || '',
-                    }));
-                  }
-                  setIsEditing(!isEditing);
-                }}
-              >
-                {isEditing ? 'キャンセル' : '編集'}
-              </Button>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">アカウント情報</CardTitle>
+                {!isEditing ? (
+                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                    編集
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="sm" onClick={handleCancelEdit} disabled={saveMutation.isPending}>
+                    キャンセル
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
 
@@ -246,6 +266,13 @@ export default function AdminSettings() {
                 />
               </div>
 
+              {saveError && (
+                <p className="text-sm text-red-600 flex items-center gap-1.5">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  {saveError}
+                </p>
+              )}
+
               {isEditing && (
                 <div className="flex gap-2 pt-2 border-t">
                   <Button
@@ -253,8 +280,10 @@ export default function AdminSettings() {
                     onClick={handleSave}
                     disabled={saveMutation.isPending}
                   >
-                    {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    保存
+                    {saveMutation.isPending
+                      ? <><Loader2 className="w-4 h-4 animate-spin" />保存中...</>
+                      : <><Save className="w-4 h-4" />保存</>
+                    }
                   </Button>
                 </div>
               )}
