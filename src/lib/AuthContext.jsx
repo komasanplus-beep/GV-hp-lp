@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
@@ -138,10 +138,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
+  const hasRedirectedRef = useRef(false);
+  
+  const navigateToLogin = useCallback(() => {
+    // 1 回だけリダイレクト
+    if (hasRedirectedRef.current) return;
+    hasRedirectedRef.current = true;
     base44.auth.redirectToLogin(window.location.href);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider value={{ 
@@ -153,7 +157,8 @@ export const AuthProvider = ({ children }) => {
       appPublicSettings,
       logout,
       navigateToLogin,
-      checkAppState
+      checkAppState,
+      hasRedirected: hasRedirectedRef.current
     }}>
       {children}
     </AuthContext.Provider>

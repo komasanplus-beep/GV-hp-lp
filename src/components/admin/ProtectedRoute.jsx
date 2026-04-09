@@ -17,7 +17,8 @@ export default function ProtectedRoute({ children, requiredRole = 'any' }) {
     const check = async () => {
       const authenticated = await base44.auth.isAuthenticated();
       if (!authenticated) {
-        base44.auth.redirectToLogin(window.location.pathname);
+        // App.jsx の AuthContext に任せる（二重リダイレクト防止）
+        setStatus('redirect');
         return;
       }
 
@@ -40,11 +41,12 @@ export default function ProtectedRoute({ children, requiredRole = 'any' }) {
           if (role === 'admin' || role === 'master') {
             setStatus('ok');
           } else {
-            window.location.href = createPageUrl('UserDashboard'); // Redirect non-admin/master users
+            window.location.href = createPageUrl('UserDashboard');
           }
         }
       } catch {
-        base44.auth.redirectToLogin(window.location.pathname);
+        // App.jsx の AuthContext に任せる
+        setStatus('redirect');
       }
     };
     check();
