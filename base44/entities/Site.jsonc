@@ -32,7 +32,7 @@
     },
     "enabled_features": {
       "type": "object",
-      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u304b\u3089\u5f15\u304d\u7d99\u3044\u3060\u6709\u52b9\u6a5f\u80fd\u30d5\u30e9\u30b0\u3002\u4f8b: { booking: true, blog: true, inquiry: true, customer: true }",
+      "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u304b\u3089\u5f15\u304d\u7d99\u3044\u3060\u6709\u52b9\u6a5f\u80fd\u30d5\u30e9\u30b0",
       "properties": {
         "booking": {
           "type": "boolean",
@@ -61,40 +61,21 @@
       "description": "\u30d5\u30c3\u30bf\u30fc\u8a2d\u5b9a",
       "properties": {
         "copyright_text": {
-          "type": "string",
-          "description": "\u8457\u4f5c\u6a29\u8868\u8a18\u306e\u30ab\u30b9\u30bf\u30e0\u30c6\u30ad\u30b9\u30c8"
+          "type": "string"
         },
         "footer_links": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "label": {
-                "type": "string"
-              },
-              "href": {
-                "type": "string"
-              },
-              "sort_order": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "label",
-              "href"
-            ]
-          },
-          "description": "\u30d5\u30c3\u30bf\u30fc\u306e\u30ea\u30f3\u30af\u9805\u76ee"
+            "type": "object"
+          }
         },
         "show_site_name": {
           "type": "boolean",
-          "default": true,
-          "description": "\u30b5\u30a4\u30c8\u540d\u3092\u8868\u793a\u3059\u308b\u304b"
+          "default": true
         },
         "show_year": {
           "type": "boolean",
-          "default": true,
-          "description": "\u5e74\u53f7\u3092\u8868\u793a\u3059\u308b\u304b"
+          "default": true
         }
       }
     },
@@ -103,16 +84,13 @@
       "description": "SEO\u8a2d\u5b9a",
       "properties": {
         "meta_title": {
-          "type": "string",
-          "description": "\u30da\u30fc\u30b8\u30bf\u30a4\u30c8\u30eb\uff0860\u6587\u5b57\u4ee5\u5185\u63a8\u5968\uff09"
+          "type": "string"
         },
         "meta_description": {
-          "type": "string",
-          "description": "\u30e1\u30bf\u30c7\u30a3\u30b9\u30af\u30ea\u30d7\u30b7\u30e7\u30f3\uff08160\u6587\u5b57\u4ee5\u5185\u63a8\u5968\uff09"
+          "type": "string"
         },
         "og_image_url": {
-          "type": "string",
-          "description": "OGP\u753b\u50cfURL"
+          "type": "string"
         }
       }
     }
@@ -122,25 +100,42 @@
     "site_name"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
+    "create": {},
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

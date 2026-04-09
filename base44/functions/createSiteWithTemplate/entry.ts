@@ -1,74 +1,109 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const TEMPLATE_PAGES = {
-  salon: [
-    { slug: 'index', title: 'トップ', type: 'home', show_in_header: true, show_in_footer: false },
-    { slug: 'services', title: 'サービス', type: 'menu', show_in_header: true, show_in_footer: false },
-    { slug: 'price', title: '料金', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'staff', title: 'スタッフ', type: 'staff', show_in_header: true, show_in_footer: false },
-    { slug: 'voice', title: 'お客様の声', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'access', title: 'アクセス', type: 'access', show_in_header: true, show_in_footer: false },
-    { slug: 'contact', title: 'お問い合わせ', type: 'contact', show_in_header: true, show_in_footer: false },
-    { slug: 'privacy-policy', title: '個人情報保護方針', type: 'custom', category: 'privacy', is_system: true, show_in_footer: true },
-    { slug: 'security-policy', title: '情報セキュリティ管理', type: 'custom', category: 'security', is_system: true, show_in_footer: true },
-    { slug: 'compliance', title: 'コンプライアンス', type: 'custom', category: 'compliance', is_system: true, show_in_footer: true },
-  ],
-  hotel: [
-    { slug: 'index', title: 'トップ', type: 'home', show_in_header: true, show_in_footer: false },
-    { slug: 'rooms', title: '客室案内', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'facilities', title: '施設案内', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'plans', title: '宿泊プラン', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'news', title: 'お知らせ', type: 'custom', show_in_header: true, show_in_footer: false },
-    { slug: 'access', title: 'アクセス', type: 'access', show_in_header: true, show_in_footer: false },
-    { slug: 'contact', title: 'お問い合わせ', type: 'contact', show_in_header: true, show_in_footer: false },
-    { slug: 'privacy-policy', title: '個人情報保護方針', type: 'custom', category: 'privacy', is_system: true, show_in_footer: true },
-    { slug: 'security-policy', title: '情報セキュリティ管理', type: 'custom', category: 'security', is_system: true, show_in_footer: true },
-    { slug: 'compliance', title: 'コンプライアンス', type: 'custom', category: 'compliance', is_system: true, show_in_footer: true },
-  ],
-};
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await req.json();
+    const { site_name, business_type, template, navigation_config } = body;
+
+    if (!site_name?.trim()) {
+      return Response.json({ error: 'site_name is required', code: 'MISSING_FIELD' }, { status: 400 });
     }
 
-    const { site_id, template_type } = await req.json();
+    // プラン上限チェック
+    const existingSites = await base44.asServiceRole.entities.Site.filter({ user_id: user.id });
+    const currentCount = existingSites.length;
 
-    if (!site_id || !template_type || !TEMPLATE_PAGES[template_type]) {
-      return Response.json({ error: 'Invalid template_type' }, { status: 400 });
+    // UserSubscription からプランを取得
+    const subs = await base44.asServiceRole.entities.UserSubscription.filter({ user_id: user.id }).catch(() => []);
+    const planCode = subs[0]?.current_plan_code || 'free';
+
+    // PlanMaster から上限取得
+    const planMasters = await base44.asServiceRole.entities.PlanMaster.filter({ code: planCode }).catch(() => []);
+    const siteLimit = planMasters[0]?.limits?.site_count ?? 1;
+
+    if (siteLimit !== -1 && currentCount >= siteLimit) {
+      return Response.json({
+        error: `サイト作成上限（${siteLimit}件）に達しています。プランをアップグレードしてください。`,
+        code: 'PLAN_LIMIT_EXCEEDED',
+        current_count: currentCount,
+        limit: siteLimit,
+      }, { status: 403 });
     }
 
-    const pages = TEMPLATE_PAGES[template_type];
-    const createdPages = [];
+    // Site作成（サービスロール経由）
+    const site = await base44.asServiceRole.entities.Site.create({
+      site_name: site_name.trim(),
+      business_type: business_type || 'other',
+      user_id: user.id,
+      status: 'draft',
+      enabled_features: template?.enabled_features || { booking: false, blog: false, inquiry: true, customer: false },
+      navigation_config: navigation_config || {},
+    });
 
-    for (const pageData of pages) {
-      const pageObj = {
-        site_id,
-        title: pageData.title,
-        slug: pageData.slug,
-        page_type: pageData.type,
-        page_category: pageData.category || 'regular',
-        is_system_page: pageData.is_system || false,
-        show_in_header: pageData.show_in_header || false,
-        show_in_footer: pageData.show_in_footer || false,
-        status: 'published',
-        sort_order: createdPages.length,
-      };
+    // ページ作成
+    const pageMap = {};
+    for (const pageDef of (template?.default_pages || [])) {
+      const page = await base44.asServiceRole.entities.SitePage.create({
+        site_id: site.id,
+        title: pageDef.title,
+        slug: pageDef.slug,
+        page_type: pageDef.page_type,
+        sort_order: pageDef.sort_order ?? 0,
+        status: 'draft',
+      });
+      pageMap[pageDef.slug] = page.id;
+    }
 
-      const created = await base44.entities.SitePage.create(pageObj);
-      createdPages.push(created);
+    // ブロック作成
+    for (const blockDef of (template?.default_blocks || [])) {
+      const pageId = pageMap[blockDef.page_slug];
+      if (!pageId) continue;
+      await base44.asServiceRole.entities.SiteBlock.create({
+        site_id: site.id,
+        page_id: pageId,
+        block_type: blockDef.block_type,
+        sort_order: blockDef.sort_order ?? 0,
+        data: blockDef.data || {},
+        user_id: user.id,
+        animation_type: blockDef.animation_type || 'fade-up',
+        animation_trigger: blockDef.animation_trigger || 'on-scroll',
+        animation_delay: blockDef.animation_delay ?? 0,
+        animation_duration: blockDef.animation_duration ?? 600,
+        animation_once: blockDef.animation_once ?? true,
+      });
+    }
+
+    // 初期サービス
+    const initialData = template?.initial_data || {};
+    const features = template?.enabled_features || {};
+    if (initialData.services?.length > 0) {
+      for (const service of initialData.services) {
+        await base44.asServiceRole.entities.Service.create({ ...service, site_id: site.id }).catch(() => {});
+      }
+    }
+
+    // 初期ブログ
+    if (features.blog && initialData.blog_posts?.length > 0) {
+      for (const post of initialData.blog_posts) {
+        await base44.asServiceRole.entities.Post.create({
+          site_id: site.id, user_id: user.id, status: 'published', ...post,
+        }).catch(() => {});
+      }
     }
 
     return Response.json({
       success: true,
-      pages: createdPages,
+      site_id: site.id,
+      site,
+      message: `「${site.site_name}」を作成しました`,
     });
+
   } catch (error) {
-    console.error('Create site with template error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('createSiteWithTemplate error:', error);
+    return Response.json({ error: error.message, code: 'SERVER_ERROR' }, { status: 500 });
   }
 });

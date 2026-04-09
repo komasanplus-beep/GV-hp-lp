@@ -7,7 +7,6 @@ import { Loader2, Check, ChevronRight, Eye, Calendar, BookOpen, MessageSquare, U
 import { createPageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { incrementUsage } from '@/lib/planUsage';
 import { hotelTemplate } from '@/lib/templates/hotelTemplate';
 
 // 機能フラグの表示設定
@@ -91,93 +90,33 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
     if (!selectedTemplate || !siteName.trim()) return;
     setLoading(true);
 
-    const user = await base44.auth.me();
-    const features = selectedTemplate.enabled_features || {};
-    const initialData = selectedTemplate.initial_data || {};
-
-    // 1. Site作成（有効機能フラグを保存）
-    const site = await base44.entities.Site.create({
+    const res = await base44.functions.invoke('createSiteWithTemplate', {
       site_name: siteName,
       business_type: businessType,
-      user_id: user.id,
-      status: 'draft',
-      enabled_features: features,
-      navigation_config: selectedTemplate.navigation_config || {},
+      template: {
+        enabled_features: selectedTemplate.enabled_features || {},
+        navigation_config: selectedTemplate.navigation_config || {},
+        default_pages: selectedTemplate.default_pages || [],
+        default_blocks: selectedTemplate.default_blocks || [],
+        initial_data: selectedTemplate.initial_data || {},
+      },
     });
 
-    // 2. default_pages から SitePage 作成
-    const pageMap = {};
-    for (const pageDef of (selectedTemplate.default_pages || [])) {
-      const page = await base44.entities.SitePage.create({
-        site_id: site.id,
-        title: pageDef.title,
-        slug: pageDef.slug,
-        page_type: pageDef.page_type,
-        sort_order: pageDef.sort_order ?? 0,
-        status: 'draft',
-      });
-      pageMap[pageDef.slug] = page.id;
-    }
-
-    // 3. default_blocks から SiteBlock 作成
-    for (const blockDef of (selectedTemplate.default_blocks || [])) {
-      const pageId = pageMap[blockDef.page_slug];
-      if (!pageId) continue;
-      await base44.entities.SiteBlock.create({
-        site_id: site.id,
-        page_id: pageId,
-        block_type: blockDef.block_type,
-        sort_order: blockDef.sort_order ?? 0,
-        data: blockDef.data || {},
-        user_id: user.id,
-        animation_type: blockDef.animation_type || 'fade-up',
-        animation_trigger: blockDef.animation_trigger || 'on-scroll',
-        animation_delay: blockDef.animation_delay ?? 0,
-        animation_duration: blockDef.animation_duration ?? 600,
-        animation_once: blockDef.animation_once ?? true,
-      });
-    }
-
-    // 4. 初期サービスを生成
-    if (initialData.services?.length > 0) {
-      for (const service of initialData.services) {
-        await base44.entities.Service.create({
-          ...service,
-          site_id: site.id,
-        });
-      }
-    }
-
-    // 5. 初期ブログ記事を生成
-    if (features.blog && initialData.blog_posts?.length > 0) {
-      for (const post of initialData.blog_posts) {
-        await base44.entities.BlogPost.create({
-          site_id: site.id,
-          user_id: user.id,
-          status: 'published',
-          ...post,
-        });
-      }
-    }
-
-    // 6. 初期予約サンプルを生成（Reservation）
-    if (features.booking && initialData.bookings?.length > 0) {
-      for (const booking of initialData.bookings) {
-        await base44.entities.Reservation.create({
-          site_id: site.id,
-          status: 'pending',
-          ...booking,
-        });
-      }
-    }
-
-    // 7. usage increment
-    await incrementUsage('site_count');
-
     setLoading(false);
+
+    if (!res.data?.success) {
+      const code = res.data?.code;
+      if (code === 'PLAN_LIMIT_EXCEEDED') {
+        toast.error(res.data?.error || 'プランの上限に達しています');
+      } else {
+        toast.error(res.data?.error || 'サイトの作成に失敗しました');
+      }
+      return;
+    }
+
     setDone(true);
-    toast.success(`「${site.site_name}」を作成しました！`);
-    setTimeout(() => onComplete(site), 1000);
+    toast.success(res.data.message || `サイトを作成しました！`);
+    setTimeout(() => onComplete(res.data.site), 1000);
   };
 
   return (

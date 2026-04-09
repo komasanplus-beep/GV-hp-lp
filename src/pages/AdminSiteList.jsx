@@ -33,9 +33,17 @@ export default function AdminSiteList() {
   const queryClient = useQueryClient();
   const { plan, usage, isAtSiteLimit } = usePlan();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const { data: sites = [], isLoading } = useQuery({
-    queryKey: ['sites'],
-    queryFn: () => base44.entities.Site.list('-created_date'),
+    queryKey: ['sites', currentUser?.id],
+    queryFn: () => currentUser
+      ? base44.entities.Site.filter({ user_id: currentUser.id }, '-created_date')
+      : Promise.resolve([]),
+    enabled: !!currentUser,
   });
 
   const updateMutation = useMutation({
