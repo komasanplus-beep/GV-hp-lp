@@ -78,7 +78,14 @@ function AdminSiteListContent() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Site.delete(id),
+    mutationFn: async (id) => {
+      console.log('[AdminSiteList] deleting site via backend function:', id);
+      const result = await base44.functions.invoke('deleteSiteById', { siteId: id });
+      if (!result.data?.success) {
+        throw new Error(result.data?.error || '削除に失敗しました');
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast.success('削除しました');
@@ -88,6 +95,9 @@ function AdminSiteListContent() {
       toast.error(`削除に失敗しました: ${error.message}`);
     },
   });
+  
+  // 削除確認ダイアログ用
+  const [deleteConfirmSite, setDeleteConfirmSite] = useState(null);
 
   const businessLabel = (val) => BUSINESS_TYPES.find(t => t.value === val)?.label || val;
 
@@ -193,7 +203,12 @@ function AdminSiteListContent() {
                         <Button variant="ghost" size="icon" onClick={() => { setEditSite(site); setEditForm({ site_name: site.site_name, business_type: site.business_type, status: site.status }); }}>
                           <Pencil className="w-4 h-4 text-slate-400" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(site.id)}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => setDeleteConfirmSite(site)}
+                          disabled={deleteMutation.isPending}
+                        >
                           <Trash2 className="w-4 h-4 text-red-400" />
                         </Button>
                       </div>
@@ -256,6 +271,50 @@ function AdminSiteListContent() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* ── Delete Confirm Dialog ── */}
+        <Dialog open={!!deleteConfirmSite} onOpenChange={(open) => !open && setDeleteConfirmSite(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                サイトを削除しますか？
+              </DialogTitle>
+              <DialogDescription>
+                「{deleteConfirmSite?.site_name}」を削除します。この操作は元に戻せません。
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-3 pt-4">
+              <Button 
+                variant="outline" 
+                className="flex-1" 
+                onClick={() => setDeleteConfirmSite(null)}
+                disabled={deleteMutation.isPending}
+              >
+                キャンセル
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => {
+                  if (deleteConfirmSite) {
+                    deleteMutation.mutate(deleteConfirmSite.id, {
+                      onSuccess: () => setDeleteConfirmSite(null),
+                      onError: () => setDeleteConfirmSite(null),
+                    });
+                  }
+                }}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />削除中...</>
+                ) : (
+                  <><Trash2 className="w-4 h-4 mr-2" />削除する</>
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </UserLayout>
