@@ -5,7 +5,10 @@ import MasterLayout from '@/components/master/MasterLayout';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, ExternalLink } from 'lucide-react';
+import { Search, ExternalLink, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 const BUSINESS_LABELS = {
   hair_salon: 'ヘアサロン', beauty_salon: '美容サロン', nail_salon: 'ネイルサロン',
@@ -14,6 +17,8 @@ const BUSINESS_LABELS = {
 };
 
 export default function MasterSiteList() {
+  const queryClient = useQueryClient();
+  const [deleteConfirmSite, setDeleteConfirmSite] = useState(null);
   const [search, setSearch] = useState('');
 
   const { data: sites = [], isLoading } = useQuery({
@@ -27,6 +32,24 @@ export default function MasterSiteList() {
   });
 
   const getUserEmail = (userId) => users.find(u => u.id === userId)?.email || userId;
+
+  const deleteMutation = useMutation({
+    mutationFn: async (siteId) => {
+      const result = await base44.functions.invoke('deleteSiteById', { siteId });
+      if (!result.data?.success) {
+        throw new Error(result.data?.error || '削除に失敗しました');
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['masterSites'] });
+      toast.success('サイトを削除しました');
+      setDeleteConfirmSite(null);
+    },
+    onError: (error) => {
+      toast.error(`削除に失敗しました: ${error.message}`);
+    },
+  });
 
   const filtered = sites.filter(s =>
     (s.site_name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -64,11 +87,20 @@ export default function MasterSiteList() {
               <Badge className={site.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}>
                 {site.status === 'published' ? '公開' : '下書き'}
               </Badge>
-              <div className="flex justify-end">
+              <div className="flex justify-end gap-2">
                 <Button variant="outline" size="sm" asChild>
                   <a href={`/preview/${site.id}`} target="_blank" rel="noreferrer">
                     <ExternalLink className="w-3.5 h-3.5 mr-1" />プレビュー
                   </a>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setDeleteConfirmSite(site)}
+                  disabled={deleteMutation.isPending}
+                  className="text-red-400 hover:text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -76,6 +108,52 @@ export default function MasterSiteList() {
         )}
       </div>
       <p className="text-xs text-slate-400 mt-3">計 {filtered.length} 件</p>
+
+      {/* Delete Confirm Dialog */}
+      <Dialog 
+        open={!!deleteConfirmSite} 
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmSite(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              サイトを削除しますか？
+            </DialogTitle>
+            <DialogDescription>
+              「{deleteConfirmSite?.site_name}」を削除します。この操作は元に戻せません。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 pt-4">
+            <Button 
+              variant="outline" 
+              className="flex-1" 
+              onClick={() => setDeleteConfirmSite(null)}
+              disabled={deleteMutation.isPending}
+            >
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={() => {
+                if (deleteConfirmSite) {
+                  deleteMutation.mutate(deleteConfirmSite.id);
+                }
+              }}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" />削除中...</>
+              ) : (
+                <><Trash2 className="w-4 h-4 mr-2" />削除する</>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MasterLayout>
   );
 }
