@@ -89,34 +89,37 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
   const handleCreate = async () => {
     if (!selectedTemplate || !siteName.trim()) return;
     setLoading(true);
+    try {
+      const res = await base44.functions.invoke('createSiteWithTemplate', {
+        site_name: siteName,
+        business_type: businessType,
+        template: {
+          enabled_features: selectedTemplate.enabled_features || {},
+          navigation_config: selectedTemplate.navigation_config || {},
+          default_pages: selectedTemplate.default_pages || [],
+          default_blocks: selectedTemplate.default_blocks || [],
+          initial_data: selectedTemplate.initial_data || {},
+        },
+      });
 
-    const res = await base44.functions.invoke('createSiteWithTemplate', {
-      site_name: siteName,
-      business_type: businessType,
-      template: {
-        enabled_features: selectedTemplate.enabled_features || {},
-        navigation_config: selectedTemplate.navigation_config || {},
-        default_pages: selectedTemplate.default_pages || [],
-        default_blocks: selectedTemplate.default_blocks || [],
-        initial_data: selectedTemplate.initial_data || {},
-      },
-    });
-
-    setLoading(false);
-
-    if (!res.data?.success) {
-      const code = res.data?.code;
-      if (code === 'PLAN_LIMIT_EXCEEDED') {
-        toast.error(res.data?.error || 'プランの上限に達しています');
-      } else {
-        toast.error(res.data?.error || 'サイトの作成に失敗しました');
+      if (!res.data?.success) {
+        const code = res.data?.code;
+        if (code === 'PLAN_LIMIT_EXCEEDED') {
+          toast.error(res.data?.error || 'プランの上限に達しています');
+        } else {
+          toast.error(`作成失敗 (${res.data?.step || 'unknown'}): ${res.data?.error || 'サイトの作成に失敗しました'}`);
+        }
+        return;
       }
-      return;
-    }
 
-    setDone(true);
-    toast.success(res.data.message || `サイトを作成しました！`);
-    setTimeout(() => onComplete(res.data.site), 1000);
+      setDone(true);
+      toast.success(res.data.message || 'サイトを作成しました！');
+      setTimeout(() => onComplete(res.data.site), 1000);
+    } catch (error) {
+      toast.error(`エラー: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -56,30 +56,29 @@ export default function SiteCreateWizard() {
 
     setIsLoading(true);
     try {
-      // サイト基本情報作成
-      const siteRes = await base44.functions.invoke('generateCompleteSite', {
-        business_type: selectedType,
+      const res = await base44.functions.invoke('createSiteWithTemplate', {
         site_name: siteName.trim(),
-        template_type: selectedType, // テンプレートタイプを指定
+        business_type: selectedType,
+        template: null, // デフォルトテンプレートを使用
       });
 
-      if (siteRes.data.status !== 'success') {
-        throw new Error(siteRes.data.error || 'Site creation failed');
+      if (!res.data?.success) {
+        const code = res.data?.code;
+        const msg = res.data?.error || 'サイトの作成に失敗しました';
+        if (code === 'PLAN_LIMIT_EXCEEDED') {
+          alert(`プランの上限に達しています: ${msg}`);
+        } else {
+          alert(`エラー (${res.data?.step || 'unknown'}): ${msg}`);
+        }
+        return;
       }
 
-      const siteId = siteRes.data.site.id;
-
-      // テンプレートに応じた初期ページを生成
-      await base44.functions.invoke('createSiteWithTemplate', {
-        site_id: siteId,
-        template_type: selectedType,
-      });
-
-      // ページ管理画面へ遷移
+      const siteId = res.data.site_id;
       window.location.href = `/SitePageManager?site_id=${siteId}`;
     } catch (error) {
       console.error('Site creation failed:', error);
-      alert(`エラー: ${error.response?.data?.error || error.message}`);
+      alert(`エラー: ${error.message}`);
+    } finally {
       setIsLoading(false);
     }
   };
