@@ -18,7 +18,7 @@ import {
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from '@/components/ui/tabs';
-import { Loader2, MessageSquare, CheckCircle, Clock } from 'lucide-react';
+import { Loader2, MessageSquare, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -47,11 +47,24 @@ export default function AdminInquiryManager() {
 
   const queryClient = useQueryClient();
 
+  const [filterCategory, setFilterCategory] = useState('all'); // 'all' | 'store' | 'system_support'
+  const [filterStatus, setFilterStatus] = useState('all');
+
   // 問い合わせ一覧取得
-  const { data: inquiries = [], isLoading } = useQuery({
+  const { data: allInquiries = [], isLoading } = useQuery({
     queryKey: ['inquiries'],
     queryFn: () => base44.entities.Inquiry.list('-created_date'),
   });
+
+  const inquiries = allInquiries.filter(i => {
+    const catMatch = filterCategory === 'all' ? true :
+      filterCategory === 'system_support' ? i.category === 'system_support' :
+      i.category !== 'system_support';
+    const statusMatch = filterStatus === 'all' ? true : i.status === filterStatus;
+    return catMatch && statusMatch;
+  });
+
+  const unresolvedQACount = allInquiries.filter(i => i.category === 'system_support' && (i.status === 'new' || i.status === 'in_progress')).length;
 
   // 選択中の問い合わせのメッセージ取得
   const { data: messages = [] } = useQuery({
@@ -121,10 +134,52 @@ export default function AdminInquiryManager() {
   return (
     <ProtectedRoute requiredRole="admin">
       <UserLayout title="問い合わせ管理">
-        <div className="max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-6xl space-y-4">
+          {/* 未対応Q&Aバナー */}
+          {unresolvedQACount > 0 && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg px-4 py-3 flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+              <p className="text-sm text-orange-800 font-medium">
+                未対応のQ&A（システムサポート）が <span className="font-bold">{unresolvedQACount}件</span> あります
+              </p>
+              <Button size="sm" variant="outline" onClick={() => { setFilterCategory('system_support'); setFilterStatus('all'); }}
+                className="ml-auto text-orange-700 border-orange-300">
+                確認する
+              </Button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左: 問い合わせ一覧 */}
           <div className="lg:col-span-1">
-            <h2 className="text-lg font-bold text-slate-800 mb-3">問い合わせ一覧</h2>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-bold text-slate-800">問い合わせ一覧</h2>
+            </div>
+            {/* フィルター */}
+            <div className="space-y-2 mb-3">
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">すべて</SelectItem>
+                  <SelectItem value="system_support">Q&A（システム）</SelectItem>
+                  <SelectItem value="store">店舗問い合わせ</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全ステータス</SelectItem>
+                  <SelectItem value="new">未対応</SelectItem>
+                  <SelectItem value="in_progress">対応中</SelectItem>
+                  <SelectItem value="resolved">解決済み</SelectItem>
+                  <SelectItem value="closed">終了</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
@@ -285,6 +340,7 @@ export default function AdminInquiryManager() {
               </Card>
             )}
           </div>
+          </div>{/* grid end */}
         </div>
 
         {/* ナレッジ化ダイアログ */}

@@ -26,7 +26,6 @@ const menuGroups = [
       { name: 'サービス管理', icon: Building2, page: 'AdminServices' },
       { name: '記事管理', icon: PenSquare, page: 'AdminPostManager' },
       { name: 'アクセス分析', icon: TrendingUp, page: 'AdminSiteAnalytics' },
-      { name: 'お知らせ管理', icon: Bell, page: 'AdminNoticeManager' },
       { name: '問い合わせ管理', icon: MessageSquare, page: 'AdminInquiryManager' },
       { name: 'コンテンツ管理', icon: FileText, page: 'AdminContent' },
       { name: 'AI生成', icon: Sparkles, page: 'AdminAIGenerate' },
@@ -65,8 +64,11 @@ const menuGroups = [
   {
     label: 'アカウント設定',
     icon: Settings,
-    page: 'AdminSettings',
-    single: true,
+    children: [
+      { name: 'ログイン・アカウント', icon: Settings, page: 'AdminSettings' },
+      { name: 'お知らせ', icon: Bell, page: 'MyNotices' },
+      { name: 'Q&A・サポート', icon: MessageSquare, page: 'UserQAPage' },
+    ],
   },
 ];
 
@@ -102,6 +104,8 @@ const PAGE_FEATURE_MAP = {
   AdminSiteAnalytics: 'site_builder',
   AdminNoticeManager: null,
   AdminInquiryManager: null,
+  MyNotices: null,
+  UserQAPage: null,
 };
 
 export default function UserSidebar({ isOpen, onClose }) {

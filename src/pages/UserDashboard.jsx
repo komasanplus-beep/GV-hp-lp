@@ -6,7 +6,7 @@ import UserLayout from '@/components/user/UserLayout';
 import KPISection from '@/components/dashboard/KPISection';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText, Eye } from 'lucide-react';
+import { Globe, Layout, Sparkles, Link2, Search, Settings, ArrowRight, FileText, Eye, MessageSquare, AlertTriangle } from 'lucide-react';
 
 const cards = [
   { name: 'サイト管理', desc: 'ホームページの作成・編集', icon: Globe, page: 'AdminSiteList', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
@@ -25,6 +25,11 @@ export default function UserDashboard() {
   const { data: lps = [] } = useQuery({
     queryKey: ['landingPages'],
     queryFn: () => base44.entities.LandingPage.list('-created_date', 5),
+  });
+
+  const { data: unresolvedInquiries = [] } = useQuery({
+    queryKey: ['unresolvedQA'],
+    queryFn: () => base44.entities.Inquiry.filter({ category: 'system_support', status: 'new' }, '-created_date', 5),
   });
 
   const publishedSites = sites.filter(s => s.status === 'published').length;
@@ -62,6 +67,26 @@ export default function UserDashboard() {
               </div>
             </div>
           </div>
+
+          {/* 未対応Q&Aバナー（管理者のみ） */}
+          {unresolvedInquiries.length > 0 && (
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-orange-600 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-orange-800">
+                  未対応Q&A: {unresolvedInquiries.length}件
+                </p>
+                <div className="mt-1 space-y-0.5">
+                  {unresolvedInquiries.slice(0, 3).map(inq => (
+                    <p key={inq.id} className="text-xs text-orange-700">• {inq.subject}</p>
+                  ))}
+                </div>
+              </div>
+              <Link to="/AdminInquiryManager" className="text-orange-600 hover:text-orange-800">
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+          )}
 
           {/* 機能カード */}
           <div>

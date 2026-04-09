@@ -1,0 +1,65 @@
+{
+  "name": "SupportChatSession",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30bb\u30c3\u30b7\u30e7\u30f3\u6240\u6709\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "escalated",
+        "resolved",
+        "closed"
+      ],
+      "default": "active",
+      "description": "\u30bb\u30c3\u30b7\u30e7\u30f3\u72b6\u614b: active=AI\u5bfe\u5fdc\u4e2d, escalated=\u7ba1\u7406\u8005\u30a8\u30b9\u30ab\u30ec\u30fc\u30b7\u30e7\u30f3\u6e08, resolved=\u89e3\u6c7a, closed=\u30af\u30ed\u30fc\u30ba"
+    },
+    "last_message_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u6700\u7d42\u30e1\u30c3\u30bb\u30fc\u30b8\u65e5\u6642"
+    },
+    "title": {
+      "type": "string",
+      "description": "\u30bb\u30c3\u30b7\u30e7\u30f3\u30bf\u30a4\u30c8\u30eb\uff08\u6700\u521d\u306e\u8cea\u554f\u304b\u3089\u81ea\u52d5\u751f\u6210\uff09"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

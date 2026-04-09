@@ -1,0 +1,71 @@
+{
+  "name": "SupportChatMessage",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "\u30bb\u30c3\u30b7\u30e7\u30f3ID"
+    },
+    "sender_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "ai",
+        "admin",
+        "system"
+      ],
+      "description": "\u9001\u4fe1\u8005\u30bf\u30a4\u30d7"
+    },
+    "message": {
+      "type": "string",
+      "description": "\u30e1\u30c3\u30bb\u30fc\u30b8\u672c\u6587"
+    },
+    "attachment_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30ebURL\u4e00\u89a7"
+    },
+    "ai_knowledge_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u53c2\u7167\u3057\u305f\u30ca\u30ec\u30c3\u30b8ID\u30ea\u30b9\u30c8"
+    },
+    "is_resolved_trigger": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u300c\u89e3\u6c7a\u3057\u305f\u300d\u30dc\u30bf\u30f3\u3067\u9001\u3089\u308c\u305f\u30e1\u30c3\u30bb\u30fc\u30b8\u304b"
+    },
+    "is_escalate_trigger": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u300c\u7ba1\u7406\u8005\u306b\u554f\u3044\u5408\u308f\u305b\u308b\u300d\u30c8\u30ea\u30ac\u30fc\u304b"
+    }
+  },
+  "required": [
+    "session_id",
+    "sender_type",
+    "message"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
