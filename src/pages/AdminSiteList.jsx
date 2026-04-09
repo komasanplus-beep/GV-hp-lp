@@ -275,47 +275,52 @@ function AdminSiteListContent() {
         </Dialog>
 
         {/* ── Delete Confirm Dialog ── */}
-        <Dialog open={!!deleteConfirmSite} onOpenChange={(open) => !open && setDeleteConfirmSite(null)}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-red-600">
-                <AlertTriangle className="w-5 h-5" />
-                サイトを削除しますか？
-              </DialogTitle>
-              <DialogDescription>
-                「{deleteConfirmSite?.site_name}」を削除します。この操作は元に戻せません。
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex gap-3 pt-4">
-              <Button 
-                variant="outline" 
-                className="flex-1" 
-                onClick={() => setDeleteConfirmSite(null)}
-                disabled={deleteMutation.isPending}
-              >
-                キャンセル
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => {
-                  if (deleteConfirmSite) {
+        <Dialog 
+          open={!!deleteConfirmSite} 
+          onOpenChange={(open) => {
+            if (!open) setDeleteConfirmSite(null);
+          }}
+        >
+          {deleteConfirmSite && (
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="w-5 h-5" />
+                  サイトを削除しますか？
+                </DialogTitle>
+                <DialogDescription>
+                  「{deleteConfirmSite.site_name}」を削除します。この操作は元に戻せません。
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={() => setDeleteConfirmSite(null)}
+                  disabled={deleteMutation.isPending}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={() => {
                     deleteMutation.mutate(deleteConfirmSite.id, {
                       onSuccess: () => setDeleteConfirmSite(null),
                       onError: () => setDeleteConfirmSite(null),
                     });
-                  }
-                }}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? (
-                  <><Loader2 className="w-4 h-4 animate-spin mr-2" />削除中...</>
-                ) : (
-                  <><Trash2 className="w-4 h-4 mr-2" />削除する</>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
+                  }}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" />削除中...</>
+                  ) : (
+                    <><Trash2 className="w-4 h-4 mr-2" />削除する</>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          )}
         </Dialog>
       </UserLayout>
     </ProtectedRoute>
