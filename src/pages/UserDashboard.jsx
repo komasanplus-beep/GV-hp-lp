@@ -32,41 +32,14 @@ export default function UserDashboard() {
     queryFn: () => base44.entities.Inquiry.filter({ category: 'system_support', status: 'new' }, '-created_date', 5),
   });
 
-  const publishedSites = sites.filter(s => s.status === 'published').length;
-  const publishedLPs = lps.filter(lp => lp.status === 'published').length;
 
   return (
     <ProtectedRoute requiredRole="admin">
       <UserLayout title="ダッシュボード">
         <div className="max-w-6xl mx-auto space-y-6">
 
-          {/* KPI セクション */}
+          {/* ようこそバー + アクセス分析 + KPIカード群 */}
           <KPISection />
-
-          {/* ようこそ エリア - コンパクト版 */}
-          <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 text-white">
-            <h2 className="text-xl font-bold mb-4">ようこそ</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div>
-                <p className="text-amber-100 text-sm font-medium mb-2">サイト</p>
-                <p className="text-2xl font-bold">{sites.length}</p>
-                <p className="text-sm text-amber-200 mt-1">上限: ∞</p>
-              </div>
-              <div>
-                <p className="text-amber-100 text-sm font-medium mb-2">公開中サイト</p>
-                <p className="text-2xl font-bold">{publishedSites}</p>
-              </div>
-              <div>
-                <p className="text-amber-100 text-sm font-medium mb-2">LP</p>
-                <p className="text-2xl font-bold">{lps.length}</p>
-                <p className="text-sm text-amber-200 mt-1">上限: ∞</p>
-              </div>
-              <div>
-                <p className="text-amber-100 text-sm font-medium mb-2">公開中LP</p>
-                <p className="text-2xl font-bold">{publishedLPs}</p>
-              </div>
-            </div>
-          </div>
 
           {/* 未対応Q&Aバナー（管理者のみ） */}
           {unresolvedInquiries.length > 0 && (
