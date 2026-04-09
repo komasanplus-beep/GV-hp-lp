@@ -12,7 +12,9 @@ export default function OwnerAnnouncementBell() {
   const { data } = useQuery({
     queryKey: ['ownerAnnouncements'],
     queryFn: () => base44.functions.invoke('getOwnerAnnouncements', {}).then(r => r.data),
-    refetchInterval: 5 * 60 * 1000,
+    refetchInterval: 10 * 60 * 1000, // 10分に延長
+    staleTime: 5 * 60 * 1000,        // 5分はキャッシュ利用
+    retry: false,                     // レート制限時に再試行しない
   });
 
   const announcements = data?.announcements || [];
@@ -20,7 +22,19 @@ export default function OwnerAnnouncementBell() {
 
   const markReadMutation = useMutation({
     mutationFn: (id) => base44.functions.invoke('markAnnouncementRead', { announcement_id: id }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ownerAnnouncements'] }),
+    onSuccess: () => {
+      // setQueryData でキャッシュを直接更新（invalidate による再fetchを避ける）
+      queryClient.setQueryData(['ownerAnnouncements'], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          announcements: old.announcements?.map(a => 
+            a.id === markReadMutation.variables ? { ...a, is_read: true } : a
+          ),
+          unread_count: Math.max(0, (old.unread_count || 1) - 1),
+        };
+      });
+    },
   });
 
   const handleOpen = (item) => {
