@@ -13,12 +13,12 @@ Deno.serve(async (req) => {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // 並列取得
-    const [sites, lps, analyticsEvents, aiUsageLogs, lpAnalyticsList] = await Promise.all([
+    const [sites, lps, analyticsEvents, aiUsageLogs, lpEventLogs] = await Promise.all([
       base44.entities.Site.list('-created_date', 200).catch(() => []),
       base44.entities.LandingPage.list('-created_date', 200).catch(() => []),
       base44.entities.SiteAnalyticsEvent.list('-created_date', 10000).catch(() => []),
       base44.entities.AIUsageLog.list('-created_date', 500).catch(() => []),
-      base44.entities.LPAnalytics.list('-created_date', 500).catch(() => []),
+      base44.entities.LpEventLog.list('-created_date', 10000).catch(() => []),
     ]);
 
     // site_name
@@ -54,27 +54,12 @@ Deno.serve(async (req) => {
     const storageLimit = 1000;
     const storageRate = storageLimit > 0 ? Math.round((storageUsed / storageLimit) * 100) : 0;
 
-    // lp_kpi_summary — LPAnalytics集計 (今月分)
-    // LPAnalyticsは lp_id, page_views, cta_clicks, conversions フィールドを想定
-    const lpAnalytics = lpAnalyticsList || [];
-    const lpMonthly = lpAnalytics; // LPAnalyticsは累計値なので全件合算
-    const lpPV = lpMonthly.reduce((s, a) => s + (a.page_views || 0), 0);
-    const lpCTA = lpMonthly.reduce((s, a) => s + (a.cta_clicks || 0), 0);
-    const lpCV = lpMonthly.reduce((s, a) => s + (a.conversions || 0), 0);
-    const lpCVRate = lpPV > 0 ? parseFloat((lpCV / lpPV).toFixed(4)) : 0;
-
-    // フォールバック: LPAnalyticsがなければSiteAnalyticsEventのlpイベントから集計
-    let finalLpPV = lpPV;
-    let finalLpCTA = lpCTA;
-    let finalLpCV = lpCV;
-    let finalLpCVRate = lpCVRate;
-    if (lpMonthly.length === 0) {
-      const lpEvents = monthlyEvents.filter(e => e.lp_id != null);
-      finalLpPV = lpEvents.filter(e => e.event_type === 'page_view').length;
-      finalLpCTA = lpEvents.filter(e => e.event_type === 'cta_click').length;
-      finalLpCV = lpEvents.filter(e => e.event_type === 'booking_submit').length;
-      finalLpCVRate = finalLpPV > 0 ? parseFloat((finalLpCV / finalLpPV).toFixed(4)) : 0;
-    }
+    // lp_kpi_summary — LpEventLog から今月分を集計
+    const monthlyLpLogs = (lpEventLogs || []).filter(e => new Date(e.created_date) >= monthStart);
+    const finalLpPV = monthlyLpLogs.filter(e => e.event_type === 'view').length;
+    const finalLpCTA = monthlyLpLogs.filter(e => e.event_type === 'click').length;
+    const finalLpCV = monthlyLpLogs.filter(e => e.event_type === 'conversion').length;
+    const finalLpCVRate = finalLpPV > 0 ? parseFloat((finalLpCV / finalLpPV).toFixed(4)) : 0;
 
     return Response.json({
       site_name: siteName,

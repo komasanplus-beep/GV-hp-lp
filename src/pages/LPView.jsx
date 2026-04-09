@@ -5,6 +5,7 @@ import BlockRenderer from '@/components/lp/BlockRenderer';
 import { Loader2 } from 'lucide-react';
 import { useSeoHead } from '@/hooks/useSeoHead';
 import { generateThemeCSS } from '@/lib/lpThemeRenderer';
+import { trackLPEvent } from '@/lib/lpTracker';
 
 function LPViewInner({ slug, preview, token }) {
   const [themeCSS, setThemeCSS] = useState('');
@@ -23,6 +24,13 @@ function LPViewInner({ slug, preview, token }) {
 
   // 公開状態チェック（下書きで preview=true の場合は表示可）
   const canView = !lp || lp.status === 'published' || (preview === 'true');
+
+  // ページビュートラッキング（lp取得後に1回送信）
+  useEffect(() => {
+    if (lp?.id && (lp.status === 'published' || preview === 'true')) {
+      trackLPEvent(lp.id, 'view');
+    }
+  }, [lp?.id]);
 
   // テーマ取得
   const { data: themeData } = useQuery({
@@ -129,7 +137,8 @@ function LPViewInner({ slug, preview, token }) {
         <BlockRenderer 
           key={block.id} 
           block={block} 
-          siteId={siteId} 
+          siteId={siteId}
+          lpId={lp?.id}
           theme={themeData}
           useTheme={lp?.use_site_theme}
         />

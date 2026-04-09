@@ -1,0 +1,53 @@
+{
+  "name": "LpEventLog",
+  "type": "object",
+  "properties": {
+    "lp_id": {
+      "type": "string",
+      "description": "\u30e9\u30f3\u30c7\u30a3\u30f3\u30b0\u30da\u30fc\u30b8ID"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "view",
+        "click",
+        "conversion"
+      ],
+      "description": "\u30a4\u30d9\u30f3\u30c8\u7a2e\u5225"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "\u30bb\u30c3\u30b7\u30e7\u30f3ID\uff08\u91cd\u8907\u9632\u6b62\u7528\uff09"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "\u30e6\u30fc\u30b6\u30fc\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "\u53c2\u7167\u5143URL"
+    }
+  },
+  "required": [
+    "lp_id",
+    "event_type"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -25,6 +25,12 @@ export default function AdminLPAnalytics() {
     queryFn: () => base44.entities.LandingPage.list('-created_date'),
   });
 
+  // 自動トラッキングログ（今月分）
+  const { data: lpEventLogs = [] } = useQuery({
+    queryKey: ['lpEventLogs'],
+    queryFn: () => base44.entities.LpEventLog.list('-created_date', 10000),
+  });
+
   const { data: allAnalytics = [] } = useQuery({
     queryKey: ['lpAnalytics'],
     queryFn: () => base44.entities.LPAnalytics.list(),
@@ -47,13 +53,25 @@ export default function AdminLPAnalytics() {
   });
 
   // --- Helpers ---
-  const getAnalytics = (lpId) => allAnalytics.find(a => a.lp_id === lpId);
   const getInsights = (lpId) => allInsights.find(i => i.lp_id === lpId);
-  const cvRate = (a) => a && a.page_views > 0 ? ((a.conversions / a.page_views) * 100).toFixed(1) : '0.0';
+  const getAnalytics = (lpId) => allAnalytics.find(a => a.lp_id === lpId);
+
+  // 自動集計: LpEventLog から今月分を lp_id 別に集計
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const getAutoKPI = (lpId) => {
+    const logs = lpEventLogs.filter(e => e.lp_id === lpId && new Date(e.created_date) >= monthStart);
+    const pv = logs.filter(e => e.event_type === 'view').length;
+    const clicks = logs.filter(e => e.event_type === 'click').length;
+    const cv = logs.filter(e => e.event_type === 'conversion').length;
+    const cvRate = pv > 0 ? ((cv / pv) * 100).toFixed(1) : '0.0';
+    return { pv, clicks, cv, cvRate };
+  };
 
   const selectedLP = lps.find(lp => lp.id === selectedLpId) || lps[0];
   const selectedAnalytics = getAnalytics(selectedLP?.id);
   const selectedInsights = getInsights(selectedLP?.id);
+  const autoKPI = getAutoKPI(selectedLP?.id);
 
   // --- AI Analysis Mutation ---
   const analyzeInsightsMutation = useMutation({
@@ -144,23 +162,25 @@ export default function AdminLPAnalytics() {
 
           {activeLp && (
             <>
-              {/* KPI Cards */}
+              {/* KPI Cards — 自動トラッキング（今月） */}
               <section>
-                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">KPI サマリー</h3>
+                <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-1">KPI サマリー（自動集計・今月）</h3>
+                <p className="text-xs text-slate-400 mb-3">LPアクセス時に自動記録されます</p>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  <KPICard title="ページビュー" value={(selectedAnalytics?.page_views ?? 0).toLocaleString()} icon={Eye} color="blue" />
-                  <KPICard title="CTAクリック" value={(selectedAnalytics?.cta_clicks ?? 0).toLocaleString()} icon={MousePointerClick} color="amber" />
-                  <KPICard title="コンバージョン" value={(selectedAnalytics?.conversions ?? 0).toLocaleString()} icon={Target} color="green" />
-                  <KPICard title="CV率" value={cvRate(selectedAnalytics)} unit="%" icon={Percent} color="purple" />
+                  <KPICard title="ページビュー" value={autoKPI.pv.toLocaleString()} icon={Eye} color="blue" />
+                  <KPICard title="CTAクリック" value={autoKPI.clicks.toLocaleString()} icon={MousePointerClick} color="amber" />
+                  <KPICard title="コンバージョン" value={autoKPI.cv.toLocaleString()} icon={Target} color="green" />
+                  <KPICard title="CV率" value={autoKPI.cvRate} unit="%" icon={Percent} color="purple" />
                 </div>
               </section>
 
-              {/* Manual analytics input */}
-              <section className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+              {/* Manual analytics input（補助） */}
+              <section className="bg-slate-50 rounded-xl border border-slate-200 p-5">
+                <h3 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
                   <BarChart3 className="w-4 h-4 text-slate-400" />
-                  計測データ入力
+                  手動補助データ入力
                 </h3>
+                <p className="text-xs text-slate-400 mb-4">自動集計の補完用（外部計測ツールの数値など）</p>
                 <AnalyticsForm
                   initialData={selectedAnalytics}
                   onSave={(data) => upsertAnalyticsMutation.mutate({ lpId: activeLp.id, data })}

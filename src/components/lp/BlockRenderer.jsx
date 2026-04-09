@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, CheckCircle } from 'lucide-react';
+import { trackLPEvent } from '@/lib/lpTracker';
 
 const toText = (value) => {
   if (value == null) return '';
@@ -55,9 +56,13 @@ const toPairs = (value) => {
   });
 };
 
-export default function BlockRenderer({ block, siteId }) {
+export default function BlockRenderer({ block, siteId, lpId }) {
   const d = block?.data || {};
   const type = block.block_type;
+
+  const handleCTAClick = () => {
+    if (lpId) trackLPEvent(lpId, 'click');
+  };
   
   // CTA・Hero・footer CTAを site 予約・問い合わせに遷移
   const ctaUrl = (url) => {
@@ -86,7 +91,7 @@ export default function BlockRenderer({ block, siteId }) {
         {toText(d.headline) && <h1 className="text-3xl md:text-5xl lg:text-6xl font-light mb-6 leading-tight" style={{ fontFamily: 'serif' }}>{toText(d.headline)}</h1>}
         {toText(d.subheadline) && <p className="text-base md:text-lg lg:text-xl text-white/80 mb-10 font-light">{toText(d.subheadline)}</p>}
         {toText(d.cta_text) && (
-          <a href={ctaUrl(d.cta_url || '#booking')} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-8 md:px-10 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
+          <a href={ctaUrl(d.cta_url || '#booking')} onClick={handleCTAClick} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-8 md:px-10 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
             {toText(d.cta_text)}
           </a>
         )}
@@ -318,7 +323,7 @@ export default function BlockRenderer({ block, siteId }) {
         {toText(d.title) && <h2 className="text-2xl md:text-3xl lg:text-4xl font-light mb-4 md:mb-6" style={{ fontFamily: 'serif' }}>{toText(d.title)}</h2>}
         {toText(d.body) && <p className="text-white/70 mb-8 md:mb-10 leading-relaxed text-sm md:text-base">{toText(d.body)}</p>}
         {toText(d.cta_text) && (
-          <a href={ctaUrl(d.cta_url || '#booking')} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-10 md:px-12 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
+          <a href={ctaUrl(d.cta_url || '#booking')} onClick={handleCTAClick} className="inline-block w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-10 md:px-12 py-4 text-base md:text-lg font-light tracking-wide transition-colors text-center">
             {toText(d.cta_text)}
           </a>
         )}
