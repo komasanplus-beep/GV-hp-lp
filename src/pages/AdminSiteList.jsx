@@ -28,6 +28,7 @@ const BUSINESS_TYPES = [
 
 export default function AdminSiteList() {
   const [showWizard, setShowWizard] = useState(false);
+  const [wizardLoading, setWizardLoading] = useState(false);
   const [editSite, setEditSite] = useState(null);
   const [editForm, setEditForm] = useState({});
   const queryClient = useQueryClient();
@@ -165,19 +166,21 @@ export default function AdminSiteList() {
           )}
         </div>
 
-        {/* Wizard Dialog */}
-        <Dialog open={showWizard} onOpenChange={setShowWizard}>
-          <DialogContent className="max-w-lg">
+        {/* Wizard Dialog — ローディング中は外側クリックで閉じない */}
+        <Dialog open={showWizard} onOpenChange={(open) => { if (!wizardLoading) setShowWizard(open); }}>
+          <DialogContent className="max-w-lg" onPointerDownOutside={(e) => { if (wizardLoading) e.preventDefault(); }} onEscapeKeyDown={(e) => { if (wizardLoading) e.preventDefault(); }}>
             <DialogHeader>
               <DialogTitle>新規サイト作成</DialogTitle>
             </DialogHeader>
             <SiteCreateWizard
+              onLoadingChange={setWizardLoading}
               onComplete={(site) => {
                 queryClient.invalidateQueries({ queryKey: ['sites'] });
                 queryClient.invalidateQueries({ queryKey: ['planUsage'] });
                 setShowWizard(false);
+                setWizardLoading(false);
               }}
-              onCancel={() => setShowWizard(false)}
+              onCancel={() => { if (!wizardLoading) setShowWizard(false); }}
             />
           </DialogContent>
         </Dialog>

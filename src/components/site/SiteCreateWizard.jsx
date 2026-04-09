@@ -40,13 +40,14 @@ const CATEGORY_ICON = {
 
 const STEPS = ['テンプレート選択', '業種選択', 'サイト名入力', '確認・生成'];
 
-export default function SiteCreateWizard({ onComplete, onCancel }) {
+export default function SiteCreateWizard({ onComplete, onCancel, onLoadingChange }) {
   const [step, setStep] = useState(0);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [businessType, setBusinessType] = useState('');
   const [siteName, setSiteName] = useState('');
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // DBからテンプレート一覧を取得、ない場合はホテルテンプレートを使用
   const { data: dbTemplates = [], isLoading: templatesLoading } = useQuery({
@@ -89,6 +90,8 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
   const handleCreate = async () => {
     if (!selectedTemplate || !siteName.trim()) return;
     setLoading(true);
+    setErrorMessage('');
+    onLoadingChange?.(true);
     try {
       const res = await base44.functions.invoke('createSiteWithTemplate', {
         site_name: siteName,
@@ -105,20 +108,21 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
       if (!res.data?.success) {
         const code = res.data?.code;
         if (code === 'PLAN_LIMIT_EXCEEDED') {
-          toast.error(res.data?.error || 'プランの上限に達しています');
+          setErrorMessage(res.data?.error || 'プランの上限に達しています。プランをアップグレードしてください。');
         } else {
-          toast.error(`作成失敗 (${res.data?.step || 'unknown'}): ${res.data?.error || 'サイトの作成に失敗しました'}`);
+          setErrorMessage(`作成に失敗しました (${res.data?.step || 'unknown'}): ${res.data?.error || 'サイトの作成に失敗しました'}`);
         }
         return;
       }
 
       setDone(true);
-      toast.success(res.data.message || 'サイトを作成しました！');
-      setTimeout(() => onComplete(res.data.site), 1000);
+      // 成功時のみ onComplete を呼ぶ
+      setTimeout(() => onComplete(res.data.site), 800);
     } catch (error) {
-      toast.error(`エラー: ${error.message}`);
+      setErrorMessage(`エラー: ${error.message}`);
     } finally {
       setLoading(false);
+      onLoadingChange?.(false);
     }
   };
 
@@ -307,6 +311,12 @@ export default function SiteCreateWizard({ onComplete, onCancel }) {
           {done && (
             <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
               <Check className="w-4 h-4" /> 作成完了！
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+              {errorMessage}
             </div>
           )}
 
