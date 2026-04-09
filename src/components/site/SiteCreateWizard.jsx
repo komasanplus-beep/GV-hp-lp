@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -131,7 +131,7 @@ export default function SiteCreateWizard({ onComplete, onCancel, onLoadingChange
       {/* Step indicator */}
       <div className="flex items-center gap-1">
         {STEPS.map((s, i) => (
-          <React.Fragment key={s}>
+          <div key={`step-${i}`}>
             <div className={cn(
               "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full transition-all",
               i === step ? "bg-amber-100 text-amber-700" :
@@ -141,7 +141,7 @@ export default function SiteCreateWizard({ onComplete, onCancel, onLoadingChange
               <span className="hidden sm:inline">{s}</span>
             </div>
             {i < STEPS.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300 flex-shrink-0" />}
-          </React.Fragment>
+          </div>
         ))}
       </div>
 

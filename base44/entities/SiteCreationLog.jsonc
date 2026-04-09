@@ -1,0 +1,74 @@
+{
+  "name": "SiteCreationLog",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u4f5c\u6210\u3057\u305f\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "site_id": {
+      "type": "string",
+      "description": "\u4f5c\u6210\u3055\u308c\u305f\u30b5\u30a4\u30c8ID\uff08\u6210\u529f\u6642\uff09"
+    },
+    "site_name": {
+      "type": "string",
+      "description": "\u30b5\u30a4\u30c8\u540d"
+    },
+    "business_type": {
+      "type": "string",
+      "description": "\u696d\u7a2e"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "success",
+        "validation_error",
+        "permission_denied",
+        "plan_limit",
+        "system_error"
+      ],
+      "description": "\u4f5c\u6210\u7d50\u679c"
+    },
+    "error_code": {
+      "type": "string",
+      "description": "\u30a8\u30e9\u30fc\u30b3\u30fc\u30c9\uff08\u5931\u6557\u6642\uff09"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "\u30a8\u30e9\u30fc\u30e1\u30c3\u30bb\u30fc\u30b8\uff08\u5931\u6557\u6642\uff09"
+    },
+    "step": {
+      "type": "string",
+      "description": "\u5931\u6557\u3057\u305f\u30b9\u30c6\u30c3\u30d7\uff08\u5931\u6557\u6642\uff09"
+    }
+  },
+  "required": [
+    "user_id",
+    "result"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

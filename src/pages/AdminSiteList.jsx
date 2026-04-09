@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight, Eye, Calendar, BookOpen, MessageSquare, Users } from 'lucide-react';
+import { Plus, Globe, Pencil, Trash2, Loader2, ExternalLink, FileText, ArrowRight, Eye, Calendar, BookOpen, MessageSquare, Users, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -26,8 +27,8 @@ const BUSINESS_TYPES = [
   { value: 'other', label: 'その他' },
 ];
 
-export default function AdminSiteList() {
-  const [showWizard, setShowWizard] = useState(false);
+function AdminSiteListContent() {
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardLoading, setWizardLoading] = useState(false);
   const [editSite, setEditSite] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -39,12 +40,19 @@ export default function AdminSiteList() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: sites = [], isLoading } = useQuery({
+  const { data: sites = [], isLoading, error: sitesError } = useQuery({
     queryKey: ['sites', currentUser?.id],
-    queryFn: () => currentUser
-      ? base44.entities.Site.filter({ user_id: currentUser.id }, '-created_date')
-      : Promise.resolve([]),
+    queryFn: async () => {
+      if (!currentUser) return [];
+      try {
+        return await base44.functions.invoke('getAdminSiteList', {});
+      } catch (err) {
+        console.error('[AdminSiteList] getAdminSiteList failed:', err);
+        return [];
+      }
+    },
     enabled: !!currentUser,
+    staleTime: 5000,
   });
 
   const updateMutation = useMutation({
@@ -54,6 +62,10 @@ export default function AdminSiteList() {
       setEditSite(null);
       toast.success('サイトを更新しました');
     },
+    onError: (error) => {
+      console.error('[AdminSiteList] update failed:', error);
+      toast.error(`更新に失敗しました: ${error.message}`);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -61,6 +73,10 @@ export default function AdminSiteList() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast.success('削除しました');
+    },
+    onError: (error) => {
+      console.error('[AdminSiteList] delete failed:', error);
+      toast.error(`削除に失敗しました: ${error.message}`);
     },
   });
 
@@ -77,6 +93,17 @@ export default function AdminSiteList() {
     <ProtectedRoute requiredRole="admin">
       <UserLayout title="サイト管理">
         <div className="max-w-4xl space-y-6">
+          {/* ── エラー表示 ── */}
+          {sitesError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-800">サイト一覧の読み込みに失敗しました</p>
+                <p className="text-xs text-red-600 mt-1">{sitesError.message}</p>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-slate-800">サイト一覧</h2>
@@ -85,9 +112,9 @@ export default function AdminSiteList() {
               </p>
             </div>
             <Button
-              onClick={() => setShowWizard(true)}
+              onClick={() => setWizardOpen(true)}
               className="bg-emerald-600 hover:bg-emerald-700 gap-2"
-              disabled={isAtSiteLimit}
+              disabled={isAtSiteLimit || wizardLoading}
               title={isAtSiteLimit ? 'サイト作成数の上限に達しています' : ''}
             >
               <Plus className="w-4 h-4" />新規サイト作成
@@ -95,8 +122,11 @@ export default function AdminSiteList() {
           </div>
 
           {isAtSiteLimit && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-              サイト作成数の上限（{plan.max_sites ?? 1}件）に達しています。プランをアップグレードしてください。
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2 items-start">
+              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-800">
+                サイト作成数の上限（{plan.max_sites ?? 1}件）に達しています。プランをアップグレードしてください。
+              </p>
             </div>
           )}
 
@@ -108,7 +138,7 @@ export default function AdminSiteList() {
                 <Globe className="w-14 h-14 mx-auto mb-4 opacity-20" />
                 <p className="font-semibold text-slate-600">サイトがまだありません</p>
                 <p className="text-sm mt-1 mb-6">「新規サイト作成」からウィザードで簡単に作成できます</p>
-                <Button onClick={() => setShowWizard(true)} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
+                <Button onClick={() => setWizardOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 gap-2">
                   <Plus className="w-4 h-4" />最初のサイトを作成
                 </Button>
               </CardContent>
@@ -166,59 +196,68 @@ export default function AdminSiteList() {
           )}
         </div>
 
-        {/* Wizard Dialog — ローディング中は外側クリックで閉じない */}
-        {showWizard && (
-          <Dialog open={showWizard} onOpenChange={(open) => { if (!wizardLoading) setShowWizard(open); }}>
-            <DialogContent className="max-w-lg" onPointerDownOutside={(e) => { if (wizardLoading) e.preventDefault(); }} onEscapeKeyDown={(e) => { if (wizardLoading) e.preventDefault(); }}>
-              <DialogHeader>
-                <DialogTitle>新規サイト作成</DialogTitle>
-                <DialogDescription>テンプレートを選択してサイトを作成します</DialogDescription>
-              </DialogHeader>
-              <SiteCreateWizard
-                onLoadingChange={setWizardLoading}
-                onComplete={(site) => {
-                  queryClient.invalidateQueries({ queryKey: ['sites'] });
-                  queryClient.invalidateQueries({ queryKey: ['planUsage'] });
-                  setShowWizard(false);
-                  setWizardLoading(false);
-                }}
-                onCancel={() => { if (!wizardLoading) setShowWizard(false); }}
-              />
-            </DialogContent>
-          </Dialog>
-        )}
+        {/* ── Wizard Dialog（1系統化） ── */}
+        <Dialog open={wizardOpen} onOpenChange={(open) => !wizardLoading && setWizardOpen(open)}>
+          <DialogContent className="max-w-lg" onPointerDownOutside={(e) => wizardLoading && e.preventDefault()} onEscapeKeyDown={(e) => wizardLoading && e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle>新規サイト作成</DialogTitle>
+              <DialogDescription>テンプレートを選択してサイトを作成します</DialogDescription>
+            </DialogHeader>
+            <SiteCreateWizard
+              onLoadingChange={setWizardLoading}
+              onComplete={(site) => {
+                toast.success(`「${site.site_name}」を作成しました`);
+                queryClient.invalidateQueries({ queryKey: ['sites'] });
+                setWizardOpen(false);
+                setWizardLoading(false);
+              }}
+              onCancel={() => !wizardLoading && setWizardOpen(false)}
+            />
+          </DialogContent>
+        </Dialog>
 
-        {/* Edit Dialog */}
-        {editSite && (
-          <Dialog open={!!editSite} onOpenChange={() => setEditSite(null)}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>サイトを編集</DialogTitle>
-                <DialogDescription>サイト情報を変更します</DialogDescription>
-              </DialogHeader>
+        {/* ── Edit Dialog（1系統化） ── */}
+        <Dialog open={!!editSite} onOpenChange={(open) => !open && setEditSite(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>サイトを編集</DialogTitle>
+              <DialogDescription>サイト名を変更します</DialogDescription>
+            </DialogHeader>
+            {editSite && (
               <div className="space-y-4 pt-2">
                 <div>
                   <label className="text-sm font-medium text-slate-700 mb-1 block">サイト名</label>
                   <Input
                     value={editForm.site_name || ''}
                     onChange={e => setEditForm(p => ({ ...p, site_name: e.target.value }))}
+                    placeholder="サイト名を入力"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button variant="outline" className="flex-1" onClick={() => setEditSite(null)}>キャンセル</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => setEditSite(null)} disabled={updateMutation.isPending}>
+                    キャンセル
+                  </Button>
                   <Button
                     className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                     onClick={() => updateMutation.mutate({ id: editSite.id, data: { site_name: editForm.site_name } })}
-                    disabled={updateMutation.isPending}
+                    disabled={updateMutation.isPending || !editForm.site_name?.trim()}
                   >
-                    {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : '更新'}
+                    {updateMutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />更新中</> : '更新'}
                   </Button>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
       </UserLayout>
     </ProtectedRoute>
+  );
+}
+
+export default function AdminSiteList() {
+  return (
+    <ErrorBoundary>
+      <AdminSiteListContent />
+    </ErrorBoundary>
   );
 }

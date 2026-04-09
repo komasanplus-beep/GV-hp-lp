@@ -216,6 +216,17 @@ Deno.serve(async (req) => {
     const createdPages = defaultPages.map(p => ({ slug: p.slug, title: p.title }));
     console.log(`[createSiteWithTemplate] completed site_id=${site.id}`);
 
+    // --- ログを保存 ---
+    await base44.asServiceRole.entities.SiteCreationLog.create({
+      user_id: user.id,
+      site_id: site.id,
+      site_name: site.site_name,
+      business_type: site.business_type,
+      result: 'success',
+    }).catch(logErr => {
+      console.warn('[createSiteWithTemplate] SiteCreationLog save failed:', logErr.message);
+    });
+
     return Response.json({
       success: true,
       site_id: site.id,
@@ -227,7 +238,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error(`[createSiteWithTemplate] FAILED step=${currentStep}`, error.message, error.stack);
 
-    // ロールバック: Siteだけ作成されてページがない中途半端な状態を防ぐ
+    // --- ロールバック: Siteだけ作成されてページがない中途半端な状態を防ぐ ---
     if (createdSiteId) {
       console.log(`[createSiteWithTemplate] rolling back site_id=${createdSiteId}`);
       try {
@@ -245,6 +256,23 @@ Deno.serve(async (req) => {
       } catch (rbErr) {
         console.error('[createSiteWithTemplate] rollback failed:', rbErr.message);
       }
+    }
+
+    // --- ログを保存（失敗） ---
+    try {
+      const base44log = createClientFromRequest(req);
+      const user = await base44log.auth.me();
+      if (user) {
+        await base44log.asServiceRole.entities.SiteCreationLog.create({
+          user_id: user.id,
+          result: currentStep === 'plan_check' ? 'plan_limit' : currentStep === 'auth' ? 'permission_denied' : currentStep === 'validation' ? 'validation_error' : 'system_error',
+          error_code: error.code || 'UNKNOWN',
+          error_message: error.message,
+          step: currentStep,
+        }).catch(() => {});
+      }
+    } catch (logErr) {
+      console.warn('[createSiteWithTemplate] error log save failed:', logErr.message);
     }
 
     return Response.json({
