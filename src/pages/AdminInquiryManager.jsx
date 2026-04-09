@@ -91,7 +91,7 @@ export default function AdminInquiryManager() {
 
       // Inquiry のステータスを更新
       if (selectedStatus) {
-        await base44.asServiceRole.entities.Inquiry.update(selectedInquiry.id, {
+        await base44.entities.Inquiry.update(selectedInquiry.id, {
           status: selectedStatus,
           assigned_admin_id: 'admin',
         });

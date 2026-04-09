@@ -2,49 +2,103 @@
   "name": "Inquiry",
   "type": "object",
   "properties": {
-    "site_id": {
+    "user_id": {
       "type": "string",
-      "description": "\u554f\u3044\u5408\u308f\u305b\u5148\u30b5\u30a4\u30c8ID"
+      "description": "\u554f\u3044\u5408\u308f\u305b\u30e6\u30fc\u30b6\u30fcID"
     },
     "name": {
       "type": "string",
-      "description": "\u304a\u540d\u524d"
+      "description": "\u9001\u4fe1\u8005\u540d\uff08\u65e7\u30d5\u30a9\u30fc\u30e0\u4e92\u63db\uff09"
     },
     "email": {
       "type": "string",
-      "description": "\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9"
+      "description": "\u9001\u4fe1\u8005\u30e1\u30fc\u30eb\uff08\u65e7\u30d5\u30a9\u30fc\u30e0\u4e92\u63db\uff09"
     },
     "message": {
       "type": "string",
-      "description": "\u30e1\u30c3\u30bb\u30fc\u30b8\u672c\u6587"
+      "description": "\u554f\u3044\u5408\u308f\u305b\u5185\u5bb9\uff08\u65e7\u30d5\u30a9\u30fc\u30e0\u4e92\u63db\uff09"
+    },
+    "subject": {
+      "type": "string",
+      "description": "\u4ef6\u540d"
+    },
+    "category": {
+      "type": "string",
+      "description": "\u554f\u3044\u5408\u308f\u305b\u30ab\u30c6\u30b4\u30ea"
+    },
+    "body": {
+      "type": "string",
+      "description": "\u554f\u3044\u5408\u308f\u305b\u672c\u6587"
     },
     "status": {
       "type": "string",
       "enum": [
         "new",
-        "read",
-        "replied"
+        "ai_answered",
+        "in_progress",
+        "resolved",
+        "closed"
       ],
       "default": "new",
-      "description": "\u5bfe\u5fdc\u72b6\u6cc1"
+      "description": "\u554f\u3044\u5408\u308f\u305b\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ],
+      "default": "normal",
+      "description": "\u512a\u5148\u5ea6"
+    },
+    "is_resolved_by_ai": {
+      "type": "boolean",
+      "default": false,
+      "description": "AI\u56de\u7b54\u3067\u89e3\u6c7a\u3057\u305f\u30d5\u30e9\u30b0"
+    },
+    "assigned_admin_id": {
+      "type": "string",
+      "description": "\u62c5\u5f53\u7ba1\u7406\u8005ID"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "\u7d10\u4ed8\u3051SupportChatSession ID"
+    },
+    "attachment_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30ebURL\u4e00\u89a7"
     }
   },
-  "required": [
-    "name",
-    "email",
-    "message"
-  ],
+  "required": [],
   "rls": {
     "create": {},
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "delete": {
       "user_condition": {

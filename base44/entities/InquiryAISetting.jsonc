@@ -1,0 +1,68 @@
+{
+  "name": "InquiryAISetting",
+  "type": "object",
+  "properties": {
+    "is_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u554f\u3044\u5408\u308f\u305bAI\u6709\u52b9\u5316\u30d5\u30e9\u30b0"
+    },
+    "system_prompt": {
+      "type": "string",
+      "description": "AI\u30b7\u30b9\u30c6\u30e0\u30d7\u30ed\u30f3\u30d7\u30c8"
+    },
+    "response_tone": {
+      "type": "string",
+      "enum": [
+        "formal",
+        "friendly",
+        "casual"
+      ],
+      "default": "friendly",
+      "description": "AI\u56de\u7b54\u30c8\u30fc\u30f3"
+    },
+    "max_answer_length": {
+      "type": "number",
+      "default": 1000,
+      "description": "\u56de\u7b54\u4e0a\u9650\u6587\u5b57\u6570"
+    },
+    "allowed_categories": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u56de\u7b54\u5bfe\u8c61\u30ab\u30c6\u30b4\u30ea\u4e00\u89a7"
+    },
+    "escalation_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u7ba1\u7406\u8005\u3078\u306e\u30a8\u30b9\u30ab\u30ec\u30fc\u30b7\u30e7\u30f3\u30ad\u30fc\u30ef\u30fc\u30c9"
+    },
+    "confidence_threshold": {
+      "type": "number",
+      "default": 0.7,
+      "description": "AI\u56de\u7b54\u4fe1\u983c\u5ea6\u95be\u5024"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'subject, body required' }, { status: 400 });
     }
 
-    // Inquiry を作成
-    const inquiry = await base44.entities.Inquiry.create({
+    // Inquiry を作成（serviceRole で書き込み権限を確保）
+    const inquiry = await base44.asServiceRole.entities.Inquiry.create({
       user_id: user.id,
       subject,
       category: category || 'general',
@@ -33,16 +33,19 @@ Deno.serve(async (req) => {
     });
 
     // InquiryMessage を作成（ユーザー初期メッセージ）
-    const message = await base44.entities.InquiryMessage.create({
+    const message = await base44.asServiceRole.entities.InquiryMessage.create({
       inquiry_id: inquiry.id,
       sender_type: 'user',
       sender_id: user.id,
       message: body,
     });
 
-    // AI設定を確認
-    const aiSettings = await base44.asServiceRole.entities.InquiryAISetting.list();
-    const setting = aiSettings[0];
+    // AI設定を確認（エンティティ未設定でもクラッシュしない）
+    let setting = null;
+    try {
+      const aiSettings = await base44.asServiceRole.entities.InquiryAISetting.list();
+      setting = aiSettings[0] || null;
+    } catch (_) { /* InquiryAISetting未設定時はスキップ */ }
 
     let aiResponse = null;
 

@@ -1,0 +1,59 @@
+{
+  "name": "InquiryMessage",
+  "type": "object",
+  "properties": {
+    "inquiry_id": {
+      "type": "string",
+      "description": "\u554f\u3044\u5408\u308f\u305bID"
+    },
+    "sender_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin",
+        "ai"
+      ],
+      "description": "\u9001\u4fe1\u8005\u30bf\u30a4\u30d7"
+    },
+    "sender_id": {
+      "type": "string",
+      "description": "\u9001\u4fe1\u8005ID"
+    },
+    "message": {
+      "type": "string",
+      "description": "\u30e1\u30c3\u30bb\u30fc\u30b8\u5185\u5bb9"
+    },
+    "is_official_reply": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u6b63\u5f0f\u56de\u7b54\u30d5\u30e9\u30b0"
+    }
+  },
+  "required": [
+    "inquiry_id",
+    "sender_type",
+    "message"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
