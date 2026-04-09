@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import UserSidebar from './UserSidebar';
 import { Menu } from 'lucide-react';
+import OwnerAnnouncementBell from '@/components/announcements/OwnerAnnouncementBell';
 
 export default function UserLayout({ children, title }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,7 +14,8 @@ export default function UserLayout({ children, title }) {
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-500 hover:text-slate-700">
             <Menu className="w-5 h-5" />
           </button>
-          <h1 className="font-semibold text-slate-800">{title}</h1>
+          <h1 className="font-semibold text-slate-800 flex-1">{title}</h1>
+          <OwnerAnnouncementBell />
         </header>
         <main className="p-4 lg:p-6">{children}</main>
       </div>

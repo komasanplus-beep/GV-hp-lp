@@ -4,7 +4,7 @@ import { createPageUrl } from '@/utils';
 import {
   Users, ToggleLeft, Settings, BookOpen, FileText,
   Shield, X, LogOut, Store, ChevronDown, LayoutTemplate,
-  CreditCard, Globe, Layout, Layers
+  CreditCard, Globe, Layout, Layers, Megaphone, Brain
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,13 @@ const menuGroups = [
     items: [
       { name: 'AI設定', icon: Settings, page: 'MasterAISettings' },
       { name: 'AIナレッジ', icon: BookOpen, page: 'MasterAIKnowledge' },
+      { name: 'Q&A AI設定', icon: Brain, page: 'AdminInquiryAISettings' },
+    ],
+  },
+  {
+    label: 'オーナー向け通知',
+    items: [
+      { name: 'お知らせ管理', icon: Megaphone, page: 'MasterAnnouncements' },
     ],
   },
   {

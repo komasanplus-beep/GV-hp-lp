@@ -1,4 +1,7 @@
 import './App.css'
+import MasterAnnouncements from './pages/MasterAnnouncements'
+import MasterAnnouncementEdit from './pages/MasterAnnouncementEdit'
+import AdminInquiryAISettings from './pages/AdminInquiryAISettings'
 import MasterLPTemplates from './pages/MasterLPTemplates'
 import MasterAIControl from './pages/MasterAIControl'
 import MasterPlanLimits from './pages/MasterPlanLimits'
@@ -139,6 +142,9 @@ const AuthenticatedApp = () => {
       <Route path="/MyNotices" element={<UserNoticeList />} />
       <Route path="/MyInquiries" element={<UserInquiryList />} />
       <Route path="/UserQAPage" element={<UserQAPage />} />
+      <Route path="/MasterAnnouncements" element={<MasterAnnouncements />} />
+      <Route path="/MasterAnnouncementEdit" element={<MasterAnnouncementEdit />} />
+      <Route path="/AdminInquiryAISettings" element={<AdminInquiryAISettings />} />
     </Routes>
   );
 };

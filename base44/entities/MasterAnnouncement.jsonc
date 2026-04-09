@@ -1,0 +1,113 @@
+{
+  "name": "MasterAnnouncement",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "\u4ef6\u540d"
+    },
+    "body": {
+      "type": "string",
+      "description": "\u672c\u6587"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published",
+        "archived"
+      ],
+      "default": "draft",
+      "description": "\u30b9\u30c6\u30fc\u30bf\u30b9"
+    },
+    "is_important": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u91cd\u8981\u901a\u77e5\u30d5\u30e9\u30b0"
+    },
+    "target_mode": {
+      "type": "string",
+      "enum": [
+        "all",
+        "filter",
+        "selected_users"
+      ],
+      "default": "all",
+      "description": "\u914d\u4fe1\u5bfe\u8c61\u30e2\u30fc\u30c9"
+    },
+    "target_filters": {
+      "type": "object",
+      "description": "\u914d\u4fe1\u5bfe\u8c61\u30d5\u30a3\u30eb\u30bf\u30fc",
+      "properties": {
+        "site_type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "homepage / lp"
+        },
+        "template_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "target_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u500b\u5225\u6307\u5b9a\u30e6\u30fc\u30b6\u30fcID\u4e00\u89a7"
+    },
+    "attachment_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "\u6dfb\u4ed8\u30d5\u30a1\u30a4\u30ebURL"
+    },
+    "publish_start_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u516c\u958b\u958b\u59cb\u65e5\u6642"
+    },
+    "publish_end_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u516c\u958b\u7d42\u4e86\u65e5\u6642"
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "MasterAnnouncementRead",
+  "type": "object",
+  "properties": {
+    "announcement_id": {
+      "type": "string",
+      "description": "\u304a\u77e5\u3089\u305bID"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u65e2\u8aad\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "\u65e2\u8aad\u65e5\u6642"
+    }
+  },
+  "required": [
+    "announcement_id",
+    "user_id"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -2,14 +2,72 @@
   "name": "InquiryAISetting",
   "type": "object",
   "properties": {
+    "scope_type": {
+      "type": "string",
+      "default": "global",
+      "description": "\u30b9\u30b3\u30fc\u30d7\u7a2e\u5225"
+    },
+    "scope_id": {
+      "type": "string",
+      "default": "master",
+      "description": "\u30b9\u30b3\u30fc\u30d7ID"
+    },
     "is_enabled": {
       "type": "boolean",
       "default": true,
-      "description": "\u554f\u3044\u5408\u308f\u305bAI\u6709\u52b9\u5316\u30d5\u30e9\u30b0"
+      "description": "AI\u6709\u52b9\u30d5\u30e9\u30b0"
+    },
+    "auto_reply_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u81ea\u52d5\u56de\u7b54ON/OFF"
+    },
+    "require_admin_approval": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u7ba1\u7406\u8005\u627f\u8a8d\u5f8c\u9001\u4fe1ON/OFF"
+    },
+    "model_name": {
+      "type": "string",
+      "default": "gpt_5_mini",
+      "description": "\u4f7f\u7528AI\u30e2\u30c7\u30eb\u540d"
     },
     "system_prompt": {
       "type": "string",
-      "description": "AI\u30b7\u30b9\u30c6\u30e0\u30d7\u30ed\u30f3\u30d7\u30c8"
+      "description": "\u30b7\u30b9\u30c6\u30e0\u30d7\u30ed\u30f3\u30d7\u30c8"
+    },
+    "qa_prompt": {
+      "type": "string",
+      "description": "Q&A\u5c02\u7528\u30d7\u30ed\u30f3\u30d7\u30c8"
+    },
+    "ng_rules": {
+      "type": "string",
+      "description": "NG\u30eb\u30fc\u30eb"
+    },
+    "knowledge_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u30ca\u30ec\u30c3\u30b8\u5229\u7528ON/OFF"
+    },
+    "auto_knowledge_from_inquiries": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u554f\u3044\u5408\u308f\u305b\u304b\u3089\u30ca\u30ec\u30c3\u30b8\u81ea\u52d5\u751f\u6210"
+    },
+    "auto_knowledge_from_answers": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u56de\u7b54\u304b\u3089\u30ca\u30ec\u30c3\u30b8\u81ea\u52d5\u751f\u6210"
+    },
+    "similar_qa_reference": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u985e\u4f3cQ&A\u53c2\u7167ON/OFF"
+    },
+    "web_search_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "WEB\u691c\u7d22\uff08\u56fa\u5b9aOFF\uff09"
     },
     "response_tone": {
       "type": "string",
@@ -25,25 +83,6 @@
       "type": "number",
       "default": 1000,
       "description": "\u56de\u7b54\u4e0a\u9650\u6587\u5b57\u6570"
-    },
-    "allowed_categories": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "\u56de\u7b54\u5bfe\u8c61\u30ab\u30c6\u30b4\u30ea\u4e00\u89a7"
-    },
-    "escalation_keywords": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "\u7ba1\u7406\u8005\u3078\u306e\u30a8\u30b9\u30ab\u30ec\u30fc\u30b7\u30e7\u30f3\u30ad\u30fc\u30ef\u30fc\u30c9"
-    },
-    "confidence_threshold": {
-      "type": "number",
-      "default": 0.7,
-      "description": "AI\u56de\u7b54\u4fe1\u983c\u5ea6\u95be\u5024"
     }
   },
   "required": [],
