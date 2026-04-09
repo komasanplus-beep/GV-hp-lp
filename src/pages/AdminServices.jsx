@@ -121,9 +121,16 @@ export default function AdminServices() {
     const file = e.target.files?.[0];
     if (!file) return;
     setIsUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setFormData(prev => ({ ...prev, image_url: file_url }));
-    setIsUploading(false);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData(prev => ({ ...prev, image_url: file_url }));
+      toast.success('画像をアップロードしました');
+    } catch (error) {
+      console.error('[AdminServices] Image upload failed:', error);
+      toast.error('画像のアップロードに失敗しました');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = (e) => {
