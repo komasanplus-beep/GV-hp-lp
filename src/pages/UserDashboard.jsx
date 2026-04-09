@@ -1,70 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import KPISection from '@/components/dashboard/KPISection';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function UserDashboard() {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [summary, setSummary] = React.useState(null);
-  const [summaryError, setSummaryError] = React.useState(null);
-  const [unresolvedInquiries, setUnresolvedInquiries] = React.useState([]);
+  const hasLoadedRef = useRef(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // 順次実行でレート制限を回避
-  React.useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        // 1. ダッシュボードサマリーを取得
-        const res = await base44.functions.invoke('getDashboardSummary', {});
-        setSummary(res.data);
-      } catch (err) {
-        console.error('Dashboard summary error:', err);
-        setSummaryError(err);
-      }
-      
-      // 2. 少し待ってから問い合わせを取得（レート制限対策）
-      await new Promise(r => setTimeout(r, 500));
-      
-      try {
-        const inquiries = await base44.entities.Inquiry.filter(
-          { category: 'system_support', status: 'new' }, 
-          '-created_date', 
-          5
-        );
-        setUnresolvedInquiries(inquiries || []);
-      } catch (err) {
-        console.error('Inquiries fetch error:', err);
-        setUnresolvedInquiries([]);
-      }
-      
-      setIsLoading(false);
-    };
-    
-    loadData();
-  }, []);
+  const { data: bundleData, error: bundleError, isLoading: bundleLoading } = useQuery({
+    queryKey: ['userDashboardBundle'],
+    queryFn: async () => {
+      console.log('[UserDashboard] Fetching bundle...');
+      const res = await base44.functions.invoke('getUserDashboardBundle', {});
+      console.log('[UserDashboard] Bundle loaded');
+      return res.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5分キャッシュ
+    retry: 1,
+    retryDelay: 1000,
+    enabled: !hasLoadedRef.current,
+  });
 
-  const siteName = summary?.site_name;
+  const { data: unresolvedInquiries = [] } = useQuery({
+    queryKey: ['unresolvedQA'],
+    queryFn: () => base44.entities.Inquiry.filter({ category: 'system_support', status: 'new' }, '-created_date', 5),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // 初回ロード完了を記録
+  useEffect(() => {
+    if (bundleData && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      setIsInitialLoad(false);
+      console.log('[UserDashboard] Initial load completed');
+    }
+  }, [bundleData]);
+
+  const user = bundleData?.user;
+  const subscription = bundleData?.subscription;
+  const plan = bundleData?.plan;
+  const usage = bundleData?.usage;
+  const permissions = bundleData?.permissions;
+
+  const siteName = user?.full_name || null;
   const title = siteName ? `${siteName} のダッシュボード` : 'ダッシュボード';
 
-  // エラー時のフォールバックデータ
-  const fallbackSummary = summaryError ? {
-    site_summary: { site_count: 0, published_site_count: 0, lp_count: 0, published_lp_count: 0 },
-    monthly_access_summary: { access_count: 0, page_view_count: 0 },
-    monthly_result_summary: { reservation_count: 0, sales_amount: 0, customer_count: 0 },
-    monthly_usage_summary: { ai_used: 0, ai_limit: 50, ai_usage_rate: 0, storage_used: 0, storage_limit: 1000, storage_usage_rate: 0 },
-    lp_kpi_summary: { page_view_count: 0, cta_click_count: 0, conversion_count: 0, cv_rate: 0 },
-  } : null;
-
-  const displaySummary = summary || fallbackSummary;
-
-  if (isLoading) {
+  // white screen prevent
+  if (bundleLoading && isInitialLoad) {
     return (
       <ProtectedRoute requiredRole="admin">
         <UserLayout title="ダッシュボード">
-          <div className="flex justify-center py-12">
+          <div className="flex justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
           </div>
         </UserLayout>
@@ -76,22 +65,22 @@ export default function UserDashboard() {
     <ProtectedRoute requiredRole="admin">
       <UserLayout title={title}>
         <div className="max-w-6xl mx-auto space-y-3">
-          {/* データ取得エラーバナー */}
-          {summaryError && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-3">
-              <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          {/* Error Banner */}
+          {bundleError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-3">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-amber-800">
-                  データの読み込みに問題が発生しました
+                <p className="text-xs font-semibold text-red-800">
+                  ダッシュボード読み込みエラー
                 </p>
-                <p className="text-xs text-amber-700 truncate">
-                  ページは表示されますが、一部のデータが更新されない場合があります
+                <p className="text-xs text-red-700 truncate">
+                  {bundleError?.message || '不明なエラーが発生しました'}
                 </p>
               </div>
             </div>
           )}
 
-          {/* 未対応Q&Aバナー */}
+          {/* Unresolved Q&A Banner */}
           {unresolvedInquiries.length > 0 && (
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center gap-3">
               <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0" />
@@ -109,9 +98,51 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {/* サイト概要 + アクセス分析 + KPI + LP分析 */}
-          <KPISection summary={displaySummary} />
+          {/* Dashboard KPI */}
+          {bundleData && (
+            <div className="space-y-5">
+              {/* Plan Banner */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-blue-600 font-semibold">現在のプラン</p>
+                    <p className="text-lg font-bold text-blue-900">{plan?.name || 'Free'}</p>
+                  </div>
+                  <div className="text-right text-xs text-blue-700 space-y-1">
+                    <p>サイト: {usage?.site_count || 0} / {plan?.site_limit || 1}</p>
+                    <p>LP: {usage?.lp_count || 0} / {plan?.lp_limit || 1}</p>
+                    <p>AI: {usage?.ai_used_count || 0} / {plan?.ai_limit || 10}</p>
+                  </div>
+                </div>
+              </div>
 
+              {/* Create Buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <Link
+                  to="/AdminSiteList"
+                  className={`p-4 rounded-lg border text-center transition-all ${
+                    permissions?.can_create_site
+                      ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400 text-emerald-700'
+                      : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">サイト管理</p>
+                  <p className="text-xs text-slate-500 mt-1">作成可能: {permissions?.can_create_site ? '○' : '✕'}</p>
+                </Link>
+                <Link
+                  to="/AdminLPList"
+                  className={`p-4 rounded-lg border text-center transition-all ${
+                    permissions?.can_create_lp
+                      ? 'bg-amber-50 border-amber-200 hover:border-amber-400 text-amber-700'
+                      : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">LP管理</p>
+                  <p className="text-xs text-slate-500 mt-1">作成可能: {permissions?.can_create_lp ? '○' : '✕'}</p>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </UserLayout>
     </ProtectedRoute>
