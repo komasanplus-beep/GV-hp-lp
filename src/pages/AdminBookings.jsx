@@ -56,18 +56,6 @@ export default function AdminBookings() {
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get('site_id') || null;
 
-  // API レベルで予約管理機能のアクセス権確認
-  const { data: accessCheck, isLoading: isCheckingAccess } = useQuery({
-    queryKey: ['featureAccess', 'booking_form'],
-    queryFn: async () => {
-      const res = await base44.functions.invoke('resolveFeatureAccess', {
-        feature_code: 'booking_form',
-        site_id: siteId,
-      });
-      return res.data;
-    },
-  });
-
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ['bookings', siteId],
     queryFn: () => siteId
@@ -105,26 +93,6 @@ export default function AdminBookings() {
     if (!checkIn || !checkOut) return 0;
     return differenceInDays(new Date(checkOut), new Date(checkIn));
   };
-
-  // アクセス拒否
-  if (!isCheckingAccess && accessCheck && accessCheck.allowed === false) {
-    return (
-      <ProtectedRoute requiredRole="admin">
-        <UserLayout title="予約管理">
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <Calendar className="w-8 h-8 text-red-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">アクセスできません</h3>
-            <p className="text-slate-500 text-sm max-w-sm">
-              予約管理機能はご利用のプランに含まれていません。<br />
-              プランをアップグレードするか、管理者にお問い合わせください。
-            </p>
-          </div>
-        </UserLayout>
-      </ProtectedRoute>
-    );
-  }
 
   return (
     <ProtectedRoute requiredRole="admin">
