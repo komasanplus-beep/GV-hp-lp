@@ -1,27 +1,50 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import KPISection from '@/components/dashboard/KPISection';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function UserDashboard() {
-  const { data: summary, error: summaryError } = useQuery({
-    queryKey: ['dashboardSummary'],
-    queryFn: async () => {
-      const res = await base44.functions.invoke('getDashboardSummary', {});
-      return res.data;
-    },
-    retry: 1,
-    retryDelay: 1000,
-  });
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [summary, setSummary] = React.useState(null);
+  const [summaryError, setSummaryError] = React.useState(null);
+  const [unresolvedInquiries, setUnresolvedInquiries] = React.useState([]);
 
-  const { data: unresolvedInquiries = [] } = useQuery({
-    queryKey: ['unresolvedQA'],
-    queryFn: () => base44.entities.Inquiry.filter({ category: 'system_support', status: 'new' }, '-created_date', 5),
-  });
+  // 順次実行でレート制限を回避
+  React.useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        // 1. ダッシュボードサマリーを取得
+        const res = await base44.functions.invoke('getDashboardSummary', {});
+        setSummary(res.data);
+      } catch (err) {
+        console.error('Dashboard summary error:', err);
+        setSummaryError(err);
+      }
+      
+      // 2. 少し待ってから問い合わせを取得（レート制限対策）
+      await new Promise(r => setTimeout(r, 500));
+      
+      try {
+        const inquiries = await base44.entities.Inquiry.filter(
+          { category: 'system_support', status: 'new' }, 
+          '-created_date', 
+          5
+        );
+        setUnresolvedInquiries(inquiries || []);
+      } catch (err) {
+        console.error('Inquiries fetch error:', err);
+        setUnresolvedInquiries([]);
+      }
+      
+      setIsLoading(false);
+    };
+    
+    loadData();
+  }, []);
 
   const siteName = summary?.site_name;
   const title = siteName ? `${siteName} のダッシュボード` : 'ダッシュボード';
@@ -36,6 +59,18 @@ export default function UserDashboard() {
   } : null;
 
   const displaySummary = summary || fallbackSummary;
+
+  if (isLoading) {
+    return (
+      <ProtectedRoute requiredRole="admin">
+        <UserLayout title="ダッシュボード">
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+          </div>
+        </UserLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute requiredRole="admin">

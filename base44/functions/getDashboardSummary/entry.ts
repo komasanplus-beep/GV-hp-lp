@@ -1,5 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
+// 遅延用ユーティリティ
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -16,6 +19,7 @@ Deno.serve(async (req) => {
     let sites = [];
     try {
       sites = await base44.entities.Site.list('-created_date', 50);
+      await delay(100); // レート制限回避のための遅延
     } catch (e) {
       console.warn('Site list error:', e.message);
     }
@@ -23,6 +27,7 @@ Deno.serve(async (req) => {
     let lps = [];
     try {
       lps = await base44.entities.LandingPage.list('-created_date', 50);
+      await delay(100);
     } catch (e) {
       console.warn('LP list error:', e.message);
     }
@@ -41,6 +46,7 @@ Deno.serve(async (req) => {
     let analyticsEvents = [];
     try {
       analyticsEvents = await base44.entities.SiteAnalyticsEvent.list('-created_date', 1000);
+      await delay(100);
     } catch (e) {
       console.warn('Analytics events error:', e.message);
     }
@@ -63,6 +69,7 @@ Deno.serve(async (req) => {
     let aiUsageLogs = [];
     try {
       aiUsageLogs = await base44.entities.AIUsageLog.list('-created_date', 100);
+      await delay(100);
     } catch (e) {
       console.warn('AI usage logs error:', e.message);
     }
