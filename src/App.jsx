@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import './App.css'
 import MasterAnnouncements from './pages/MasterAnnouncements'
 import MasterAnnouncementEdit from './pages/MasterAnnouncementEdit'
@@ -61,13 +61,22 @@ const AuthenticatedApp = () => {
     search.includes('site_id=') || // SiteView query
     search.includes('slug=');       // LPView query
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const hasRedirectedRef = useRef(false);
 
-  // [FIXED] 認証エラー時のリダイレクトを useEffect で1回だけ実行
+  // [FIXED] 認証エラー時のリダイレクトを useEffect で1回だけ実行（hasRedirectedRef で保護）
   useEffect(() => {
-    if (!isPublicRoute && authError?.type === 'auth_required') {
+    if (!isPublicRoute && authError?.type === 'auth_required' && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
       navigateToLogin();
     }
   }, [authError?.type, isPublicRoute, navigateToLogin]);
+
+  // ページ遷移時に redirect フラグをリセット（ブラウザ戻るボタン対応）
+  useEffect(() => {
+    if (isPublicRoute || !authError?.type) {
+      hasRedirectedRef.current = false;
+    }
+  }, [isPublicRoute, authError?.type]);
 
   // Show loading spinner while checking app public settings (only for protected routes)
   if (!isPublicRoute && isLoadingPublicSettings) {
