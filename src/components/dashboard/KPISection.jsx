@@ -33,6 +33,8 @@ export default function KPISection({ summary: externalSummary }) {
       return res.data;
     },
     enabled: !externalSummary, // 外部からsummaryが渡された場合はfetchしない
+    staleTime: 5 * 60 * 1000, // 5分キャッシュ
+    gcTime: 10 * 60 * 1000, // 10分保持
   });
 
   const summary = externalSummary || fetchedSummary;
