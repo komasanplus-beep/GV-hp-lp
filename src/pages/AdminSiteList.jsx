@@ -40,13 +40,18 @@ function AdminSiteListContent() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: sites = [], isLoading, error: sitesError } = useQuery({
+  const { data: sitesRaw, isLoading, error: sitesError } = useQuery({
     queryKey: ['sites', currentUser?.id],
     queryFn: async () => {
       if (!currentUser) return [];
       try {
         const res = await base44.functions.invoke('getAdminSiteList', {});
-        return res.data?.items || [];
+        console.log('[AdminSiteList] response:', res);
+        // レスポンスが配列ならそのまま、オブジェクトなら items を取り出す
+        if (Array.isArray(res)) return res;
+        if (res?.data?.items && Array.isArray(res.data.items)) return res.data.items;
+        if (res?.items && Array.isArray(res.items)) return res.items;
+        return [];
       } catch (err) {
         console.error('[AdminSiteList] getAdminSiteList failed:', err);
         return [];
@@ -55,6 +60,9 @@ function AdminSiteListContent() {
     enabled: !!currentUser,
     staleTime: 5000,
   });
+  
+  // 常に配列を保証
+  const sites = Array.isArray(sitesRaw) ? sitesRaw : [];
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Site.update(id, data),
