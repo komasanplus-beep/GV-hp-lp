@@ -57,27 +57,27 @@ export default function KPISection() {
   return (
     <div className="space-y-5">
 
-      {/* ① サイト概要バー（オレンジ） */}
-      <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg px-4 py-3 text-white flex flex-wrap items-center gap-x-6 gap-y-1">
-        <div className="flex items-center gap-2">
-          <Globe className="w-3.5 h-3.5 text-amber-200 flex-shrink-0" />
-          <span className="text-xs text-amber-100">サイト</span>
-          <span className="text-base font-bold">{ss.site_count ?? 0}</span>
-          <span className="text-xs text-amber-200">公開中 {ss.published_site_count ?? 0}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Layout className="w-3.5 h-3.5 text-amber-200 flex-shrink-0" />
-          <span className="text-xs text-amber-100">LP</span>
-          <span className="text-base font-bold">{ss.lp_count ?? 0}</span>
-          <span className="text-xs text-amber-200">公開中 {ss.published_lp_count ?? 0}</span>
-        </div>
-      </div>
-
-      {/* ② 現在の利用状況 — 上位見出し */}
-      <div className="pt-1">
+      {/* 現在の利用状況 — 上位見出し */}
+      <div>
         <h2 className="text-sm font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4">
           現在の利用状況
         </h2>
+
+        {/* サイト概要バー（オレンジ） */}
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg px-4 py-3 text-white flex flex-wrap items-center gap-x-6 gap-y-1 mb-4">
+          <div className="flex items-center gap-2">
+            <Globe className="w-3.5 h-3.5 text-amber-200 flex-shrink-0" />
+            <span className="text-xs text-amber-100">サイト</span>
+            <span className="text-base font-bold">{ss.site_count ?? 0}</span>
+            <span className="text-xs text-amber-200">公開中 {ss.published_site_count ?? 0}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Layout className="w-3.5 h-3.5 text-amber-200 flex-shrink-0" />
+            <span className="text-xs text-amber-100">LP</span>
+            <span className="text-base font-bold">{ss.lp_count ?? 0}</span>
+            <span className="text-xs text-amber-200">公開中 {ss.published_lp_count ?? 0}</span>
+          </div>
+        </div>
 
         <div className="space-y-4">
 
@@ -88,7 +88,7 @@ export default function KPISection() {
               linkLabel="アクセス分析"
               linkTo={createPageUrl('AdminSiteAnalytics')}
             />
-            <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 max-w-sm">
+            <div className="grid grid-cols-2 gap-2 max-w-sm">
               <KPICard
                 icon={BarChart3}
                 color="bg-indigo-50 border-indigo-200 text-indigo-700"
@@ -158,7 +158,7 @@ export default function KPISection() {
         </div>
       </div>
 
-      {/* ③ LP分析サマリー */}
+      {/* LP分析サマリー */}
       <div className="bg-white border border-slate-200 rounded-lg p-4">
         <SectionHeader
           title="LP分析サマリー"
