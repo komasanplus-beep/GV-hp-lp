@@ -1,17 +1,23 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 Deno.serve(async (req) => {
+  console.log('[deleteSiteById] Request received:', req.method);
+  
   if (req.method !== 'POST') {
     return Response.json({ error: 'POST required' }, { status: 405 });
   }
 
   try {
     const base44 = createClientFromRequest(req);
+    console.log('[deleteSiteById] Base44 client created');
+    
     const user = await base44.auth.me();
+    console.log('[deleteSiteById] User:', user?.id, 'Role:', user?.role);
 
-    // Only master users can delete sites
-    if (user?.role !== 'master') {
-      return Response.json({ error: 'Forbidden: Master access required' }, { status: 403 });
+    // Only master or admin users can delete sites
+    if (user?.role !== 'master' && user?.role !== 'admin') {
+      console.log('[deleteSiteById] Forbidden: user role is', user?.role);
+      return Response.json({ error: 'Forbidden: Master or Admin access required' }, { status: 403 });
     }
 
     const body = await req.json();
