@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    // Only allow admin users to delete sites via this function
-    if (user?.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    // Only allow admin or master users to delete sites via this function
+    if (user?.role !== 'admin' && user?.role !== 'master') {
+      return Response.json({ error: 'Forbidden: Admin or Master access required' }, { status: 403 });
     }
 
     const body = await req.json();
