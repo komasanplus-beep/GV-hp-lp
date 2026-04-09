@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { base44 } from '@/api/base44Client';
@@ -9,6 +9,12 @@ export default function NavigationTracker() {
     const { isAuthenticated } = useAuth();
     const { Pages, mainPage } = pagesConfig;
     const mainPageKey = mainPage ?? Object.keys(Pages)[0];
+    const prevPageRef = useRef(null);
+
+    // [FIXED] Public routes をスキップ
+    const isPublicRoute = [
+        '/SiteView', '/site/', '/lp/', '/login', '/register'
+    ].some(p => location.pathname.startsWith(p));
 
     // Post navigation changes to parent window
     useEffect(() => {
@@ -18,9 +24,14 @@ export default function NavigationTracker() {
         }, '*');
     }, [location]);
 
-    // [DISABLED] Log user activity when navigating to a page
-    // ナビゲーション連打による429ループを停止（無限ループ検証中）
+    // [FIXED] Log user activity - public routes を除外し、重複ログを防止
     useEffect(() => {
+        // Public routes ではログ送信しない
+        if (isPublicRoute) {
+            prevPageRef.current = null;
+            return;
+        }
+
         // Extract page name from pathname
         const pathname = location.pathname;
         let pageName;
@@ -40,12 +51,14 @@ export default function NavigationTracker() {
             pageName = matchedKey || null;
         }
 
-        // [DISABLED] if (isAuthenticated && pageName) {
-        //     base44.appLogs.logUserInApp(pageName).catch(() => {
-        //         // Silently fail - logging shouldn't break the app
-        //     });
-        // }
-    }, [location, isAuthenticated, Pages, mainPageKey]);
+        // 同じページへの重複ログを防止
+        if (isAuthenticated && pageName && prevPageRef.current !== pageName) {
+            prevPageRef.current = pageName;
+            base44.appLogs.logUserInApp(pageName).catch(() => {
+                // Silently fail - logging shouldn't break the app
+            });
+        }
+    }, [location, isAuthenticated, Pages, mainPageKey, isPublicRoute]);
 
     return null;
 }

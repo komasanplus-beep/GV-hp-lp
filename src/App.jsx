@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'
 import './App.css'
 import MasterAnnouncements from './pages/MasterAnnouncements'
 import MasterAnnouncementEdit from './pages/MasterAnnouncementEdit'
@@ -61,6 +62,13 @@ const AuthenticatedApp = () => {
     search.includes('slug=');       // LPView query
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
+  // [FIXED] 認証エラー時のリダイレクトを useEffect で1回だけ実行
+  useEffect(() => {
+    if (!isPublicRoute && authError?.type === 'auth_required') {
+      navigateToLogin();
+    }
+  }, [authError?.type, isPublicRoute, navigateToLogin]);
+
   // Show loading spinner while checking app public settings (only for protected routes)
   if (!isPublicRoute && isLoadingPublicSettings) {
     return (
@@ -70,17 +78,10 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // [MODIFIED] Handle authentication errors (only for protected routes)
-  // navigateToLogin() の呼び出しをコメント化（リダイレクトループを防止）
-  if (!isPublicRoute && authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // [DISABLED] navigateToLogin() は何度も呼ばれてリダイレクトループを引き起こすため一時停止
-      // navigateToLogin();
-      console.log('[App] Auth required - redirect disabled (infinite loop prevention)');
-      return <div className="fixed inset-0 flex items-center justify-center"><div className="text-center"><div className="animate-spin">認証中...</div></div></div>;
-    }
+  // [FIXED] authError 処理は useEffect で実行済み（render 中の実行は削除）
+  // ここでは user_not_registered エラーのみを同期で表示
+  if (!isPublicRoute && authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   // Render the main app
