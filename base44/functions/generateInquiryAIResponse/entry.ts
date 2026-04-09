@@ -27,11 +27,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'AI not enabled' }, { status: 400 });
     }
 
-    // 関連ナレッジを検索（カテゴリマッチ + 検索キーワード）
+    // 関連ナレッジを検索（is_active のみでフィルタ。カテゴリフィールドはスキーマに存在しない）
     const knowledgeList = await base44.asServiceRole.entities.InquiryAIKnowledge.filter({
       is_active: true,
-      category: category || 'general',
-    }, '-usage_count', 5);
+    }, '-created_date', 10);
 
     const knowledgeContext = knowledgeList
       .map(k => `【${k.title}】\n${k.content}`)
@@ -56,13 +55,14 @@ ${systemPrompt}
 回答は${setting.max_answer_length || 1000}文字以内で、簡潔にお願いします。
 `;
 
-    const aiResult = await base44.integrations.Core.InvokeLLM({
+    const aiResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
+      model: setting.model_name || 'gpt_5_mini',
       add_context_from_internet: false,
     });
 
-    // AI メッセージを作成
-    const aiMessage = await base44.entities.InquiryMessage.create({
+    // AI メッセージを作成（サービスロール使用：InquiryMessage RLS は admin のみ）
+    const aiMessage = await base44.asServiceRole.entities.InquiryMessage.create({
       inquiry_id,
       sender_type: 'ai',
       sender_id: 'system-ai',
@@ -70,14 +70,15 @@ ${systemPrompt}
       is_official_reply: false,
     });
 
-    // ログを記録
-    await base44.asServiceRole.entities.InquiryAIResponseLog.create({
+    // AIレスポンス下書きを記録（InquiryAIResponseDraft スキーマに合わせる）
+    await base44.asServiceRole.entities.InquiryAIResponseDraft.create({
       inquiry_id,
-      message_id: aiMessage.id,
+      generated_answer: aiResult,
+      model_name: setting.model_name || 'gpt_5_mini',
       prompt_snapshot: prompt,
       knowledge_refs: knowledgeList.map(k => k.id),
-      response_text: aiResult,
-    });
+      status: setting.require_admin_approval ? 'draft' : 'sent',
+    }).catch(e => console.warn('Draft save skipped:', e.message));
 
     // Inquiry の状態を "ai_answered" に更新
     await base44.asServiceRole.entities.Inquiry.update(inquiry_id, {

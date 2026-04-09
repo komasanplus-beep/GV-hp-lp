@@ -36,27 +36,57 @@ Deno.serve(async (req) => {
       last_message_at: new Date().toISOString(),
     });
 
-    // AIナレッジ取得
-    let knowledgeContext = '';
-    let knowledgeRefs = [];
+    // AI設定を取得（管理者マスター設定を参照）
+    let aiSetting = null;
     try {
-      const knowledgeList = await base44.asServiceRole.entities.InquiryAIKnowledge.filter({ is_active: true }, '-created_date', 20);
-      if (knowledgeList.length > 0) {
-        knowledgeContext = knowledgeList
-          .map(k => `【${k.title}】\n${k.content}`)
-          .join('\n\n');
-        knowledgeRefs = knowledgeList.slice(0, 5).map(k => k.id);
-      }
+      const settings = await base44.asServiceRole.entities.InquiryAISetting.filter({ scope_type: 'global' });
+      aiSetting = settings[0] || null;
     } catch (_) { /* ignore */ }
 
-    // AI回答生成
-    const prompt = `あなたはサービスサポート担当AIです。ユーザーの質問に丁寧に答えてください。
+    // AI無効の場合はデフォルト応答
+    if (aiSetting && !aiSetting.is_enabled) {
+      const disabledMsg = await base44.asServiceRole.entities.SupportChatMessage.create({
+        session_id,
+        sender_type: 'ai',
+        message: 'ただいまAIサポートは無効になっています。管理者までお問い合わせください。',
+      });
+      return Response.json({ user_message: userMsg, ai_message: disabledMsg });
+    }
+
+    // AIナレッジ取得（管理者登録ナレッジを参照）
+    let knowledgeContext = '';
+    let knowledgeRefs = [];
+    if (!aiSetting || aiSetting.knowledge_enabled !== false) {
+      try {
+        const knowledgeList = await base44.asServiceRole.entities.InquiryAIKnowledge.filter({ is_active: true }, '-created_date', 20);
+        if (knowledgeList.length > 0) {
+          knowledgeContext = knowledgeList
+            .map(k => `【${k.title}】\n${k.content}`)
+            .join('\n\n');
+          knowledgeRefs = knowledgeList.slice(0, 5).map(k => k.id);
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    // システムプロンプト（管理者設定を優先）
+    const toneMap = { formal: '丁寧かつフォーマルな', friendly: '親切で分かりやすい', casual: 'フレンドリーな' };
+    const tone = toneMap[aiSetting?.response_tone] || '親切で分かりやすい';
+    const systemPrompt = aiSetting?.system_prompt ||
+      `あなたはサービスサポート担当AIです。${tone}日本語でユーザーの質問に答えてください。解決策が分からない場合は「担当者に確認が必要です」と伝えてください。`;
+    const maxLen = aiSetting?.max_answer_length || 1000;
+
+    const prompt = `${systemPrompt}
 ${knowledgeContext ? `\n以下のナレッジを参考にしてください:\n${knowledgeContext}\n` : ''}
 ユーザーの質問: ${message}
 
-簡潔で分かりやすい日本語で回答してください。解決策が分からない場合は「担当者に確認が必要です」と伝えてください。`;
+回答は${maxLen}文字以内で簡潔にまとめてください。`;
 
-    const aiResult = await base44.asServiceRole.integrations.Core.InvokeLLM({ prompt });
+    const modelName = aiSetting?.model_name || 'gpt_5_mini';
+    const aiResult = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt,
+      model: modelName,
+      add_context_from_internet: false,
+    });
     const aiText = typeof aiResult === 'string' ? aiResult : (aiResult?.response || '申し訳ありません。回答を生成できませんでした。');
 
     // AI回答を保存
