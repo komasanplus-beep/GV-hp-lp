@@ -37,7 +37,11 @@ export default function ProtectedRoute({ children, requiredRole = 'any' }) {
             window.location.href = createPageUrl('UserDashboard');
           }
         } else if (requiredRole === 'admin') {
-          setStatus('ok');
+          if (role === 'admin' || role === 'master') {
+            setStatus('ok');
+          } else {
+            window.location.href = createPageUrl('UserDashboard'); // Redirect non-admin/master users
+          }
         }
       } catch {
         base44.auth.redirectToLogin(window.location.pathname);
