@@ -5,6 +5,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
  * サイト・ページ・ブロックをすべてサービスロールで作成。
  * フロントから SitePage/SiteBlock を直接作成させない。
  * 失敗時はロールバック（作成済みサイトを削除）する。
+ *
+ * プラン体系: UserPlan → Plan (フロントの usePlan と同じ正規体系)
  */
 
 // デフォルトテンプレート（サロン向け）
@@ -57,17 +59,34 @@ Deno.serve(async (req) => {
       return Response.json({ success: false, step: 'validation', error: 'site_name is required', code: 'MISSING_FIELD' }, { status: 400 });
     }
 
-    // --- プラン上限チェック ---
+    // --- プラン上限チェック (UserPlan → Plan 正規体系) ---
     currentStep = 'plan_check';
     console.log(`[createSiteWithTemplate] step=${currentStep} user=${user.id}`);
 
     const existingSites = await base44.asServiceRole.entities.Site.filter({ user_id: user.id }).catch(() => []);
     const currentCount = existingSites.length;
 
-    const subs = await base44.asServiceRole.entities.UserSubscription.filter({ user_id: user.id }).catch(() => []);
-    const planCode = subs[0]?.current_plan_code || 'free';
-    const planMasters = await base44.asServiceRole.entities.PlanMaster.filter({ code: planCode }).catch(() => []);
-    const siteLimit = planMasters[0]?.limits?.site_count ?? 1;
+    // UserPlan → Plan の正規体系でプランを取得 (usePlan フックと同じ)
+    let siteLimit = -1; // デフォルトは無制限（プランが取れない場合は通す）
+    try {
+      const userPlans = await base44.asServiceRole.entities.UserPlan.filter({ user_id: user.id });
+      const userPlan = userPlans[0];
+      if (userPlan?.plan_id) {
+        const plans = await base44.asServiceRole.entities.Plan.filter({ id: userPlan.plan_id });
+        const plan = plans[0];
+        if (plan) {
+          siteLimit = plan.max_sites ?? 1;
+          console.log(`[createSiteWithTemplate] plan=${plan.name || plan.plan_code} max_sites=${siteLimit}`);
+        }
+      } else {
+        // UserPlanがない = 未設定 → 制限なしで通す（管理者が直接使うケースを考慮）
+        console.log('[createSiteWithTemplate] no UserPlan found, skipping site limit check');
+        siteLimit = -1;
+      }
+    } catch (planErr) {
+      console.warn('[createSiteWithTemplate] plan check failed, skipping:', planErr.message);
+      siteLimit = -1;
+    }
 
     if (siteLimit !== -1 && currentCount >= siteLimit) {
       return Response.json({
@@ -87,7 +106,6 @@ Deno.serve(async (req) => {
     // フロントから渡されたテンプレートがある場合はそれを使う。nullなら DB → デフォルトの順で解決。
     let template = templateInput;
     if (!template || !template.default_pages?.length) {
-      // DBからテンプレートを取得
       try {
         const dbTemplates = await base44.asServiceRole.entities.SiteTemplate.filter({ is_active: true });
         if (dbTemplates.length > 0) {
@@ -213,7 +231,6 @@ Deno.serve(async (req) => {
     if (createdSiteId) {
       console.log(`[createSiteWithTemplate] rolling back site_id=${createdSiteId}`);
       try {
-        // 作成済みページ・ブロックを削除
         const base44rb = createClientFromRequest(req);
         const pages = await base44rb.asServiceRole.entities.SitePage.filter({ site_id: createdSiteId }).catch(() => []);
         for (const p of pages) {
