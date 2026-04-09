@@ -21,94 +21,80 @@ Deno.serve(async (req) => {
       base44.entities.AIUsageLog.list('-created_date', 500).catch(() => []),
     ]);
 
-    // ----- welcome_summary -----
+    // site_name: 最初の公開済みサイトまたは最初のサイト名
+    const primarySite = (sites || []).find(s => s.status === 'published') || (sites || [])[0];
+    const siteName = primarySite?.site_name || null;
+
+    // site_summary
     const siteCount = sites.length;
     const publishedSiteCount = sites.filter(s => s.status === 'published').length;
     const lpCount = lps.length;
     const publishedLPCount = lps.filter(l => l.status === 'published').length;
 
-    const welcomeSummary = {
-      site_count: siteCount,
-      published_site_count: publishedSiteCount,
-      lp_count: lpCount,
-      published_lp_count: publishedLPCount,
-      site_limit: null, // プラン制限なし
-      lp_limit: null,
-    };
-
-    // ----- analytics集計 -----
+    // analytics (today)
     const events = analyticsEvents || [];
+    const todayEvents = events.filter(e => new Date(e.created_date) >= todayStart);
 
-    const accessToday = new Set(
-      events
-        .filter(e => new Date(e.created_date) >= todayStart && e.event_type === 'page_view')
-        .map(e => e.visitor_id)
+    const todayAccess = new Set(
+      todayEvents.filter(e => e.event_type === 'page_view').map(e => e.visitor_id)
     ).size;
 
-    const accessMonthly = new Set(
-      events
-        .filter(e => new Date(e.created_date) >= monthStart && e.event_type === 'page_view')
-        .map(e => e.visitor_id)
-    ).size;
+    const todayPV = todayEvents.filter(e => e.event_type === 'page_view').length;
 
-    const pageViewToday = events.filter(e =>
-      new Date(e.created_date) >= todayStart && e.event_type === 'page_view'
-    ).length;
-
-    const bookingActionToday = events.filter(e =>
-      new Date(e.created_date) >= todayStart &&
+    const todayReservation = todayEvents.filter(e =>
       ['booking_submit', 'booking_click'].includes(e.event_type)
     ).length;
 
-    const bookingActionMonthly = events.filter(e =>
+    // monthly for access secondary
+    const monthlyAccess = new Set(
+      events.filter(e => new Date(e.created_date) >= monthStart && e.event_type === 'page_view').map(e => e.visitor_id)
+    ).size;
+
+    const monthlyReservation = events.filter(e =>
       new Date(e.created_date) >= monthStart &&
       ['booking_submit', 'booking_click'].includes(e.event_type)
     ).length;
 
-    const analyticsQuickLink = {
-      today_access: accessToday,
-      today_page_view: pageViewToday,
-      today_reservation_actions: bookingActionToday,
-      link_url: '/AdminSiteAnalytics',
-    };
-
-    // ----- AI使用量 -----
+    // AI usage
     const aiLimit = 50;
-    const aiUsed = (aiUsageLogs || []).filter(a =>
-      new Date(a.created_date) >= monthStart
-    ).length;
+    const aiUsed = (aiUsageLogs || []).filter(a => new Date(a.created_date) >= monthStart).length;
     const aiRate = aiLimit > 0 ? Math.round((aiUsed / aiLimit) * 100) : 0;
 
-    // ----- ストレージ(仮) -----
+    // Storage
     const storageUsed = 0;
     const storageLimit = 1000;
     const storageRate = storageLimit > 0 ? Math.round((storageUsed / storageLimit) * 100) : 0;
 
-    // ----- KPIs配列 -----
+    // LP analytics (CV = booking_submit from LP events)
+    const lpEvents = events.filter(e => e.lp_id != null);
+    const lpAccess = new Set(
+      lpEvents.filter(e => e.event_type === 'page_view').map(e => e.visitor_id)
+    ).size;
+    const lpCV = lpEvents.filter(e => e.event_type === 'booking_submit').length;
+    const lpCVRate = lpAccess > 0 ? lpCV / lpAccess : 0;
+
+    // KPIs — secondary_label/value は値が0の時は省略して重複感を排除
     const kpis = [
       {
         key: 'access',
         label: 'アクセス',
-        primary_value: accessToday,
-        primary_unit: null,
-        secondary_label: accessMonthly > 0 ? '今月' : null,
-        secondary_value: accessMonthly > 0 ? accessMonthly : null,
+        primary_value: todayAccess,
+        secondary_label: monthlyAccess > todayAccess ? '今月' : null,
+        secondary_value: monthlyAccess > todayAccess ? monthlyAccess : null,
       },
       {
         key: 'page_view',
         label: 'ページビュー',
-        primary_value: pageViewToday,
-        primary_unit: null,
+        primary_value: todayPV,
         secondary_label: null,
         secondary_value: null,
       },
       {
         key: 'reservation',
         label: '予約送信',
-        primary_value: bookingActionToday,
-        primary_unit: null,
-        secondary_label: bookingActionMonthly > 0 ? '今月' : null,
-        secondary_value: bookingActionMonthly > 0 ? bookingActionMonthly : null,
+        primary_value: todayReservation,
+        secondary_label: monthlyReservation > todayReservation ? '今月' : null,
+        secondary_value: monthlyReservation > todayReservation ? monthlyReservation : null,
       },
       {
         key: 'sales',
@@ -122,7 +108,6 @@ Deno.serve(async (req) => {
         key: 'customers',
         label: '顧客',
         primary_value: 0,
-        primary_unit: null,
         secondary_label: null,
         secondary_value: null,
       },
@@ -130,9 +115,7 @@ Deno.serve(async (req) => {
         key: 'ai_usage',
         label: 'AI生成',
         primary_value: aiUsed,
-        primary_unit: null,
         limit_value: aiLimit,
-        limit_unit: null,
         usage_rate: aiRate,
       },
       {
@@ -146,35 +129,40 @@ Deno.serve(async (req) => {
       },
     ];
 
-    // 後方互換: 旧形式レスポンスも保持
-    const legacySummary = {
-      analytics: {
-        access_today: accessToday,
-        access_monthly: accessMonthly,
-        page_view_today: pageViewToday,
-        page_view_monthly: 0,
-        booking_action_today: bookingActionToday,
-        booking_action_monthly: bookingActionMonthly,
-      },
-      sales: { today: 0, monthly: 0 },
-      guests: { total: 0, monthly_new: 0 },
-      ai_usage: { used: aiUsed, limit: aiLimit },
-      storage: { used: storageUsed, limit: storageLimit },
-      site_usage: {
-        site_used: siteCount,
-        site_limit: 999,
-        lp_used: lpCount,
-        lp_limit: 999,
-        published_site: publishedSiteCount,
-        published_lp: publishedLPCount,
-      },
-    };
-
     return Response.json({
-      welcome_summary: welcomeSummary,
-      analytics_quick_link: analyticsQuickLink,
+      site_name: siteName,
+      site_summary: {
+        site_count: siteCount,
+        published_site_count: publishedSiteCount,
+        lp_count: lpCount,
+        published_lp_count: publishedLPCount,
+      },
+      analytics: {
+        today_access: todayAccess,
+        today_pv: todayPV,
+        today_reservation: todayReservation,
+      },
       kpis,
-      ...legacySummary,
+      lp_analytics: {
+        cv_count: lpCV,
+        cv_rate: parseFloat(lpCVRate.toFixed(4)),
+        access: lpAccess,
+      },
+      // 後方互換
+      welcome_summary: {
+        site_count: siteCount,
+        published_site_count: publishedSiteCount,
+        lp_count: lpCount,
+        published_lp_count: publishedLPCount,
+        site_limit: null,
+        lp_limit: null,
+      },
+      analytics_quick_link: {
+        today_access: todayAccess,
+        today_page_view: todayPV,
+        today_reservation_actions: todayReservation,
+        link_url: '/AdminSiteAnalytics',
+      },
     });
   } catch (error) {
     console.error('getDashboardSummary error:', error);
