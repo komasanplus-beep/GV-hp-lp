@@ -16,7 +16,6 @@ import { Card } from '@/components/ui/card';
 import { AlertCircle, Upload, Loader2, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import ImageMappingUI from '@/components/lp/ImageMappingUI';
-import { extractImageUrlsFromHtml } from '@/lib/imageExtractor';
 
 const TEMPLATE_OPTIONS = [
   { value: 'default', label: 'デフォルト' },
