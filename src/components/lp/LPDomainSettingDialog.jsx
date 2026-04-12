@@ -27,6 +27,12 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
     enabled: open,
   });
 
+  const { data: siteDomainMapping = null } = useQuery({
+    queryKey: ['siteDomainMapping', siteId],
+    queryFn: () => base44.entities.DomainMapping.filter({ site_id: siteId }).then(r => r?.[0] || null),
+    enabled: !!siteId && domainType === 'site_path',
+  });
+
   // 既存設定の初期値反映
   useEffect(() => {
     if (!open) return;
@@ -150,7 +156,14 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
               {selectedSite && lp?.slug && (
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
                   <p className="text-xs text-slate-600 mb-1">プレビューURL</p>
-                  <p className="text-sm font-medium text-slate-800">{selectedSite.site_name}/lp/{lp.slug}</p>
+                  <p className="text-sm font-medium text-slate-800">
+                    {siteDomainMapping
+                      ? siteDomainMapping.domain_type === 'custom_domain'
+                        ? `${siteDomainMapping.domain}/lp/${lp.slug}`
+                        : `${siteDomainMapping.subdomain}.base44.app/lp/${lp.slug}`
+                      : `${selectedSite.slug}/lp/${lp.slug}`
+                    }
+                  </p>
                   <p className="text-xs text-slate-400 mt-2">※パスにはLPのスラッグ（半角英数字・ハイフンのみ）が自動的に使用されます。スラッグはLP作成時に設定した値です。</p>
                 </div>
               )}
