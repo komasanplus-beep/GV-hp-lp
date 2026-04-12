@@ -229,7 +229,7 @@ export default function AdminDomainSettings() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="subdomain">サブドメイン（例: your-salon.service.com）</SelectItem>
-                    <SelectItem value="custom">独自ドメイン（例: example.com）</SelectItem>
+                    <SelectItem value="custom_domain">独自ドメイン（例: example.com）</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -246,9 +246,9 @@ export default function AdminDomainSettings() {
                   {form.domain_type === 'subdomain' && <span className="text-sm text-slate-400 whitespace-nowrap">.service.com</span>}
                 </div>
               </div>
-              {form.domain_type === 'custom' && (
+              {form.domain_type === 'custom_domain' && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
-                  独自ドメインを使用する場合、DNSのCNAMEレコードを <strong>cname.service.com</strong> に設定してください。
+                  独自ドメインを使用する場合、DNSのCNAMEレコードを <strong>base44.onrender.com</strong> に設定してください。
                 </div>
               )}
               <div className="flex gap-3 pt-2">
