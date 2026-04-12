@@ -3,12 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function UserDashboard() {
   const hasRequestedRef = useRef(false);
   const [isReady, setIsReady] = useState(false);
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get('userId') || null;
 
   // Strict 認証状態の確定
   const { data: authUser, isLoading: authLoading, error: authError } = useQuery({
@@ -26,10 +28,10 @@ export default function UserDashboard() {
   const shouldFetchBundle = Boolean(authUser?.id) && !hasRequestedRef.current;
 
   const { data: bundleData, error: bundleError, isLoading: bundleLoading } = useQuery({
-    queryKey: ['userDashboardBundle'],
+    queryKey: ['userDashboardBundle', targetUserId],
     queryFn: async () => {
       console.log('[UserDashboard] Bundle fetch start');
-      const res = await base44.functions.invoke('getUserDashboardBundle', {});
+      const res = await base44.functions.invoke('getUserDashboardBundle', { user_id: targetUserId });
       console.log('[UserDashboard] Bundle fetch complete');
       return res.data;
     },
