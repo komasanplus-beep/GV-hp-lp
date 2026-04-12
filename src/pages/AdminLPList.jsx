@@ -7,7 +7,8 @@ import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Globe } from 'lucide-react';
+import LPDomainSettingDialog from '@/components/lp/LPDomainSettingDialog';
 import { usePlan } from '@/components/plan/usePlan';
 import LPCreationFlow from '@/components/lp/LPCreationFlow';
 
@@ -15,6 +16,7 @@ export default function AdminLPList() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showCreationFlow, setShowCreationFlow] = useState(false);
+  const [domainSettingLP, setDomainSettingLP] = useState(null);
 
   const { plan, usage, isAtLPLimit } = usePlan();
 
@@ -40,9 +42,9 @@ export default function AdminLPList() {
               {usage.lp_count} / {plan.max_lp === -1 ? '∞' : plan.max_lp} 件使用中
             </p>
           </div>
-          <Button 
-            onClick={() => setShowCreationFlow(true)} 
-            className="bg-amber-600 hover:bg-amber-700" 
+          <Button
+            onClick={() => setShowCreationFlow(true)}
+            className="bg-amber-600 hover:bg-amber-700"
             disabled={atLimit}
             title={atLimit ? 'LP作成数の上限に達しています' : ''}
           >
@@ -83,35 +85,42 @@ export default function AdminLPList() {
                   <span className="text-sm text-slate-400">/lp/{lp.slug}</span>
                 </div>
                 <div className="flex gap-2">
-                   <Button variant="outline" size="sm" title="プレビュー" asChild>
-                     <a href={`/lp/${lp.slug}?preview=true`} target="_blank" rel="noreferrer">
-                       <Eye className="w-4 h-4" />
-                     </a>
-                   </Button>
-                   <Button variant="outline" size="sm" title="編集" asChild>
-                     <Link to={createPageUrl(`AdminLPEditor?id=${lp.id}`)}>
-                       <Pencil className="w-4 h-4" />
-                     </Link>
-                   </Button>
-                   <Button
-                     variant="outline" size="sm"
-                     className="text-red-500 hover:text-red-700"
-                     title="削除"
-                     onClick={() => deleteMutation.mutate(lp.id)}
-                   >
-                     <Trash2 className="w-4 h-4" />
-                   </Button>
-                 </div>
+                  <Button variant="outline" size="sm" title="公開URL設定" onClick={() => setDomainSettingLP(lp)}>
+                    <Globe className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" title="プレビュー" asChild>
+                    <a href={`/lp/${lp.slug}?preview=true`} target="_blank" rel="noreferrer">
+                      <Eye className="w-4 h-4" />
+                    </a>
+                  </Button>
+                  <Button variant="outline" size="sm" title="編集" asChild>
+                    <Link to={createPageUrl(`AdminLPEditor?id=${lp.id}`)}>
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline" size="sm"
+                    className="text-red-500 hover:text-red-700"
+                    title="削除"
+                    onClick={() => deleteMutation.mutate(lp.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* LP 作成フロー - 作成方法選択 */}
-        <LPCreationFlow 
-          open={showCreationFlow} 
+        <LPCreationFlow
+          open={showCreationFlow}
           onOpenChange={setShowCreationFlow}
           disabled={atLimit}
+        />
+        <LPDomainSettingDialog
+          lp={domainSettingLP}
+          open={!!domainSettingLP}
+          onOpenChange={(v) => { if (!v) setDomainSettingLP(null); }}
         />
       </UserLayout>
     </ProtectedRoute>
