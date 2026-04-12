@@ -9,33 +9,25 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // subscription / sites / lps / aiLogs を並列取得
-    const [subsResult, sitesResult, lpsResult, aiLogsResult] = await Promise.allSettled([
-      base44.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1),
-      base44.entities.Site.filter({ user_id: user.id }, '-created_date', 100),
-      base44.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100),
-      base44.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200),
+    // 全データを並列取得
+    const [subsResult, plansResult, sitesResult, lpsResult, aiLogsResult] = await Promise.all([
+      base44.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1).catch(() => []),
+      base44.entities.PlanMaster.filter({ status: 'active' }, '-sort_order', 20).catch(() => []),
+      base44.entities.Site.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
+      base44.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
+      base44.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200).catch(() => []),
     ]);
 
-    const subscription = subsResult.status === 'fulfilled' ? (subsResult.value?.[0] || null) : null;
-    const sites = sitesResult.status === 'fulfilled' ? (sitesResult.value || []) : [];
-    const lps = lpsResult.status === 'fulfilled' ? (lpsResult.value || []) : [];
-    const aiLogs = aiLogsResult.status === 'fulfilled' ? (aiLogsResult.value || []) : [];
+    const subscription = subsResult?.[0] || null;
+    const allPlans = plansResult || [];
+    const sites = sitesResult || [];
+    const lps = lpsResult || [];
+    const aiLogs = aiLogsResult || [];
 
-    // Plan取得 (subscription依存)
-    let plan = null;
-    if (subscription?.plan_code) {
-      try {
-        const plans = await base44.entities.PlanMaster.filter(
-          { code: subscription.plan_code, status: 'active' },
-          '-sort_order',
-          1
-        );
-        plan = plans?.[0] || null;
-      } catch (e) {
-        console.warn('Plan fetch error:', e.message);
-      }
-    }
+    // Planをplan_codeでマッチ
+    let plan = subscription?.plan_code
+      ? allPlans.find(p => p.code === subscription.plan_code) || null
+      : null;
 
     if (!plan) {
       plan = {
