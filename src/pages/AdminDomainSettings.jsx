@@ -90,7 +90,7 @@ export default function AdminDomainSettings() {
                 <div className="text-sm text-blue-800 space-y-1">
                   <p className="font-semibold">ドメイン設定の手順</p>
                   <p><strong>サブドメイン：</strong> 管理者がサブドメインを割り当てます（例: your-salon.service.com）</p>
-                  <p><strong>独自ドメイン：</strong> お使いのドメインのCNAMEレコードを <code className="bg-blue-100 px-1 rounded">cname.service.com</code> に向けてください</p>
+                  <p><strong>独自ドメイン：</strong> お使いのドメインのCNAMEレコードを <code className="bg-blue-100 px-1 rounded">base44.onrender.com</code> に向けてください</p>
                 </div>
               </div>
             </CardContent>
@@ -235,13 +235,13 @@ export default function AdminDomainSettings() {
               </div>
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1 block">
-                  {form.domain_type === 'custom' ? 'ドメイン名' : 'サブドメイン'}
+                  {form.domain_type === 'custom_domain' ? 'ドメイン名' : 'サブドメイン'}
                 </label>
                 <div className="flex items-center gap-2">
                   <Input
                     value={form.domain}
                     onChange={e => setForm(p => ({ ...p, domain: e.target.value }))}
-                    placeholder={form.domain_type === 'custom' ? 'example.com' : 'your-salon'}
+                    placeholder={form.domain_type === 'custom_domain' ? 'example.com' : 'your-salon'}
                   />
                   {form.domain_type === 'subdomain' && <span className="text-sm text-slate-400 whitespace-nowrap">.service.com</span>}
                 </div>
