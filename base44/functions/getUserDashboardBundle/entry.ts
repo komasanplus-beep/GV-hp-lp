@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       },
     });
   } catch (error) {
-    console.error('[getUserDashboardBundle] error:', error.message);
+    console.error('[getUserDashboardBundle]', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
