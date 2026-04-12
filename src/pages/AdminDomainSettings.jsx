@@ -49,7 +49,7 @@ export default function AdminDomainSettings() {
   });
 
   const verifMutation = useMutation({
-    mutationFn: (id) => base44.functions.invoke('verifyCustomDomain', { domain_mapping_id: id }),
+    mutationFn: async (id) => { const result = await base44.functions.verifyCustomDomain({ domain_mapping_id: id }); return result; },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['domainMappings'] });
       if (res.data?.verified) {
