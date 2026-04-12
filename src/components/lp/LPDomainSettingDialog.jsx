@@ -137,18 +137,22 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
 
           {/* site_path */}
           {domainType === 'site_path' && (
-            <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">紐付けるサイト</label>
-              <Select value={siteId} onValueChange={setSiteId}>
-                <SelectTrigger><SelectValue placeholder="サイトを選択" /></SelectTrigger>
-                <SelectContent>
-                  {sites.map(s => <SelectItem key={s.id} value={s.id}>{s.site_name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-1 block">紐付けるサイト</label>
+                <Select value={siteId} onValueChange={setSiteId}>
+                  <SelectTrigger><SelectValue placeholder="サイトを選択" /></SelectTrigger>
+                  <SelectContent>
+                    {sites.map(s => <SelectItem key={s.id} value={s.id}>{s.site_name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               {selectedSite && lp?.slug && (
-                <p className="text-xs text-slate-400 mt-1">
-                  URL: {selectedSite.site_name}/lp/{lp.slug}
-                </p>
+                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                  <p className="text-xs text-slate-600 mb-1">プレビューURL</p>
+                  <p className="text-sm font-medium text-slate-800">{selectedSite.site_name}/lp/{lp.slug}</p>
+                  <p className="text-xs text-slate-400 mt-2">※パスにはLPのスラッグ（半角英数字・ハイフンのみ）が自動的に使用されます。スラッグはLP作成時に設定した値です。</p>
+                </div>
               )}
             </div>
           )}

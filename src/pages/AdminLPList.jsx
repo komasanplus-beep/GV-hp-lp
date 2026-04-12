@@ -7,7 +7,7 @@ import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Eye, Globe } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Globe, AlertTriangle } from 'lucide-react';
 import LPDomainSettingDialog from '@/components/lp/LPDomainSettingDialog';
 import { usePlan } from '@/components/plan/usePlan';
 import LPCreationFlow from '@/components/lp/LPCreationFlow';
@@ -24,6 +24,15 @@ export default function AdminLPList() {
     queryKey: ['landingPages'],
     queryFn: () => base44.entities.LandingPage.list('-created_date'),
   });
+
+  const { data: domainMappings = [] } = useQuery({
+    queryKey: ['domainMappings'],
+    queryFn: () => base44.entities.DomainMapping.list(),
+  });
+
+  const hasDomainMapping = (lpId) => {
+    return domainMappings.some(m => m.landing_page_id === lpId);
+  };
 
   const atLimit = isAtLPLimit;
 
@@ -64,8 +73,8 @@ export default function AdminLPList() {
         ) : (
           <div className="grid gap-4">
             {pages.map((lp) => (
-              <div key={lp.id} className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between">
-                <div>
+              <div key={lp.id} className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-3 mb-1 flex-wrap">
                     <span className="font-semibold text-slate-800">{lp.title}</span>
                     <Badge variant={lp.status === 'published' ? 'default' : 'secondary'}>
@@ -83,8 +92,14 @@ export default function AdminLPList() {
                     )}
                   </div>
                   <span className="text-sm text-slate-400">/lp/{lp.slug}</span>
+                  {!hasDomainMapping(lp.id) && (
+                    <div className="bg-orange-50 border border-orange-300 rounded-lg px-3 py-2 flex items-start gap-2 w-fit">
+                      <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-orange-700 font-medium">公開URL未設定</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap sm:flex-nowrap justify-start sm:justify-end">
                   <Button variant="outline" size="sm" title="公開URL設定" onClick={() => setDomainSettingLP(lp)}>
                     <Globe className="w-4 h-4" />
                   </Button>
