@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Link, useSearchParams } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function UserDashboard() {
   const hasRequestedRef = useRef(false);
@@ -19,19 +19,17 @@ export default function UserDashboard() {
       const user = await base44.auth.me();
       return user;
     },
-    staleTime: 60 * 1000, // 1分
-    retry: 0, // 失敗時は再試行しない
+    staleTime: 60 * 1000,
+    retry: 0,
   });
 
-  // Dashboard bundle: 認証確定後かつ初回のみ取得
-  // targetUserId が変わったらリセット
+  // Dashboard bundle
   const prevTargetUserIdRef = useRef(targetUserId);
   if (prevTargetUserIdRef.current !== targetUserId) {
     prevTargetUserIdRef.current = targetUserId;
     hasRequestedRef.current = false;
   }
 
-  // Bundle取得判定: auth済み && 初回リクエスト未実行
   const shouldFetchBundle = Boolean(authUser?.id) && !hasRequestedRef.current;
 
   const { data: bundleData, error: bundleError, isLoading: bundleLoading } = useQuery({
@@ -42,25 +40,12 @@ export default function UserDashboard() {
       console.log('[UserDashboard] Bundle fetch complete');
       return res.data;
     },
-    staleTime: 5 * 60 * 1000, // 5分キャッシュ
-    retry: 0, // 失敗時は再試行しない
+    staleTime: 5 * 60 * 1000,
+    retry: 0,
     enabled: shouldFetchBundle,
   });
 
-  // 未対応Q&A
-  const { data: unresolvedInquiries = [], isLoading: inquiriesLoading } = useQuery({
-    queryKey: ['unresolvedQA'],
-    queryFn: () => base44.entities.Inquiry.filter(
-      { category: 'system_support', status: 'new' },
-      '-created_date',
-      5
-    ),
-    staleTime: 5 * 60 * 1000,
-    retry: 0,
-  });
-
-  // 初回リクエスト完了フラグ設定（重複防止）
-  // dependency: authUser.id に依存（authUser変更時のみ実行）
+  // 初回リクエスト完了フラグ設定
   useEffect(() => {
     if (shouldFetchBundle) {
       console.log('[UserDashboard] Mark bundle as requested');
@@ -68,42 +53,21 @@ export default function UserDashboard() {
     }
   }, [authUser?.id]);
 
-  // 準備完了判定（ロード完了したら ready にする）
-  // dependency 最小化: bundleData のみ（bundleData 取得時のみ実行）
+  // 準備完了判定
   useEffect(() => {
     if (bundleData && !authLoading && authUser) {
       setIsReady(true);
       console.log('[UserDashboard] Ready');
-      // [TEMP] ログ送信を一旦無効化（無限ループ検証中）
-      // sendDashboardViewLog().catch(e => console.warn('[UserDashboard] Log send error (ignored):', e.message));
     }
   }, [bundleData]);
-
-  // [DISABLED] ログ送信は非ブロッキング（失敗してもUIに影響なし）
-  // 無限ループ検証後、以下を useCallback + enabled フラグで再有効化
-  const sendDashboardViewLog = async () => {
-    try {
-      if (!authUser?.id) return;
-      const now = new Date();
-      const minuteBucket = Math.floor(now.getTime() / 60000) * 60000;
-      const requestKey = `${authUser.id}:dashboard_view:UserDashboard:${new Date(minuteBucket).toISOString()}`;
-      
-      await base44.functions.invoke('logUserEvent', {
-        event_name: 'dashboard_view',
-        page_name: 'UserDashboard',
-        request_key: requestKey,
-      }).catch(() => {}); // ログ失敗は完全に無視
-    } catch {
-      // 完全に無視
-    }
-  };
 
   const user = bundleData?.user;
   const plan = bundleData?.plan;
   const usage = bundleData?.usage;
-  const permissions = bundleData?.permissions;
   const unreadInquiries = bundleData?.dashboard?.unread_inquiries || 0;
   const todayBookings = bundleData?.dashboard?.today_bookings || 0;
+  const analytics = bundleData?.analytics || [];
+  const guests = bundleData?.guests || [];
 
   const siteName = user?.full_name || null;
   const title = siteName ? `${siteName} のダッシュボード` : 'ダッシュボード';
@@ -168,107 +132,96 @@ export default function UserDashboard() {
     );
   }
 
+  // 計算
+  const siteTopAccess = analytics.filter(a => a.event_type === 'site_visit').length;
+  const servicePageViews = analytics.filter(a => a.page_path?.startsWith('/service') && a.event_type === 'page_view').length;
+  const blogPageViews = analytics.filter(a => a.page_path?.startsWith('/blog') && a.event_type === 'page_view').length;
+  const guestCount = guests.length;
+
   // 通常表示
   return (
     <ProtectedRoute requiredRole="admin">
       <UserLayout title={title}>
-        <div className="max-w-6xl mx-auto space-y-3">
-          {/* 未対応Q&A Banner */}
-          {unresolvedInquiries.length > 0 && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center gap-3">
-              <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-orange-800">
-                  未対応Q&A: {unresolvedInquiries.length}件
-                </p>
-                <p className="text-xs text-orange-700 truncate">
-                  {unresolvedInquiries.slice(0, 2).map(i => i.subject).join('、')}
-                </p>
-              </div>
-              <Link to="/AdminInquiryManager" className="text-orange-600 hover:text-orange-800 flex-shrink-0">
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* ① 今日の概要（3列グリッド） */}
+          <div className="grid grid-cols-3 gap-4">
+            {/* サイトTOPアクセス */}
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <p className="text-xs text-slate-500 mb-2">サイトTOPアクセス（今月）</p>
+              <p className="text-3xl font-bold text-slate-800">{siteTopAccess}</p>
+              <p className="text-xs text-slate-400 mt-1">件</p>
             </div>
-          )}
 
-          {/* Dashboard KPI */}
-          {bundleData && (
-            <div className="space-y-5">
-              {/* Plan Banner */}
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200 p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-blue-600 font-semibold">現在のプラン</p>
-                    <p className="text-lg font-bold text-blue-900">{plan?.name || 'Free'}</p>
-                  </div>
-                  <div className="text-right text-xs text-blue-700 space-y-1">
-                    <p>サイト: {usage?.site_count || 0} / {plan?.site_limit || 1}</p>
-                    <p>LP: {usage?.lp_count || 0} / {plan?.lp_limit || 1}</p>
-                    <p>AI: {usage?.ai_used_count || 0} / {plan?.ai_limit || 10}</p>
-                  </div>
-                </div>
+            {/* 本日の予約数 */}
+            <div className={`rounded-lg border p-4 ${
+              todayBookings > 0 
+                ? 'bg-orange-50 border-orange-200' 
+                : 'bg-white border-slate-200'
+            }`}>
+              <p className="text-xs text-slate-500 mb-2">本日の予約数</p>
+              <p className={`text-3xl font-bold ${
+                todayBookings > 0 ? 'text-orange-600' : 'text-slate-800'
+              }`}>{todayBookings}</p>
+              <p className="text-xs text-slate-400 mt-1">件</p>
+            </div>
+
+            {/* 未読の問い合わせ */}
+            <div className={`rounded-lg border p-4 ${
+              unreadInquiries > 0 
+                ? 'bg-orange-50 border-orange-200' 
+                : 'bg-white border-slate-200'
+            }`}>
+              <p className="text-xs text-slate-500 mb-2">未読の問い合わせ</p>
+              <p className={`text-3xl font-bold ${
+                unreadInquiries > 0 ? 'text-orange-600' : 'text-slate-800'
+              }`}>{unreadInquiries}</p>
+              <p className="text-xs text-slate-400 mt-1">件</p>
+            </div>
+          </div>
+
+          {/* ② クライアント数（2列） */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <p className="text-xs text-slate-500 mb-2">登録クライアント数</p>
+              <p className="text-3xl font-bold text-slate-800">{guestCount}</p>
+              <p className="text-xs text-slate-400 mt-1">件</p>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-4">
+              <p className="text-xs text-slate-500 mb-2">プラン使用率</p>
+              <p className="text-3xl font-bold text-slate-800">{usage?.site_count || 0}/{plan?.site_limit || 1}</p>
+              <p className="text-xs text-slate-400 mt-1">サイト</p>
+            </div>
+          </div>
+
+          {/* ③ ページ別アクセス（今月） */}
+          <div className="bg-white rounded-lg border border-slate-200 p-4">
+            <h3 className="text-sm font-semibold text-slate-800 mb-4">ページ別アクセス（今月）</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <p className="text-sm text-slate-600">サービスページ合計</p>
+                <p className="text-lg font-bold text-slate-800">{servicePageViews}</p>
               </div>
-
-              {/* KPI Cards */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs text-slate-500 mb-2">サイト数</p>
-                  <p className="text-2xl font-bold text-slate-800">{usage?.site_count || 0}</p>
-                </div>
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs text-slate-500 mb-2">LP数</p>
-                  <p className="text-2xl font-bold text-slate-800">{usage?.lp_count || 0}</p>
-                </div>
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs text-slate-500 mb-2">今月AI使用</p>
-                  <p className="text-2xl font-bold text-slate-800">{usage?.ai_used_count || 0}</p>
-                </div>
-                <div className={`bg-white rounded-lg border p-4 ${
-                  unreadInquiries > 0 ? 'border-orange-200 bg-orange-50' : 'border-slate-200'
-                }`}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <p className="text-xs text-slate-500">未読のお問い合わせ</p>
-                    {unreadInquiries > 0 && (
-                      <span className="inline-block px-1.5 py-0.5 bg-orange-200 text-orange-700 text-xs font-semibold rounded">未読</span>
-                    )}
-                  </div>
-                  <p className={`text-2xl font-bold ${
-                    unreadInquiries > 0 ? 'text-orange-600' : 'text-slate-400'
-                  }`}>{unreadInquiries}</p>
-                </div>
-                <div className="bg-white rounded-lg border border-slate-200 p-4">
-                  <p className="text-xs text-slate-500 mb-2">本日の予約</p>
-                  <p className="text-2xl font-bold text-slate-800">{todayBookings}</p>
-                </div>
-              </div>
-
-              {/* Create Buttons */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link
-                  to="/AdminSiteList"
-                  className={`p-4 rounded-lg border text-center transition-all ${
-                    permissions?.can_create_site
-                      ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-400 text-emerald-700'
-                      : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  <p className="text-sm font-semibold">サイト管理</p>
-                  <p className="text-xs text-slate-500 mt-1">作成可能: {permissions?.can_create_site ? '○' : '✕'}</p>
-                </Link>
-                <Link
-                  to="/AdminLPList"
-                  className={`p-4 rounded-lg border text-center transition-all ${
-                    permissions?.can_create_lp
-                      ? 'bg-amber-50 border-amber-200 hover:border-amber-400 text-amber-700'
-                      : 'bg-slate-50 border-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-                >
-                  <p className="text-sm font-semibold">LP管理</p>
-                  <p className="text-xs text-slate-500 mt-1">作成可能: {permissions?.can_create_lp ? '○' : '✕'}</p>
-                </Link>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-600">ブログ記事合計</p>
+                <p className="text-lg font-bold text-slate-800">{blogPageViews}</p>
               </div>
             </div>
-          )}
+          </div>
+
+          {/* ④ 現在のプラン（一番下） */}
+          <div className="bg-slate-100 rounded-lg border border-slate-300 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 mb-1">現在のプラン</p>
+                <p className="text-2xl font-bold text-slate-800">{plan?.name || 'Free'}</p>
+              </div>
+              <div className="text-right text-xs text-slate-600 space-y-1">
+                <p>サイト: {usage?.site_count || 0}/{plan?.site_limit || 1}</p>
+                <p>LP: {usage?.lp_count || 0}/{plan?.lp_limit || 1}</p>
+                <p>AI: {usage?.ai_used_count || 0}/{plan?.ai_limit || 10}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </UserLayout>
     </ProtectedRoute>

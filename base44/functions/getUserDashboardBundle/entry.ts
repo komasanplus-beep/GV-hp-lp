@@ -69,6 +69,10 @@ Deno.serve(async (req) => {
       return bookingDate.getTime() === today.getTime();
     });
 
+    // Wait for analytics and guests
+    const analyticsResult = sites?.length > 0 ? await base44.asServiceRole.entities.SiteAnalyticsEvent.filter({ site_id: sites[0].id }, '-created_date', 500).catch(() => []) : [];
+    const guestsResult = sites?.length > 0 ? await base44.asServiceRole.entities.Guest.filter({ site_id: sites[0].id }, '-created_date', 500).catch(() => []) : [];
+
     return Response.json({
       user: {
         id: user.id,
@@ -108,6 +112,8 @@ Deno.serve(async (req) => {
         today_bookings: todayBookings.length,
         total_inquiries: inquiries.length,
       },
+      analytics: analyticsResult || [],
+      guests: guestsResult || [],
     });
   } catch (error) {
     console.error('[getUserDashboardBundle]', error.message);
