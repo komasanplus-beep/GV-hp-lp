@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
 const TARGET_CNAME = 'sites.base44.app';
+const TARGET_CNAME_WWW = 'base44.onrender.com';
 const TARGET_IP = '216.24.57.1';
 
 Deno.serve(async (req) => {
@@ -52,7 +53,27 @@ Deno.serve(async (req) => {
         }
       }
 
-      // CNAMEで未検証の場合はAレコードを確認
+      // www.{domain} の CNAME が TARGET_CNAME_WWW か確認
+      if (!verified) {
+        const wwwDomain = `www.${domain}`;
+        const wwwRes = await fetch(
+          `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(wwwDomain)}&type=CNAME`,
+          { headers: { Accept: 'application/dns-json' } }
+        );
+        const wwwData = await wwwRes.json();
+        if (wwwData.Answer && wwwData.Answer.length > 0) {
+          const wwwCname = wwwData.Answer.find(r => r.type === 5);
+          if (wwwCname) {
+            const wwwResolved = wwwCname.data.replace(/\.$/, '');
+            if (wwwResolved === TARGET_CNAME_WWW) {
+              resolvedValue = wwwResolved;
+              verified = true;
+            }
+          }
+        }
+      }
+
+      // CNAME（www含む）未検証の場合はAレコードを確認
       if (!verified) {
         const aRes = await fetch(
           `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=A`,
@@ -60,13 +81,13 @@ Deno.serve(async (req) => {
         );
         const aData = await aRes.json();
         if (aData.Answer && aData.Answer.length > 0) {
-          const aRecord = aData.Answer.find(r => r.type === 1); // type 1 = A
+          const aRecord = aData.Answer.find(r => r.type === 1);
           if (aRecord) {
             resolvedValue = aRecord.data;
             verified = aRecord.data === TARGET_IP;
           }
         } else {
-          errorDetail = 'No DNS records found (CNAME or A)';
+          errorDetail = 'No DNS records found (CNAME, www CNAME, or A)';
         }
       }
     } catch (dnsErr) {
