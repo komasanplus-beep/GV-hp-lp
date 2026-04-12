@@ -8,11 +8,14 @@ Deno.serve(async (req) => {
 
     const now = new Date().toISOString();
 
-    // 公開中のお知らせを全件取得
-    const allPublished = await base44.asServiceRole.entities.MasterAnnouncement.filter(
-      { status: 'published' },
-      '-publish_start_at'
-    );
+    // 全クエリを一括並列取得
+    const [allPublished, userSites, userSubs, userLPs, readRecords] = await Promise.all([
+      base44.asServiceRole.entities.MasterAnnouncement.filter({ status: 'published' }, '-publish_start_at').catch(() => []),
+      base44.asServiceRole.entities.Site.filter({ created_by: user.email }).catch(() => []),
+      base44.asServiceRole.entities.UserSubscription.filter({ user_id: user.id }).catch(() => []),
+      base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 1).catch(() => []),
+      base44.asServiceRole.entities.MasterAnnouncementRead.filter({ user_id: user.id }).catch(() => []),
+    ]);
 
     // 公開期間フィルタ
     const active = allPublished.filter(a => {
@@ -20,14 +23,6 @@ Deno.serve(async (req) => {
       if (a.publish_end_at && a.publish_end_at < now) return false;
       return true;
     });
-
-    // 対象ユーザーフィルタ用データを並列取得
-    const [userSites, userSubs, userLPs, readRecords] = await Promise.all([
-      base44.asServiceRole.entities.Site.filter({ created_by: user.email }).catch(() => []),
-      base44.asServiceRole.entities.UserSubscription.filter({ user_id: user.id }).catch(() => []),
-      base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 1).catch(() => []),
-      base44.asServiceRole.entities.MasterAnnouncementRead.filter({ user_id: user.id }).catch(() => []),
-    ]);
 
     const hasHomepage = userSites.some(s => !s.lp_only);
     const hasLP = userSites.some(s => s.lp_only) || userLPs.length > 0;
