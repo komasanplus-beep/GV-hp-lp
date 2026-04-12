@@ -26,8 +26,14 @@ export default function AdminLPList() {
   });
 
   const { data: domainMappings = [] } = useQuery({
-    queryKey: ['domainMappings'],
-    queryFn: () => base44.entities.DomainMapping.list(),
+    queryKey: ['domainMappings', pages.map(p => p.id).join(',')],
+    queryFn: async () => {
+      if (pages.length === 0) return [];
+      const lpIds = pages.map(p => p.id);
+      const allMappings = await base44.entities.DomainMapping.list();
+      return allMappings.filter(m => lpIds.includes(m.landing_page_id));
+    },
+    enabled: pages.length > 0,
   });
 
   const hasDomainMapping = (lpId) => {
@@ -110,6 +116,7 @@ export default function AdminLPList() {
                         <br />
                         <span className="block mt-1">① <strong>サブドメイン（無料）</strong>: xxxxx.base44.app 形式。すぐに使えます。</span>
                         <span className="block">② <strong>独自ドメイン</strong>: お持ちのドメインを設定（DNS設定が必要）。</span>
+                        <span className="block">③ <strong>サイトのパス配下</strong>: 紐づけるサイトを選択し、/lp/スラッグ 形式で公開。</span>
                       </p>
                     </div>
                   )}
