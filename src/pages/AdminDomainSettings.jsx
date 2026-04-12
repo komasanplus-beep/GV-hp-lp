@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
-import { Plus, Link2, CheckCircle2, Clock, Trash2, Loader2, Info, Eye, AlertTriangle } from 'lucide-react';
+import { Plus, Link2, CheckCircle2, Clock, Trash2, Loader2, Info, Eye, AlertTriangle, Copy, XCircle } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,12 +49,21 @@ export default function AdminDomainSettings() {
   });
 
   const verifMutation = useMutation({
-    mutationFn: (id) => base44.entities.DomainMapping.update(id, { verification_status: 'verified' }),
-    onSuccess: () => {
+    mutationFn: (id) => base44.functions.invoke('verifyCustomDomain', { domain_mapping_id: id }),
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['domainMappings'] });
-      toast.success('DNS確認済みとしてマークしました（実際の接続はサーバー側設定が必要です）');
+      if (res.data?.verified) {
+        toast.success('DNS確認に成功しました！ドメインが認証されました。');
+      } else {
+        toast.error(`DNS確認に失敗しました。${res.data?.error || 'DNSレコードが正しく設定されていない可能性があります。'}`);
+      }
     },
   });
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('コピーしました');
+  };
 
   // ドメインの内部プレビューURL（サイトIDベース）
   const getPreviewUrl = (d) => {
@@ -135,6 +144,26 @@ export default function AdminDomainSettings() {
                           )}
                         </div>
                         <p className="text-xs text-slate-500 mt-0.5">サイト: {getSiteName(d.site_id)}</p>
+                        {/* DNS設定手順（pending時のみ） */}
+                        {d.verification_status !== 'verified' && d.domain_type === 'custom_domain' && (
+                          <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+                            <p className="text-xs font-semibold text-slate-700">DNS設定手順</p>
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between gap-2 text-xs">
+                                <span className="text-slate-500"><span className="font-medium text-slate-700">Aレコード：</span> @ → <code className="bg-white border border-slate-200 px-1 rounded">216.24.57.1</code></span>
+                                <button onClick={() => copyToClipboard('216.24.57.1')} className="flex items-center gap-1 text-slate-400 hover:text-slate-700">
+                                  <Copy className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <div className="flex items-center justify-between gap-2 text-xs">
+                                <span className="text-slate-500"><span className="font-medium text-slate-700">CNAME：</span> www → <code className="bg-white border border-slate-200 px-1 rounded">base44.onrender.com</code></span>
+                                <button onClick={() => copyToClipboard('base44.onrender.com')} className="flex items-center gap-1 text-slate-400 hover:text-slate-700">
+                                  <Copy className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         {/* URL種別を明示 */}
                         <div className="mt-2 space-y-1">
                           <p className="text-xs text-slate-400">
@@ -167,7 +196,8 @@ export default function AdminDomainSettings() {
                         )}
                         {d.verification_status !== 'verified' && (
                           <Button variant="outline" size="sm" onClick={() => verifMutation.mutate(d.id)} disabled={verifMutation.isPending}>
-                            DNS確認済みにする
+                            {verifMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                            DNS確認
                           </Button>
                         )}
                         <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(d.id)}>

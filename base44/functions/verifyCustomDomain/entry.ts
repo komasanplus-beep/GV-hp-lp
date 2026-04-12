@@ -103,9 +103,13 @@ Deno.serve(async (req) => {
     return Response.json({
       domain,
       verified,
-      verification_status: newStatus,
-      resolved_cname: resolvedValue,
-      target_cname: TARGET_CNAME,
+      status: newStatus,
+      checkedRecords: {
+        cname: { target: TARGET_CNAME, matched: verified && resolvedValue === TARGET_CNAME },
+        www_cname: { target: TARGET_CNAME_WWW, matched: verified && resolvedValue === TARGET_CNAME_WWW },
+        a_record: { target: TARGET_IP, matched: verified && resolvedValue === TARGET_IP },
+        resolved: resolvedValue,
+      },
       error: errorDetail,
     });
   } catch (error) {
