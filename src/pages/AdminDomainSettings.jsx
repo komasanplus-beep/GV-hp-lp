@@ -50,13 +50,8 @@ export default function AdminDomainSettings() {
 
   const verifMutation = useMutation({
     mutationFn: async (id) => { const result = await base44.functions.verifyCustomDomain({ domain_mapping_id: id }); return result; },
-    onSuccess: (res) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['domainMappings'] });
-      if (res.data?.verified) {
-        toast.success('DNS確認に成功しました！ドメインが認証されました。');
-      } else {
-        toast.error(`DNS確認に失敗しました。${res.data?.error || 'DNSレコードが正しく設定されていない可能性があります。'}`);
-      }
     },
   });
 
