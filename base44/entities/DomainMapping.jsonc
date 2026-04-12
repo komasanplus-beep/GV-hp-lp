@@ -1,0 +1,73 @@
+{
+  "name": "DomainMapping",
+  "type": "object",
+  "properties": {
+    "site_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "landing_page_id": {
+      "type": "string",
+      "description": "\u7d10\u4ed8\u3051\u308b\u30e9\u30f3\u30c7\u30a3\u30f3\u30b0\u30da\u30fc\u30b8ID\uff08site_path\u30bf\u30a4\u30d7\u6642\u306b\u4f7f\u7528\uff09"
+    },
+    "domain": {
+      "type": "string",
+      "description": "\u72ec\u81ea\u30c9\u30e1\u30a4\u30f3 (\u4f8b: example.com)"
+    },
+    "subdomain": {
+      "type": "string",
+      "description": "\u30b5\u30d6\u30c9\u30e1\u30a4\u30f3 (\u4f8b: user1.service.com)"
+    },
+    "domain_type": {
+      "type": "string",
+      "enum": [
+        "subdomain",
+        "custom_domain",
+        "site_path"
+      ],
+      "default": "subdomain"
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "verified",
+        "failed"
+      ],
+      "default": "pending"
+    },
+    "dns_record": {
+      "type": "string",
+      "description": "DNS\u78ba\u8a8d\u7528\u30ec\u30b3\u30fc\u30c9"
+    }
+  },
+  "required": [
+    "site_id",
+    "user_id",
+    "domain_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
