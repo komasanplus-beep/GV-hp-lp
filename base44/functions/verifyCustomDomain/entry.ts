@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-// CNAMEまたはAレコードの検証先ホスト（自社サービスのホスト）
 const TARGET_CNAME = 'sites.base44.app';
+const TARGET_IP = '216.24.57.1';
 
 Deno.serve(async (req) => {
   try {
@@ -47,14 +47,27 @@ Deno.serve(async (req) => {
       if (dnsData.Answer && dnsData.Answer.length > 0) {
         const cname = dnsData.Answer.find(r => r.type === 5); // type 5 = CNAME
         if (cname) {
-          resolvedValue = cname.data.replace(/\.$/, ''); // 末尾のドットを除去
+          resolvedValue = cname.data.replace(/\.$/, '');
           verified = resolvedValue === TARGET_CNAME;
         }
       }
 
-      // CNAMEがなければAレコードも確認（オプション）
-      if (!verified && (!dnsData.Answer || dnsData.Answer.length === 0)) {
-        errorDetail = 'No DNS records found';
+      // CNAMEで未検証の場合はAレコードを確認
+      if (!verified) {
+        const aRes = await fetch(
+          `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=A`,
+          { headers: { Accept: 'application/dns-json' } }
+        );
+        const aData = await aRes.json();
+        if (aData.Answer && aData.Answer.length > 0) {
+          const aRecord = aData.Answer.find(r => r.type === 1); // type 1 = A
+          if (aRecord) {
+            resolvedValue = aRecord.data;
+            verified = aRecord.data === TARGET_IP;
+          }
+        } else {
+          errorDetail = 'No DNS records found (CNAME or A)';
+        }
       }
     } catch (dnsErr) {
       errorDetail = `DNS lookup failed: ${dnsErr.message}`;
