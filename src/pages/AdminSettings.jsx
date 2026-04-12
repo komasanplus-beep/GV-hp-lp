@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
@@ -23,6 +24,8 @@ const EMPTY_FORM = {
 
 export default function AdminSettings() {
   const qc = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get('userId') || null;
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saveError, setSaveError] = useState('');
@@ -34,9 +37,9 @@ export default function AdminSettings() {
 
   // isFetching でなく isLoading(初回のみ)を使用して、再フェッチ時にローディング画面へ切り替わらないようにする
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
-    queryKey: ['accountProfile'],
+    queryKey: ['accountProfile', targetUserId],
     queryFn: async () => {
-      const res = await base44.functions.invoke('getAccountProfile', {});
+      const res = await base44.functions.invoke('getAccountProfile', targetUserId ? { user_id: targetUserId } : {});
       return res.data || {};
     },
   });
@@ -146,11 +149,11 @@ export default function AdminSettings() {
             <CardContent className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-slate-600 block mb-1">ユーザー名</label>
-                <Input value={currentUser?.full_name || '-'} disabled className="bg-slate-50" readOnly />
+                <Input value={(targetUserId ? profile?.contact_name : currentUser?.full_name) || '-'} disabled className="bg-slate-50" readOnly />
               </div>
               <div>
                 <label className="text-xs font-medium text-slate-600 block mb-1">ログインメール</label>
-                <Input value={currentUser?.email || '-'} disabled className="bg-slate-50" readOnly />
+                <Input value={(targetUserId ? profile?.email : currentUser?.email) || '-'} disabled className="bg-slate-50" readOnly />
               </div>
             </CardContent>
           </Card>

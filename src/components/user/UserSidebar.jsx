@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   LayoutDashboard, Settings, LogOut, Layout, Sparkles, X, Store,
@@ -110,6 +110,9 @@ const PAGE_FEATURE_MAP = {
 
 export default function UserSidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get('userId') || null;
+  const userIdSuffix = targetUserId ? `?userId=${targetUserId}` : '';
   const [isAdmin, setIsAdmin] = useState(false);
   const [userId, setUserId] = useState(null);
   const [allowedFeatures, setAllowedFeatures] = useState(null); // null = まだ未取得
@@ -209,7 +212,7 @@ export default function UserSidebar({ isOpen, onClose }) {
                   return (
                     <li key={group.label}>
                       <Link
-                        to={createPageUrl(group.page)}
+                        to={createPageUrl(group.page) + userIdSuffix}
                         onClick={onClose}
                         className={cn(
                           "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium",
@@ -253,8 +256,8 @@ export default function UserSidebar({ isOpen, onClose }) {
                           const isActive = location.pathname.includes(item.page);
                           // AdminServices は site_id 必須なので、クエリを付与
                           const linkUrl = item.page === 'AdminServices'
-                            ? `${createPageUrl(item.page)}?site_id=auto`  // フロントで自動選択
-                            : createPageUrl(item.page);
+                            ? `${createPageUrl(item.page)}?site_id=auto${targetUserId ? `&userId=${targetUserId}` : ''}`
+                            : createPageUrl(item.page) + userIdSuffix;
                           return (
                             <li key={item.name}>
                               <Link
