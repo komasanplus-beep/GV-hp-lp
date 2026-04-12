@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const url = new URL(req.url);
     const lpId = url.searchParams.get('lp_id');
+    const slug = url.searchParams.get('slug');
     const domain = url.searchParams.get('domain');
     const subdomain = url.searchParams.get('subdomain');
     const siteId = url.searchParams.get('site_id');
@@ -32,6 +33,10 @@ Deno.serve(async (req) => {
     if (lpId) {
       // 1. lp_id 直接指定
       const lps = await base44.asServiceRole.entities.LandingPage.filter({ id: lpId });
+      lp = lps?.[0] || null;
+    } else if (slug) {
+      // 2. slug で直接検索（既存動作）
+      const lps = await base44.asServiceRole.entities.LandingPage.filter({ slug });
       lp = lps?.[0] || null;
     } else if (domain) {
       // 2. 独自ドメイン
@@ -60,7 +65,7 @@ Deno.serve(async (req) => {
         }
       }
     } else {
-      return Response.json({ error: 'lp_id, domain, subdomain, or site_id+lp_slug required' }, { status: 400 });
+      return Response.json({ error: 'lp_id, slug, domain, subdomain, or site_id+lp_slug required' }, { status: 400 });
     }
 
     if (!lp) {

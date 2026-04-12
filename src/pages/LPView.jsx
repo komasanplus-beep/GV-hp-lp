@@ -7,57 +7,43 @@ import { useSeoHead } from '@/hooks/useSeoHead';
 import { generateThemeCSS } from '@/lib/lpThemeRenderer';
 import { trackLPEvent } from '@/lib/lpTracker';
 
-function LPViewInner({ slug, preview, token }) {
+function LPViewInner({ queryParams, preview }) {
   const [themeCSS, setThemeCSS] = useState('');
 
-  const { data: pages = [], isLoading: lpLoading } = useQuery({
-    queryKey: ['lpBySlug', slug],
-    queryFn: () => base44.entities.LandingPage.filter({ slug }),
-    enabled: !!slug,
+  // getLandingPageWithTheme でLP+ブロック+テーマを一括取得
+  const { data: lpData, isLoading } = useQuery({
+    queryKey: ['lpWithTheme', queryParams],
+    queryFn: async () => {
+      const params = new URLSearchParams(queryParams).toString();
+      const res = await base44.functions.invoke('getLandingPageWithTheme?' + params, {});
+      return res.data;
+    },
+    enabled: Object.keys(queryParams).length > 0,
   });
 
-  const lp = pages[0];
+  const lp = lpData?.lp;
+  const blocks = lpData?.blocks || [];
+  const themeData = lpData?.theme;
+  const useTheme = lpData?.useTheme;
   const siteId = lp?.site_id;
-
-  // source_type が pasted_code の場合用の処理
   const isCodeLP = lp?.source_type === 'pasted_code';
+  const canView = !lp || lp.status === 'published' || preview === 'true';
 
-  // 公開状態チェック（下書きで preview=true の場合は表示可）
-  const canView = !lp || lp.status === 'published' || (preview === 'true');
-
-  // ページビュートラッキング（lp取得後に1回送信）
+  // ページビュートラッキング
   useEffect(() => {
     if (lp?.id && (lp.status === 'published' || preview === 'true')) {
       trackLPEvent(lp.id, 'view');
     }
   }, [lp?.id]);
 
-  // テーマ取得
-  const { data: themeData } = useQuery({
-    queryKey: ['siteTheme', siteId],
-    queryFn: async () => {
-      if (!siteId) return null;
-      const res = await base44.functions.invoke('getSiteTheme', { site_id: siteId });
-      return res.data?.theme;
-    },
-    enabled: !!siteId && lp?.use_site_theme,
-  });
-
-  // テーマCSSを生成
+  // テーマCSS生成
   useEffect(() => {
-    if (themeData && lp?.use_site_theme) {
-      const css = generateThemeCSS(themeData);
-      setThemeCSS(css);
+    if (themeData && useTheme) {
+      setThemeCSS(generateThemeCSS(themeData));
     }
-  }, [themeData, lp?.use_site_theme]);
+  }, [themeData, useTheme]);
 
-  const { data: blocks = [], isLoading: blocksLoading } = useQuery({
-    queryKey: ['lpBlocksView', lp?.id],
-    queryFn: () => base44.entities.LPBlock.filter({ lp_id: lp.id }, 'sort_order'),
-    enabled: !!lp?.id && !isCodeLP,
-  });
-
-  // LP固有のSEOデータ (lp_id = lp.id)
+  // SEOデータ取得
   const { data: seoArr = [] } = useQuery({
     queryKey: ['lpSeo', lp?.id],
     queryFn: () => base44.entities.LPSeoData.filter({ lp_id: lp.id }),
@@ -75,7 +61,7 @@ function LPViewInner({ slug, preview, token }) {
     keywords: seo?.seo_keywords,
   });
 
-  if (lpLoading || blocksLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
@@ -88,7 +74,6 @@ function LPViewInner({ slug, preview, token }) {
       <div className="min-h-screen flex items-center justify-center text-slate-400">
         <div className="text-center">
           <p className="text-2xl mb-2">ページが見つかりません</p>
-          <p className="text-sm">/lp/{slug}</p>
         </div>
       </div>
     );
@@ -105,11 +90,10 @@ function LPViewInner({ slug, preview, token }) {
     );
   }
 
-  // コード貼り付けLP の表示
+  // コード貼り付けLP
   if (isCodeLP) {
     const htmlToDisplay = lp.sanitized_html || lp.html_code || '';
     const cssToDisplay = lp.css_code || '';
-
     if (!htmlToDisplay) {
       return (
         <div className="min-h-screen flex items-center justify-center text-slate-400">
@@ -120,7 +104,6 @@ function LPViewInner({ slug, preview, token }) {
         </div>
       );
     }
-
     return (
       <div>
         <style>{cssToDisplay}</style>
@@ -129,18 +112,18 @@ function LPViewInner({ slug, preview, token }) {
     );
   }
 
-  // ブロック型LP の表示
+  // ブロック型LP
   return (
     <div className="min-h-screen">
       {themeCSS && <style>{themeCSS}</style>}
       {blocks.map((block) => (
-        <BlockRenderer 
-          key={block.id} 
-          block={block} 
+        <BlockRenderer
+          key={block.id}
+          block={block}
           siteId={siteId}
           lpId={lp?.id}
           theme={themeData}
-          useTheme={lp?.use_site_theme}
+          useTheme={useTheme}
         />
       ))}
     </div>
@@ -150,17 +133,37 @@ function LPViewInner({ slug, preview, token }) {
 export default function LPView() {
   const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
-  const slug = urlParams.get('slug') || pathParts[pathParts.indexOf('lp') + 1] || '';
   const preview = urlParams.get('preview');
-  const token = urlParams.get('token');
 
-  if (!slug) {
+  // LP解決用パラメータを優先順位に従って決定
+  const lpId = urlParams.get('lp_id');
+  const slug = urlParams.get('slug') || pathParts[pathParts.indexOf('lp') + 1] || '';
+  const subdomain = urlParams.get('subdomain');
+  const siteId = urlParams.get('site_id');
+  const lpSlug = urlParams.get('lp_slug');
+  const domain = urlParams.get('domain');
+
+  let queryParams = {};
+  if (lpId) {
+    queryParams = { lp_id: lpId };
+  } else if (domain) {
+    queryParams = { domain };
+  } else if (subdomain) {
+    queryParams = { subdomain };
+  } else if (siteId && lpSlug) {
+    queryParams = { site_id: siteId, lp_slug: lpSlug };
+  } else if (slug) {
+    // 既存動作: slugでLPを直接検索（lp_idとして渡すのではなくslugで検索）
+    queryParams = { slug };
+  }
+
+  if (Object.keys(queryParams).length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center text-slate-400">
-        <p>slug が指定されていません</p>
+        <p>LP識別子が指定されていません</p>
       </div>
     );
   }
 
-  return <LPViewInner slug={slug} preview={preview} token={token} />;
+  return <LPViewInner queryParams={queryParams} preview={preview} />;
 }
