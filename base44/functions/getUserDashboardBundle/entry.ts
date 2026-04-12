@@ -11,11 +11,11 @@ Deno.serve(async (req) => {
 
     // 全データを並列取得
     const [subsResult, plansResult, sitesResult, lpsResult, aiLogsResult] = await Promise.all([
-      base44.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1).catch(() => []),
-      base44.entities.PlanMaster.filter({ status: 'active' }, '-sort_order', 20).catch(() => []),
-      base44.entities.Site.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
-      base44.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
-      base44.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200).catch(() => []),
+      base44.asServiceRole.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1).catch(() => []),
+      base44.asServiceRole.entities.PlanMaster.filter({ status: 'active' }, '-sort_order', 20).catch(() => []),
+      base44.asServiceRole.entities.Site.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
+      base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
+      base44.asServiceRole.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200).catch(() => []),
     ]);
 
     const subscription = subsResult?.[0] || null;
