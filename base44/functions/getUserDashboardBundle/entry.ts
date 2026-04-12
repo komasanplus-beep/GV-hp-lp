@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.PlanMaster.filter({ status: 'active' }, '-sort_order', 20).catch(() => []),
       base44.asServiceRole.entities.Site.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
       base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
-      base44.asServiceRole.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200).catch(() => []),
+      base44.asServiceRole.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 50).catch(() => []),
     ]);
 
     const subscription = subsResult?.[0] || null;
