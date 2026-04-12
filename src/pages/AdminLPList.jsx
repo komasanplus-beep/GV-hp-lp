@@ -93,9 +93,24 @@ export default function AdminLPList() {
                   </div>
                   <span className="text-sm text-slate-400">/lp/{lp.slug}</span>
                   {!hasDomainMapping(lp.id) && (
-                    <div className="bg-orange-50 border border-orange-300 rounded-lg px-3 py-2 flex items-start gap-2 w-fit">
-                      <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm text-orange-700 font-medium">公開URL未設定</span>
+                    <div className="bg-orange-50 border border-orange-300 rounded-lg px-4 py-3 w-full">
+                      <div className="flex items-start gap-2 mb-2">
+                        <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm font-semibold text-orange-700">公開URL未設定</span>
+                      </div>
+                      <p className="text-xs text-orange-700 leading-relaxed ml-6">
+                        公開するには公開URL設定が必要です。
+                        <button
+                          onClick={() => setDomainSettingLP(lp)}
+                          className="text-orange-900 hover:text-orange-950 font-medium underline ml-1"
+                        >
+                          🌐 設定ボタン
+                        </button>
+                        から以下のいずれかを選択してください：
+                        <br />
+                        <span className="block mt-1">① <strong>サブドメイン（無料）</strong>: xxxxx.base44.app 形式。すぐに使えます。</span>
+                        <span className="block">② <strong>独自ドメイン</strong>: お持ちのドメインを設定（DNS設定が必要）。</span>
+                      </p>
                     </div>
                   )}
                 </div>
