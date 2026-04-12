@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const TARGET_CNAME = 'sites.base44.app';
+const TARGET_CNAME = 'base44.onrender.com';
 const TARGET_CNAME_WWW = 'base44.onrender.com';
 const TARGET_IP = '216.24.57.1';
 
