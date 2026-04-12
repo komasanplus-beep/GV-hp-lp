@@ -21,16 +21,16 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // 対象ユーザーフィルタ
-    // ユーザーのサイト・プラン情報を取得
-    const [userSites, userSubs] = await Promise.all([
+    // 対象ユーザーフィルタ用データを並列取得
+    const [userSites, userSubs, userLPs, readRecords] = await Promise.all([
       base44.asServiceRole.entities.Site.filter({ created_by: user.email }).catch(() => []),
       base44.asServiceRole.entities.UserSubscription.filter({ user_id: user.id }).catch(() => []),
+      base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 1).catch(() => []),
+      base44.asServiceRole.entities.MasterAnnouncementRead.filter({ user_id: user.id }).catch(() => []),
     ]);
 
     const hasHomepage = userSites.some(s => !s.lp_only);
-    const hasLP = userSites.some(s => s.lp_only) ||
-      (await base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }).catch(() => [])).length > 0;
+    const hasLP = userSites.some(s => s.lp_only) || userLPs.length > 0;
     const siteTemplateCategories = [...new Set(userSites.map(s => s.template_category).filter(Boolean))];
     const activePlan = userSubs[0]?.current_plan_code || 'free';
 
@@ -56,10 +56,6 @@ Deno.serve(async (req) => {
       return true;
     });
 
-    // 既読状態を取得
-    const readRecords = await base44.asServiceRole.entities.MasterAnnouncementRead.filter(
-      { user_id: user.id }
-    ).catch(() => []);
     const readIds = new Set(readRecords.map(r => r.announcement_id));
 
     const result = targeted.map(a => ({
@@ -71,7 +67,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ announcements: result, unread_count });
   } catch (error) {
-    console.error('getOwnerAnnouncements error:', error);
+    console.error('[getOwnerAnnouncements]', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
