@@ -102,6 +102,8 @@ export default function UserDashboard() {
   const plan = bundleData?.plan;
   const usage = bundleData?.usage;
   const permissions = bundleData?.permissions;
+  const unreadInquiries = bundleData?.dashboard?.unread_inquiries || 0;
+  const todayBookings = bundleData?.dashboard?.today_bookings || 0;
 
   const siteName = user?.full_name || null;
   const title = siteName ? `${siteName} のダッシュボード` : 'ダッシュボード';
@@ -204,6 +206,39 @@ export default function UserDashboard() {
                     <p>LP: {usage?.lp_count || 0} / {plan?.lp_limit || 1}</p>
                     <p>AI: {usage?.ai_used_count || 0} / {plan?.ai_limit || 10}</p>
                   </div>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <p className="text-xs text-slate-500 mb-2">サイト数</p>
+                  <p className="text-2xl font-bold text-slate-800">{usage?.site_count || 0}</p>
+                </div>
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <p className="text-xs text-slate-500 mb-2">LP数</p>
+                  <p className="text-2xl font-bold text-slate-800">{usage?.lp_count || 0}</p>
+                </div>
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <p className="text-xs text-slate-500 mb-2">今月AI使用</p>
+                  <p className="text-2xl font-bold text-slate-800">{usage?.ai_used_count || 0}</p>
+                </div>
+                <div className={`bg-white rounded-lg border p-4 ${
+                  unreadInquiries > 0 ? 'border-orange-200 bg-orange-50' : 'border-slate-200'
+                }`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-xs text-slate-500">未読のお問い合わせ</p>
+                    {unreadInquiries > 0 && (
+                      <span className="inline-block px-1.5 py-0.5 bg-orange-200 text-orange-700 text-xs font-semibold rounded">未読</span>
+                    )}
+                  </div>
+                  <p className={`text-2xl font-bold ${
+                    unreadInquiries > 0 ? 'text-orange-600' : 'text-slate-400'
+                  }`}>{unreadInquiries}</p>
+                </div>
+                <div className="bg-white rounded-lg border border-slate-200 p-4">
+                  <p className="text-xs text-slate-500 mb-2">本日の予約</p>
+                  <p className="text-2xl font-bold text-slate-800">{todayBookings}</p>
                 </div>
               </div>
 
