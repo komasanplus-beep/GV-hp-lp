@@ -24,6 +24,13 @@ export default function UserDashboard() {
   });
 
   // Dashboard bundle: 認証確定後かつ初回のみ取得
+  // targetUserId が変わったらリセット
+  const prevTargetUserIdRef = useRef(targetUserId);
+  if (prevTargetUserIdRef.current !== targetUserId) {
+    prevTargetUserIdRef.current = targetUserId;
+    hasRequestedRef.current = false;
+  }
+
   // Bundle取得判定: auth済み && 初回リクエスト未実行
   const shouldFetchBundle = Boolean(authUser?.id) && !hasRequestedRef.current;
 
