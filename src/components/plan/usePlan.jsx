@@ -1,11 +1,8 @@
 /**
  * usePlan - 現在ユーザーのプラン・使用量・機能フラグを取得するフック
  *
- * 正 (Canonical) な構造:
- *   User → UserPlan → Plan → PlanUsage
- *
- * Legacy (非接続):
- *   SubscriptionPlan, UserSubscription — 参照しない
+ * 構造: User → UserPlan → Plan → PlanUsage
+ * ※ Subscription系エンティティは使用しない
  */
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
