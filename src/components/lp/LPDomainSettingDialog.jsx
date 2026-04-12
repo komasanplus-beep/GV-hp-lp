@@ -27,9 +27,9 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
     enabled: open,
   });
 
-  const { data: siteDomainMapping = null } = useQuery({
-    queryKey: ['siteDomainMapping', siteId],
-    queryFn: () => base44.entities.DomainMapping.filter({ site_id: siteId }).then(r => r?.[0] || null),
+  const { data: siteDomainMappings = [] } = useQuery({
+    queryKey: ['siteDomainMappings', siteId],
+    queryFn: () => base44.entities.DomainMapping.filter({ site_id: siteId }),
     enabled: !!siteId && domainType === 'site_path',
   });
 
@@ -81,6 +81,25 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
   const copy = (text) => { navigator.clipboard.writeText(text); toast.success('コピーしました'); };
 
   const selectedSite = sites.find(s => s.id === siteId);
+
+  // サイトのパス配下の場合、優先順位をつけてドメインを選択
+  const getDisplayDomain = () => {
+    if (!siteDomainMappings || siteDomainMappings.length === 0) {
+      return selectedSite?.slug || '';
+    }
+    // custom_domain があれば優先
+    const customDomainMapping = siteDomainMappings.find(m => m.domain_type === 'custom_domain');
+    if (customDomainMapping) {
+      return customDomainMapping.domain;
+    }
+    // subdomain があれば次
+    const subdomainMapping = siteDomainMappings.find(m => m.domain_type === 'subdomain');
+    if (subdomainMapping) {
+      return `${subdomainMapping.subdomain}.base44.app`;
+    }
+    // どちらもなければ site slug をフォールバック
+    return selectedSite?.slug || '';
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,12 +176,7 @@ export default function LPDomainSettingDialog({ lp, open, onOpenChange }) {
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
                   <p className="text-xs text-slate-600 mb-1">プレビューURL</p>
                   <p className="text-sm font-medium text-slate-800">
-                    {siteDomainMapping
-                      ? siteDomainMapping.domain_type === 'custom_domain'
-                        ? `${siteDomainMapping.domain}/lp/${lp.slug}`
-                        : `${siteDomainMapping.subdomain}.base44.app/lp/${lp.slug}`
-                      : `${selectedSite.slug}/lp/${lp.slug}`
-                    }
+                    {getDisplayDomain()}/lp/{lp.slug}
                   </p>
                   <p className="text-xs text-slate-400 mt-2">※パスにはLPのスラッグ（半角英数字・ハイフンのみ）が自動的に使用されます。スラッグはLP作成時に設定した値です。</p>
                 </div>

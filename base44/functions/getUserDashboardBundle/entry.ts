@@ -18,11 +18,13 @@ Deno.serve(async (req) => {
     }
 
     // 全データを並列取得
-    const [subsResult, plansResult, sitesResult, lpsResult, aiLogsResult] = await Promise.all([
+    const [subsResult, plansResult, sitesResult, lpsResult, inquiriesResult, bookingsResult, aiLogsResult] = await Promise.all([
       base44.asServiceRole.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1).catch(() => []),
       base44.asServiceRole.entities.PlanMaster.filter({ status: 'active' }, '-sort_order', 20).catch(() => []),
       base44.asServiceRole.entities.Site.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
       base44.asServiceRole.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100).catch(() => []),
+      base44.asServiceRole.entities.Inquiry.filter({ user_id: user.id, is_read: false }, '-created_date', 20).catch(() => []),
+      base44.asServiceRole.entities.Booking.filter({ user_id: user.id }, '-created_date', 50).catch(() => []),
       base44.asServiceRole.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 50).catch(() => []),
     ]);
 
@@ -30,6 +32,8 @@ Deno.serve(async (req) => {
     const allPlans = plansResult || [];
     const sites = sitesResult || [];
     const lps = lpsResult || [];
+    const inquiries = inquiriesResult || [];
+    const bookings = bookingsResult || [];
     const aiLogs = aiLogsResult || [];
 
     // Planをplan_codeでマッチ
@@ -55,6 +59,15 @@ Deno.serve(async (req) => {
     const aiUsed = aiLogs.filter(a => new Date(a.created_date) >= monthStart).length;
     const siteCount = sites.length;
     const lpCount = lps.length;
+
+    // Calculate today's bookings
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayBookings = bookings.filter(b => {
+      const bookingDate = new Date(b.created_date);
+      bookingDate.setHours(0, 0, 0, 0);
+      return bookingDate.getTime() === today.getTime();
+    });
 
     return Response.json({
       user: {
@@ -89,6 +102,11 @@ Deno.serve(async (req) => {
         can_create_site: siteCount < (plan.site_limit || 1),
         can_create_lp: lpCount < (plan.lp_limit || 1),
         can_use_ai: (plan.can_use_ai !== false) && aiUsed < (plan.ai_limit || 10),
+      },
+      dashboard: {
+        unread_inquiries: inquiries.length,
+        today_bookings: todayBookings.length,
+        total_inquiries: inquiries.length,
       },
     });
   } catch (error) {
