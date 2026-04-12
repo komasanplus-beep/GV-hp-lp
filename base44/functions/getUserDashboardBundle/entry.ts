@@ -3,10 +3,18 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    const authUser = await base44.auth.me();
 
-    if (!user) {
+    if (!authUser) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { user_id } = await req.json().catch(() => ({}));
+
+    let user = authUser;
+    if (user_id) {
+      const users = await base44.asServiceRole.entities.User.filter({ id: user_id });
+      if (users?.[0]) user = users[0];
     }
 
     // 全データを並列取得
