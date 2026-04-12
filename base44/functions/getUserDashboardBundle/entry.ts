@@ -1,10 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 Deno.serve(async (req) => {
   try {
-    console.log('[getUserDashboardBundle] Request start - no logging calls inside this function');
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
@@ -12,21 +9,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 1. Subscription取得
-    let subscription = null;
-    try {
-      const subs = await base44.entities.Subscription.filter(
-        { user_id: user.id, status: 'active' },
-        '-created_date',
-        1
-      );
-      subscription = subs?.[0] || null;
-      await delay(100);
-    } catch (e) {
-      console.warn('Subscription fetch error:', e.message);
-    }
+    // subscription / sites / lps / aiLogs を並列取得
+    const [subsResult, sitesResult, lpsResult, aiLogsResult] = await Promise.allSettled([
+      base44.entities.Subscription.filter({ user_id: user.id, status: 'active' }, '-created_date', 1),
+      base44.entities.Site.filter({ user_id: user.id }, '-created_date', 100),
+      base44.entities.LandingPage.filter({ user_id: user.id }, '-created_date', 100),
+      base44.entities.AIUsageLog.filter({ user_id: user.id }, '-created_date', 200),
+    ]);
 
-    // 2. Plan定義取得
+    const subscription = subsResult.status === 'fulfilled' ? (subsResult.value?.[0] || null) : null;
+    const sites = sitesResult.status === 'fulfilled' ? (sitesResult.value || []) : [];
+    const lps = lpsResult.status === 'fulfilled' ? (lpsResult.value || []) : [];
+    const aiLogs = aiLogsResult.status === 'fulfilled' ? (aiLogsResult.value || []) : [];
+
+    // Plan取得 (subscription依存)
     let plan = null;
     if (subscription?.plan_code) {
       try {
@@ -36,13 +32,11 @@ Deno.serve(async (req) => {
           1
         );
         plan = plans?.[0] || null;
-        await delay(100);
       } catch (e) {
         console.warn('Plan fetch error:', e.message);
       }
     }
 
-    // Default to free plan if no subscription
     if (!plan) {
       plan = {
         code: 'free',
@@ -57,56 +51,11 @@ Deno.serve(async (req) => {
       };
     }
 
-    // 3. Usage集計
-    let sites = [];
-    let lps = [];
-    let aiUsed = 0;
-    
-    try {
-      sites = await base44.entities.Site.filter(
-        { user_id: user.id },
-        '-created_date',
-        100
-      );
-      await delay(100);
-    } catch (e) {
-      console.warn('Sites fetch error:', e.message);
-    }
-
-    try {
-      lps = await base44.entities.LandingPage.filter(
-        { user_id: user.id },
-        '-created_date',
-        100
-      );
-      await delay(100);
-    } catch (e) {
-      console.warn('LPs fetch error:', e.message);
-    }
-
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    try {
-      const aiLogs = await base44.entities.AIUsageLog.filter(
-        { user_id: user.id },
-        '-created_date',
-        200
-      );
-      aiUsed = (aiLogs || []).filter(
-        a => new Date(a.created_date) >= monthStart
-      ).length;
-      await delay(100);
-    } catch (e) {
-      console.warn('AI usage fetch error:', e.message);
-    }
-
-    // 4. Permission判定
+    const aiUsed = aiLogs.filter(a => new Date(a.created_date) >= monthStart).length;
     const siteCount = sites.length;
     const lpCount = lps.length;
-    const canCreateSite = siteCount < (plan.site_limit || 1);
-    const canCreateLp = lpCount < (plan.lp_limit || 1);
-    const canUseAi = (plan.can_use_ai !== false) && aiUsed < (plan.ai_limit || 10);
 
-    console.log('[getUserDashboardBundle] Bundle prepared - returning response');
     return Response.json({
       user: {
         id: user.id,
@@ -137,9 +86,9 @@ Deno.serve(async (req) => {
         ai_used_count: aiUsed,
       },
       permissions: {
-        can_create_site: canCreateSite,
-        can_create_lp: canCreateLp,
-        can_use_ai: canUseAi,
+        can_create_site: siteCount < (plan.site_limit || 1),
+        can_create_lp: lpCount < (plan.lp_limit || 1),
+        can_use_ai: (plan.can_use_ai !== false) && aiUsed < (plan.ai_limit || 10),
       },
     });
   } catch (error) {
