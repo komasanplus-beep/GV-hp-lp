@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
   Users, ToggleLeft, Settings, BookOpen, FileText,
@@ -68,9 +68,11 @@ export const MasterUserContext = React.createContext({ selectedUserId: null, sel
 
 export default function MasterSidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showUserPicker, setShowUserPicker] = useState(false);
 
   useEffect(() => {
     base44.entities.User.list().then(setUsers).catch(() => {});
@@ -191,14 +193,41 @@ export default function MasterSidebar({ isOpen, onClose }) {
           </nav>
 
           <div className="p-3 border-t border-slate-700 space-y-0.5">
-            <Link
-              to={createPageUrl('UserDashboard') + (selectedUserId ? `?userId=${selectedUserId}` : '')}
-              onClick={onClose}
-              className="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-700 hover:text-white rounded-lg transition-all text-sm"
+            <button
+              onClick={() => setShowUserPicker(true)}
+              className="flex items-center gap-3 px-3 py-2.5 w-full text-slate-400 hover:bg-slate-700 hover:text-white rounded-lg transition-all text-sm"
             >
               <Store className="w-4 h-4" />
               <span className="font-medium">Userダッシュボードへ</span>
-            </Link>
+            </button>
+
+            {/* User picker modal */}
+            {showUserPicker && (
+              <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center" onClick={() => setShowUserPicker(false)}>
+                <div className="bg-white rounded-xl shadow-2xl w-80 p-5" onClick={e => e.stopPropagation()}>
+                  <h3 className="text-sm font-semibold text-slate-800 mb-3">表示するユーザーを選択</h3>
+                  <div className="space-y-1 max-h-64 overflow-y-auto">
+                    <button
+                      onClick={() => { navigate(createPageUrl('UserDashboard')); setShowUserPicker(false); onClose(); }}
+                      className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      — 自分のダッシュボード —
+                    </button>
+                    {users.map(u => (
+                      <button
+                        key={u.id}
+                        onClick={() => { navigate(createPageUrl('UserDashboard') + `?userId=${u.id}`); setShowUserPicker(false); onClose(); }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-slate-100 rounded-lg"
+                      >
+                        <div className="font-medium text-slate-800">{u.full_name || u.email}</div>
+                        <div className="text-xs text-slate-400">{u.email}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => setShowUserPicker(false)} className="mt-3 w-full text-xs text-slate-400 hover:text-slate-600">キャンセル</button>
+                </div>
+              </div>
+            )}
             <button
               onClick={() => base44.auth.logout()}
               className="flex items-center gap-3 px-3 py-2.5 w-full text-slate-400 hover:bg-slate-700 hover:text-white rounded-lg transition-all text-sm"
