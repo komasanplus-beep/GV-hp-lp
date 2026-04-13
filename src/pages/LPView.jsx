@@ -91,8 +91,8 @@ function LPViewInner({ queryParams, preview }) {
       return (
         <iframe
           src={lp.html_file_url}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          style={{ width: '100%', height: '100vh', border: 'none' }}
+          sandbox="allow-scripts allow-same-origin allow-forms"
           title={lp.title}
         />
       );
