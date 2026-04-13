@@ -80,17 +80,26 @@ export default function AdminLPCodeCreator() {
   useEffect(() => {
     if (existingLp && existingLp.length > 0) {
       const lp = existingLp[0];
-      setForm({
+      setForm(f => ({
+        ...f,
         title: lp.title || '',
         slug: lp.slug || '',
         description: lp.description || '',
         status: lp.status || 'draft',
         template_type: lp.template_type || 'custom',
-        html_code: lp.html_code || '',
         css_code: lp.css_code || '',
-      });
+      }));
       if (lp.extracted_image_urls) {
         setExtractedImages(lp.extracted_image_urls);
+      }
+      // html_file_urlがあればGitHubから取得、なければhtml_codeを使用
+      if (lp.html_file_url) {
+        fetch(lp.html_file_url)
+          .then(r => r.text())
+          .then(html => setForm(f => ({ ...f, html_code: html })))
+          .catch(() => setForm(f => ({ ...f, html_code: lp.html_code || '' })));
+      } else {
+        setForm(f => ({ ...f, html_code: lp.html_code || '' }));
       }
     }
   }, [existingLp]);

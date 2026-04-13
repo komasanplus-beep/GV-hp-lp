@@ -95,71 +95,72 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      {/* Public Routes - no authentication required */}
-      <Route path="/SiteView" element={<SiteView />} />
-      <Route path="/site/:siteId" element={<SiteView />} />
-      <Route path="/lp/:slug" element={<LPView />} />
-      <Route path="/:slug" element={<LPView />} />
-      
-      {/* New Site Creation Wizard - protected */}
-      <Route path="/create-site" element={<SiteCreateWizard />} />
-      
-      <Route path="*" element={<PageNotFound />} />
-      
-      {/* Protected Routes */}
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
-      <Route path="/MasterAIControl" element={<MasterAIControl />} />
-      <Route path="/MasterPlanLimits" element={<MasterPlanLimits />} />
-      <Route path="/MasterBillingSettings" element={<MasterBillingSettings />} />
-      <Route path="/MasterBillingPlans" element={<MasterBillingPlans />} />
-      <Route path="/MasterSubscriptionManagement" element={<MasterSubscriptionManagement />} />
-      <Route path="/AdminInquiries" element={<AdminInquiries />} />
-      <Route path="/AdminServices" element={<AdminServices />} />
-      <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />
-      <Route path="/AdminLPList" element={<AdminLPList />} />
-      {/* Redirect legacy LP AI generation routes to LP management */}
-      <Route path="/AdminLPGenerate" element={<Navigate to="/AdminLPList" replace />} />
-      <Route path="/admin/lp-ai" element={<Navigate to="/AdminLPList" replace />} />
-      <Route path="/admin/lp/ai" element={<Navigate to="/AdminLPList" replace />} />
-      <Route path="/SiteHeaderSettings" element={<SiteHeaderSettings />} />
-      <Route path="/SiteFooterSettings" element={<SiteFooterSettings />} />
-      <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
-      <Route path="/service/:serviceId" element={<ServiceDetail />} />
-      <Route path="/AdminPostManager" element={<AdminPostManager />} />
-      <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
-      <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
-      <Route path="/AdminPostTags" element={<AdminPostTags />} />
-      <Route path="/AdminLPAnalytics" element={<AdminLPAnalytics />} />
-      <Route path="/AdminSiteAnalytics" element={<AdminSiteAnalytics />} />
-      <Route path="/AdminNoticeManager" element={<AdminNoticeManager />} />
-      <Route path="/AdminInquiryManager" element={<AdminInquiryManager />} />
-      <Route path="/Pricing" element={<PricingPage />} />
-      <Route path="/posts" element={<PostListPage />} />
-      <Route path="/post/:slug" element={<PostDetailPage />} />
-      <Route path="/MyNotices" element={<UserNoticeList />} />
-      <Route path="/MyInquiries" element={<UserInquiryList />} />
-      <Route path="/UserQAPage" element={<UserQAPage />} />
-      <Route path="/MasterAnnouncements" element={<MasterAnnouncements />} />
-      <Route path="/MasterAnnouncementEdit" element={<MasterAnnouncementEdit />} />
-      <Route path="/AdminInquiryAISettings" element={<AdminInquiryAISettings />} />
-    </Routes>
+  <Routes>
+    {/* Public Routes - no authentication required */}
+    <Route path="/SiteView" element={<SiteView />} />
+    <Route path="/site/:siteId" element={<SiteView />} />
+    <Route path="/lp/:slug" element={<LPView />} />
+
+    {/* New Site Creation Wizard - protected */}
+    <Route path="/create-site" element={<SiteCreateWizard />} />
+
+    {/* Protected Routes */}
+    <Route path="/" element={
+      <LayoutWrapper currentPageName={mainPageKey}>
+        <MainPage />
+      </LayoutWrapper>
+    } />
+    {Object.entries(Pages).map(([path, Page]) => (
+      <Route
+        key={path}
+        path={`/${path}`}
+        element={
+          <LayoutWrapper currentPageName={path}>
+            <Page />
+          </LayoutWrapper>
+        }
+      />
+    ))}
+    <Route path="/MasterLPTemplates" element={<MasterLPTemplates />} />
+    <Route path="/MasterAIControl" element={<MasterAIControl />} />
+    <Route path="/MasterPlanLimits" element={<MasterPlanLimits />} />
+    <Route path="/MasterBillingSettings" element={<MasterBillingSettings />} />
+    <Route path="/MasterBillingPlans" element={<MasterBillingPlans />} />
+    <Route path="/MasterSubscriptionManagement" element={<MasterSubscriptionManagement />} />
+    <Route path="/AdminInquiries" element={<AdminInquiries />} />
+    <Route path="/AdminServices" element={<AdminServices />} />
+    <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />
+    <Route path="/AdminLPList" element={<AdminLPList />} />
+    {/* Redirect legacy LP AI generation routes to LP management */}
+    <Route path="/AdminLPGenerate" element={<Navigate to="/AdminLPList" replace />} />
+    <Route path="/admin/lp-ai" element={<Navigate to="/AdminLPList" replace />} />
+    <Route path="/admin/lp/ai" element={<Navigate to="/AdminLPList" replace />} />
+    <Route path="/SiteHeaderSettings" element={<SiteHeaderSettings />} />
+    <Route path="/SiteFooterSettings" element={<SiteFooterSettings />} />
+    <Route path="/SiteSeoSettings" element={<SiteSeoSettings />} />
+    <Route path="/service/:serviceId" element={<ServiceDetail />} />
+    <Route path="/AdminPostManager" element={<AdminPostManager />} />
+    <Route path="/AdminPostEdit" element={<AdminPostEdit />} />
+    <Route path="/AdminPostCategories" element={<AdminPostCategories />} />
+    <Route path="/AdminPostTags" element={<AdminPostTags />} />
+    <Route path="/AdminLPAnalytics" element={<AdminLPAnalytics />} />
+    <Route path="/AdminSiteAnalytics" element={<AdminSiteAnalytics />} />
+    <Route path="/AdminNoticeManager" element={<AdminNoticeManager />} />
+    <Route path="/AdminInquiryManager" element={<AdminInquiryManager />} />
+    <Route path="/Pricing" element={<PricingPage />} />
+    <Route path="/posts" element={<PostListPage />} />
+    <Route path="/post/:slug" element={<PostDetailPage />} />
+    <Route path="/MyNotices" element={<UserNoticeList />} />
+    <Route path="/MyInquiries" element={<UserInquiryList />} />
+    <Route path="/UserQAPage" element={<UserQAPage />} />
+    <Route path="/MasterAnnouncements" element={<MasterAnnouncements />} />
+    <Route path="/MasterAnnouncementEdit" element={<MasterAnnouncementEdit />} />
+    <Route path="/AdminInquiryAISettings" element={<AdminInquiryAISettings />} />
+
+    {/* LP slug route - must be LAST before catch-all */}
+    <Route path="/:slug" element={<LPView />} />
+    <Route path="*" element={<PageNotFound />} />
+  </Routes>
   );
 };
 
