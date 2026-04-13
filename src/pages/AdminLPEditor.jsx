@@ -139,7 +139,7 @@ export default function AdminLPEditor() {
             </Button>
             <div>
               <h2 className="font-semibold text-slate-800">{lp?.title}</h2>
-              <span className="text-sm text-slate-400">/lp/{lp?.slug}</span>
+              <span className="text-sm text-slate-400">/{lp?.slug}</span>
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">

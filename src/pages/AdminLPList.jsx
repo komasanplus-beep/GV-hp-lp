@@ -29,18 +29,14 @@ export default function AdminLPList() {
     queryKey: ['domainMappings', pages.map(p => p.id).join(',')],
     queryFn: async () => {
       if (pages.length === 0) return [];
-      const lpIds = pages.map(p => p.id);
       const allMappings = await base44.entities.DomainMapping.list();
-      return allMappings.filter(m => lpIds.includes(m.landing_page_id));
+      return allMappings.filter(m => pages.map(p => p.id).includes(m.landing_page_id));
     },
     enabled: pages.length > 0,
   });
 
-  const hasDomainMapping = (lpId) => {
-    return domainMappings.some(m => m.landing_page_id === lpId);
-  };
+  const hasDomainMapping = (lpId) => domainMappings.some(m => m.landing_page_id === lpId);
 
-  // 本番URLを生成（preview-sandboxプレフィックスを除去）
   const productionHost = window.location.hostname.replace(/^preview-sandbox--/, '');
   const productionBaseUrl = `https://${productionHost}`;
 
@@ -49,6 +45,11 @@ export default function AdminLPList() {
     if (mapping?.domain) return `https://${mapping.domain}/${lp.slug}`;
     if (mapping?.subdomain) return `https://${mapping.subdomain}/${lp.slug}`;
     return `${productionBaseUrl}/${lp.slug}`;
+  };
+
+  const getEditUrl = (lp) => {
+    if (lp.source_type === 'pasted_code') return `/AdminLPCodeCreator?id=${lp.id}`;
+    return createPageUrl(`AdminLPEditor?id=${lp.id}`);
   };
 
   const isLPAtLimit = plan?.max_lp !== -1 && pages.length >= (plan?.max_lp ?? 1);
@@ -140,7 +141,7 @@ export default function AdminLPList() {
                         <br />
                         <span className="block mt-1">① <strong>サブドメイン（無料）</strong>: xxxxx.base44.app 形式。すぐに使えます。</span>
                         <span className="block">② <strong>独自ドメイン</strong>: お持ちのドメインを設定（DNS設定が必要）。</span>
-                        <span className="block">③ <strong>サイトのパス配下</strong>: 紐づけるサイトを選択し、/lp/スラッグ 形式で公開。</span>
+                        <span className="block">③ <strong>サイトのパス配下</strong>: 紐づけるサイトを選択し、/スラッグ 形式で公開。</span>
                       </p>
                     </div>
                   )}
@@ -155,7 +156,7 @@ export default function AdminLPList() {
                     </a>
                   </Button>
                   <Button variant="outline" size="sm" title="編集" asChild>
-                    <Link to={createPageUrl(`AdminLPEditor?id=${lp.id}`)}>
+                    <Link to={getEditUrl(lp)}>
                       <Pencil className="w-4 h-4" />
                     </Link>
                   </Button>

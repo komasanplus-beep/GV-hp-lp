@@ -10,7 +10,6 @@ import { trackLPEvent } from '@/lib/lpTracker';
 function LPViewInner({ queryParams, preview }) {
   const [themeCSS, setThemeCSS] = useState('');
 
-  // getLandingPageWithTheme でLP+ブロック+テーマを一括取得
   const { data: lpData, isLoading } = useQuery({
     queryKey: ['lpWithTheme', queryParams],
     queryFn: async () => {
@@ -29,37 +28,18 @@ function LPViewInner({ queryParams, preview }) {
   const isCodeLP = lp?.source_type === 'pasted_code';
   const canView = !lp || lp.status === 'published' || preview === 'true';
 
-  // GitHub保存HTMLの取得（プライベートリポジトリ対応）
-  const [githubHtml, setGithubHtml] = useState(null);
-  useEffect(() => {
-    if (!isCodeLP) return;
-    if (lp?.github_file_path) {
-      base44.functions.invoke('getGithubHtml', { file_path: lp.github_file_path })
-        .then(res => setGithubHtml(res.data?.html || ''))
-        .catch(() => setGithubHtml(''));
-    } else if (lp?.html_file_url) {
-      fetch(lp.html_file_url)
-        .then(r => r.text())
-        .then(html => setGithubHtml(html))
-        .catch(() => setGithubHtml(''));
-    }
-  }, [lp?.github_file_path, lp?.html_file_url, isCodeLP]);
-
-  // ページビュートラッキング
   useEffect(() => {
     if (lp?.id && (lp.status === 'published' || preview === 'true')) {
       trackLPEvent(lp.id, 'view');
     }
   }, [lp?.id]);
 
-  // テーマCSS生成
   useEffect(() => {
     if (themeData && useTheme) {
       setThemeCSS(generateThemeCSS(themeData));
     }
   }, [themeData, useTheme]);
 
-  // SEOデータ取得
   const { data: seoArr = [] } = useQuery({
     queryKey: ['lpSeo', lp?.id],
     queryFn: () => base44.entities.LPSeoData.filter({ lp_id: lp.id }),
@@ -106,18 +86,19 @@ function LPViewInner({ queryParams, preview }) {
     );
   }
 
-  // コード貼り付けLP
+  // コード貼り付けLP: html_file_urlがあればiframe src表示
   if (isCodeLP) {
-    // html_file_url がある場合はGitHubから取得したHTMLを使用
-    if (lp.html_file_url && githubHtml === null) {
+    if (lp.html_file_url) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
-        </div>
+        <iframe
+          src={lp.html_file_url}
+          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+          title={lp.title}
+        />
       );
     }
-    const htmlToDisplay = (lp.html_file_url ? githubHtml : null) || lp.sanitized_html || lp.html_code || '';
-    const cssToDisplay = lp.css_code || '';
+    const htmlToDisplay = lp.sanitized_html || lp.html_code || '';
     if (!htmlToDisplay) {
       return (
         <div className="min-h-screen flex items-center justify-center text-slate-400">
@@ -161,7 +142,6 @@ export default function LPView() {
   const pathParts = window.location.pathname.split('/');
   const preview = urlParams.get('preview');
 
-  // LP解決用パラメータを優先順位に従って決定
   const lpId = urlParams.get('lp_id');
   const slug = urlParams.get('slug') || pathParts[1] || '';
   const subdomain = urlParams.get('subdomain');
@@ -179,7 +159,6 @@ export default function LPView() {
   } else if (siteId && lpSlug) {
     queryParams = { site_id: siteId, lp_slug: lpSlug };
   } else if (slug) {
-    // 既存動作: slugでLPを直接検索（lp_idとして渡すのではなくslugで検索）
     queryParams = { slug };
   }
 
