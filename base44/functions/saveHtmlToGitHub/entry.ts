@@ -34,8 +34,17 @@ Deno.serve(async (req) => {
       }
     } catch (e) {}
 
-    // Base64エンコード（Deno用）
-    const encoded = btoa(unescape(encodeURIComponent(htmlContent)));
+    // Base64エンコード（Deno用・マルチバイト対応）
+    function encodeToBase64(str) {
+      const encoder = new TextEncoder();
+      const bytes = encoder.encode(str);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+    const encoded = encodeToBase64(htmlContent);
 
     const body = {
       message: `LP: ${lpId}`,
