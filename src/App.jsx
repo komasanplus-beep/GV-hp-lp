@@ -99,7 +99,6 @@ const AuthenticatedApp = () => {
     {/* Public Routes - no authentication required */}
     <Route path="/SiteView" element={<SiteView />} />
     <Route path="/site/:siteId" element={<SiteView />} />
-    <Route path="/lp/:slug" element={<LPView />} />
 
     {/* New Site Creation Wizard - protected */}
     <Route path="/create-site" element={<SiteCreateWizard />} />
