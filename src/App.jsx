@@ -128,8 +128,16 @@ const AuthenticatedApp = () => {
     <Route path="/MasterSubscriptionManagement" element={<MasterSubscriptionManagement />} />
     <Route path="/AdminInquiries" element={<AdminInquiries />} />
     <Route path="/AdminServices" element={<AdminServices />} />
-    <Route path="/AdminLPCodeCreator" element={<AdminLPCodeCreator />} />
-    <Route path="/AdminLPList" element={<AdminLPList />} />
+    <Route path="/AdminLPCodeCreator" element={
+      <LayoutWrapper currentPageName="AdminLPCodeCreator">
+        <AdminLPCodeCreator />
+      </LayoutWrapper>
+    } />
+    <Route path="/AdminLPList" element={
+      <LayoutWrapper currentPageName="AdminLPList">
+        <AdminLPList />
+      </LayoutWrapper>
+    } />
     {/* Redirect legacy LP AI generation routes to LP management */}
     <Route path="/AdminLPGenerate" element={<Navigate to="/AdminLPList" replace />} />
     <Route path="/admin/lp-ai" element={<Navigate to="/AdminLPList" replace />} />
