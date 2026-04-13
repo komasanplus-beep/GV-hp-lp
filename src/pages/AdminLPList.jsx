@@ -40,7 +40,7 @@ export default function AdminLPList() {
     return domainMappings.some(m => m.landing_page_id === lpId);
   };
 
-  const atLimit = plan.max_lp !== -1 && pages.length >= plan.max_lp;
+  const isLPAtLimit = plan?.max_lp !== -1 && pages.length >= (plan?.max_lp ?? 1);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.LandingPage.delete(id),
@@ -63,15 +63,15 @@ export default function AdminLPList() {
           <Button
             onClick={() => setShowCreationFlow(true)}
             className="bg-amber-600 hover:bg-amber-700"
-            disabled={atLimit}
-            title={atLimit ? 'LP作成数の上限に達しています' : ''}
+            disabled={isLPAtLimit}
+            title={isLPAtLimit ? 'LP作成数の上限に達しています' : ''}
           >
             <Plus className="w-4 h-4 mr-2" />新規作成
           </Button>
         </div>
-        {atLimit && (
+        {isLPAtLimit && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-sm text-amber-800">
-            LP作成数の上限（{plan.max_lp}件）に達しています。プランをアップグレードしてください。
+            LP作成数の上限（{plan?.max_lp}件）に達しています。プランをアップグレードしてください。
           </div>
         )}
         {pages.length === 0 ? (
@@ -155,7 +155,7 @@ export default function AdminLPList() {
         <LPCreationFlow
           open={showCreationFlow}
           onOpenChange={setShowCreationFlow}
-          disabled={atLimit}
+          disabled={isLPAtLimit}
         />
         <LPDomainSettingDialog
           lp={domainSettingLP}
