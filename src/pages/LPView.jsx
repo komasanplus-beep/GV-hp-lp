@@ -29,16 +29,21 @@ function LPViewInner({ queryParams, preview }) {
   const isCodeLP = lp?.source_type === 'pasted_code';
   const canView = !lp || lp.status === 'published' || preview === 'true';
 
-  // GitHub保存HTMLの取得
+  // GitHub保存HTMLの取得（プライベートリポジトリ対応）
   const [githubHtml, setGithubHtml] = useState(null);
   useEffect(() => {
-    if (lp?.html_file_url) {
+    if (!isCodeLP) return;
+    if (lp?.github_file_path) {
+      base44.functions.invoke('getGithubHtml', { file_path: lp.github_file_path })
+        .then(res => setGithubHtml(res.data?.html || ''))
+        .catch(() => setGithubHtml(''));
+    } else if (lp?.html_file_url) {
       fetch(lp.html_file_url)
         .then(r => r.text())
         .then(html => setGithubHtml(html))
         .catch(() => setGithubHtml(''));
     }
-  }, [lp?.html_file_url]);
+  }, [lp?.github_file_path, lp?.html_file_url, isCodeLP]);
 
   // ページビュートラッキング
   useEffect(() => {
@@ -124,10 +129,12 @@ function LPViewInner({ queryParams, preview }) {
       );
     }
     return (
-      <div>
-        <style>{cssToDisplay}</style>
-        <div dangerouslySetInnerHTML={{ __html: htmlToDisplay }} />
-      </div>
+      <iframe
+        srcdoc={htmlToDisplay}
+        style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+        title={lp.title}
+      />
     );
   }
 
@@ -156,7 +163,7 @@ export default function LPView() {
 
   // LP解決用パラメータを優先順位に従って決定
   const lpId = urlParams.get('lp_id');
-  const slug = urlParams.get('slug') || pathParts[pathParts.indexOf('lp') + 1] || '';
+  const slug = urlParams.get('slug') || pathParts[1] || '';
   const subdomain = urlParams.get('subdomain');
   const siteId = urlParams.get('site_id');
   const lpSlug = urlParams.get('lp_slug');

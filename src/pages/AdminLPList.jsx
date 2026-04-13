@@ -40,6 +40,17 @@ export default function AdminLPList() {
     return domainMappings.some(m => m.landing_page_id === lpId);
   };
 
+  // 本番URLを生成（preview-sandboxプレフィックスを除去）
+  const productionHost = window.location.hostname.replace(/^preview-sandbox--/, '');
+  const productionBaseUrl = `https://${productionHost}`;
+
+  const getLPPublicUrl = (lp) => {
+    const mapping = domainMappings.find(m => m.landing_page_id === lp.id);
+    if (mapping?.domain) return `https://${mapping.domain}/${lp.slug}`;
+    if (mapping?.subdomain) return `https://${mapping.subdomain}/${lp.slug}`;
+    return `${productionBaseUrl}/${lp.slug}`;
+  };
+
   const isLPAtLimit = plan?.max_lp !== -1 && pages.length >= (plan?.max_lp ?? 1);
 
   const deleteMutation = useMutation({
@@ -100,7 +111,17 @@ export default function AdminLPList() {
                       </Badge>
                     )}
                   </div>
-                  <span className="text-sm text-slate-400">/lp/{lp.slug}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm text-slate-400">/{lp.slug}</span>
+                    <a
+                      href={getLPPublicUrl(lp)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-blue-500 hover:underline break-all"
+                    >
+                      {getLPPublicUrl(lp)}
+                    </a>
+                  </div>
                   {!hasDomainMapping(lp.id) && (
                     <div className="bg-orange-50 border border-orange-300 rounded-lg px-4 py-3 w-full">
                       <div className="flex items-start gap-2 mb-2">
@@ -129,7 +150,7 @@ export default function AdminLPList() {
                     <Globe className="w-4 h-4" />
                   </Button>
                   <Button variant="outline" size="sm" title="プレビュー" asChild>
-                    <a href={`/lp/${lp.slug}?preview=true`} target="_blank" rel="noreferrer">
+                    <a href={`/${lp.slug}?preview=true`} target="_blank" rel="noreferrer">
                       <Eye className="w-4 h-4" />
                     </a>
                   </Button>
