@@ -18,7 +18,7 @@ export default function AdminLPList() {
   const [showCreationFlow, setShowCreationFlow] = useState(false);
   const [domainSettingLP, setDomainSettingLP] = useState(null);
 
-  const { plan, usage, isAtLPLimit } = usePlan();
+  const { plan } = usePlan();
 
   const { data: pages = [] } = useQuery({
     queryKey: ['landingPages'],
@@ -40,7 +40,7 @@ export default function AdminLPList() {
     return domainMappings.some(m => m.landing_page_id === lpId);
   };
 
-  const atLimit = isAtLPLimit;
+  const atLimit = plan.max_lp !== -1 && pages.length >= plan.max_lp;
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.LandingPage.delete(id),
@@ -57,7 +57,7 @@ export default function AdminLPList() {
           <div>
             <h2 className="text-xl font-semibold text-slate-800">ランディングページ一覧</h2>
             <p className="text-xs text-slate-400 mt-1">
-              {usage.lp_count} / {plan.max_lp === -1 ? '∞' : plan.max_lp} 件使用中
+              {pages.length} / {plan.max_lp === -1 ? '∞' : plan.max_lp} 件使用中
             </p>
           </div>
           <Button
