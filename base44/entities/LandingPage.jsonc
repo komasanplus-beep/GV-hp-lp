@@ -126,6 +126,14 @@
     "custom_theme_overrides": {
       "type": "object",
       "description": "LP\u500b\u5225\u306e\u30c6\u30fc\u30de\u4e0a\u66f8\u304d\u8a2d\u5b9a"
+    },
+    "html_file_url": {
+      "type": "string",
+      "description": "GitHub\u306b\u4fdd\u5b58\u3055\u308c\u305fHTML\u30d5\u30a1\u30a4\u30eb\u306eURL\uff08\u5927\u5bb9\u91cfLP\u7528\uff09"
+    },
+    "github_file_path": {
+      "type": "string",
+      "description": "GitHub\u30ea\u30dd\u30b8\u30c8\u30ea\u5185\u306e\u30d5\u30a1\u30a4\u30eb\u30d1\u30b9\uff08\u4f8b: lps/user123/lp-001.html\uff09"
     }
   },
   "required": [
