@@ -44,7 +44,10 @@ export default function AdminLPList() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.LandingPage.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['landingPages'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['landingPages'] });
+      queryClient.invalidateQueries({ queryKey: ['planUsage'] });
+    },
   });
 
   return (
