@@ -1,80 +1,66 @@
-/**
- * saveHtmlToGitHub
- * HTMLファイルをGitHubリポジトリに保存し、raw URLを返す
- */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
-
-const GITHUB_TOKEN = Deno.env.get('Github-Personal-Access-Tokens');
-const GITHUB_OWNER = Deno.env.get('GITHUB_OWNER');
-const GITHUB_REPO = Deno.env.get('GITHUB_REPO');
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { userId, lpId, htmlContent } = await req.json();
-
     if (!userId || !lpId || !htmlContent) {
       return Response.json({ error: 'userId, lpId, htmlContent are required' }, { status: 400 });
     }
 
-    if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
-      return Response.json({ error: 'GitHub environment variables are not configured' }, { status: 500 });
-    }
+    const token = Deno.env.get('Github-Personal-Access-Tokens');
+    const owner = Deno.env.get('GITHUB_OWNER');
+    const repo = Deno.env.get('GITHUB_REPO');
+    const path = `lps/${userId}/${lpId}.html`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
-    const filePath = `lps/${userId}/${lpId}.html`;
-    const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+    // 既存ファイルのSHA取得
+    let sha = undefined;
+    try {
+      const getRes = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+    } catch (e) {}
 
-    // 既存ファイルのSHAを取得（上書き更新のため）
-    let sha = null;
-    const getRes = await fetch(apiUrl, {
-      headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-      },
-    });
-    if (getRes.ok) {
-      const existing = await getRes.json();
-      sha = existing.sha;
-    }
-
-    // Base64エンコード
-    const base64Content = btoa(unescape(encodeURIComponent(htmlContent)));
+    // Base64エンコード（Deno用）
+    const encoded = btoa(unescape(encodeURIComponent(htmlContent)));
 
     const body = {
-      message: `Save LP HTML: ${lpId}`,
-      content: base64Content,
-      ...(sha ? { sha } : {}),
+      message: `LP: ${lpId}`,
+      content: encoded,
+      ...(sha ? { sha } : {})
     };
 
     const putRes = await fetch(apiUrl, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json',
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body)
     });
 
     if (!putRes.ok) {
-      const errData = await putRes.json();
-      return Response.json({ error: errData.message || 'GitHub API error' }, { status: putRes.status });
+      const err = await putRes.text();
+      throw new Error(`GitHub API error: ${err}`);
     }
 
-    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${filePath}`;
-
-    return Response.json({
-      success: true,
-      html_file_url: rawUrl,
-      github_file_path: filePath,
-    });
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;
+    return Response.json({ file_url: rawUrl });
   } catch (error) {
-    console.error('saveHtmlToGitHub error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
