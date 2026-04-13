@@ -593,11 +593,11 @@ export default function AdminLPCodeCreator() {
             <Card className="p-6 h-full min-h-96">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">プレビュー</h2>
               {previewData ? (
-                <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                <div className="border border-slate-200 rounded-lg overflow-hidden bg-white" style={{ height: '100vh', overflow: 'hidden' }}>
                   <iframe
                     srcdoc={`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; } body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }${previewData.css_code || ''}</style></head><body>${previewData.sanitized_html || previewData.html_code || ''}</body></html>`}
-                    style={{ width: '100%', height: '80vh', border: 'none' }}
-                    sandbox="allow-scripts allow-same-origin"
+                    style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+                    sandbox="allow-scripts allow-same-origin allow-popups"
                     title="LP Preview"
                   />
                 </div>
