@@ -11,6 +11,7 @@ import MasterBillingPlans from './pages/MasterBillingPlans'
 import MasterSubscriptionManagement from './pages/MasterSubscriptionManagement'
 import SiteView from './pages/SiteView'
 import LPView from './pages/LPView'
+import LPSlugPage from './pages/LPSlugPage.jsx'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminServices from './pages/AdminServices'
 import AdminLPCodeCreator from './pages/AdminLPCodeCreator'
@@ -99,6 +100,7 @@ const AuthenticatedApp = () => {
     {/* Public Routes - no authentication required */}
     <Route path="/SiteView" element={<SiteView />} />
     <Route path="/site/:siteId" element={<SiteView />} />
+    <Route path="/lp/:slug" element={<LPSlugPage />} />
 
     {/* New Site Creation Wizard - protected */}
     <Route path="/create-site" element={<SiteCreateWizard />} />
