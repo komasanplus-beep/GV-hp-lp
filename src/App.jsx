@@ -157,8 +157,6 @@ const AuthenticatedApp = () => {
     <Route path="/MasterAnnouncementEdit" element={<MasterAnnouncementEdit />} />
     <Route path="/AdminInquiryAISettings" element={<AdminInquiryAISettings />} />
 
-    {/* LP slug route - must be LAST before catch-all */}
-    <Route path="/:slug" element={<LPView />} />
     <Route path="*" element={<PageNotFound />} />
   </Routes>
   );
