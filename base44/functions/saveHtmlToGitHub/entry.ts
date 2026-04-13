@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
       throw new Error(`GitHub API error: ${err}`);
     }
 
-    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;
+    const rawUrl = `https://${owner}.github.io/${repo}/${path}`;
     return Response.json({ file_url: rawUrl });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

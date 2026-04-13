@@ -595,23 +595,9 @@ export default function AdminLPCodeCreator() {
               {previewData ? (
                 <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
                   <iframe
-                    srcDoc={`
-                      <!DOCTYPE html>
-                      <html>
-                      <head>
-                        <meta charset="UTF-8">
-                        <style>
-                          * { margin: 0; padding: 0; }
-                          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-                          ${previewData.css_code || ''}
-                        </style>
-                      </head>
-                      <body>
-                        ${previewData.sanitized_html || previewData.html_code || ''}
-                      </body>
-                      </html>
-                    `}
-                    className="w-full h-96 border-0"
+                    srcdoc={`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>* { margin: 0; padding: 0; } body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }${previewData.css_code || ''}</style></head><body>${previewData.sanitized_html || previewData.html_code || ''}</body></html>`}
+                    style={{ width: '100%', height: '80vh', border: 'none' }}
+                    sandbox="allow-scripts allow-same-origin"
                     title="LP Preview"
                   />
                 </div>
