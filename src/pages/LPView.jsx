@@ -86,7 +86,6 @@ function LPViewInner({ queryParams, preview }) {
     );
   }
 
-  // コード貼り付けLP: html_file_urlがあればiframe src表示
   if (isCodeLP) {
     if (lp.html_file_url) {
       return (
@@ -119,7 +118,6 @@ function LPViewInner({ queryParams, preview }) {
     );
   }
 
-  // ブロック型LP
   return (
     <div className="min-h-screen">
       {themeCSS && <style>{themeCSS}</style>}

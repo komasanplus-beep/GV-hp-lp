@@ -161,7 +161,8 @@ export default function AdminLPList() {
                     </Link>
                   </Button>
                   <Button
-                    variant="outline" size="sm"
+                    variant="outline"
+                    size="sm"
                     className="text-red-500 hover:text-red-700"
                     title="削除"
                     onClick={() => deleteMutation.mutate(lp.id)}
