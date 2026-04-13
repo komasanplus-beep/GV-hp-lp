@@ -17,6 +17,11 @@ Deno.serve(async (req) => {
     const owner = Deno.env.get('GITHUB_OWNER');
     const repo = Deno.env.get('GITHUB_REPO');
     const path = `lps/${userId}/${lpId}.html`;
+
+    console.log('token exists:', !!token);
+    console.log('owner:', owner);
+    console.log('repo:', repo);
+    console.log('path:', path);
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
     // 既存ファイルのSHA取得

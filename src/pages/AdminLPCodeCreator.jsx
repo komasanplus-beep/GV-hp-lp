@@ -106,62 +106,44 @@ export default function AdminLPCodeCreator() {
 
   // 保存ミューテーション
   const saveMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async () => {
       try {
-        // 0. フロント側の事前クレンジング（危険属性を先制的に除去）
         const preCleanedHtml = preCleanHtml(form.html_code);
+        const user = await base44.auth.me();
 
-        // 1. バックエンド側でサニタイズ（多重防御）
-        const sanitizeRes = await base44.functions.invoke('sanitizeLandingPageHtml', {
-          html_code: preCleanedHtml,
-          css_code: form.css_code,
+        // 1. GitHubにHTMLを保存
+        const githubRes = await base44.functions.invoke('saveHtmlToGitHub', {
+          userId: user.id,
+          lpId: lpId || `new-${Date.now()}`,
+          htmlContent: preCleanedHtml,
         });
 
-        if (!sanitizeRes || !sanitizeRes.data) {
-          throw new Error('Sanitize response is invalid');
+        if (!githubRes?.data?.file_url) {
+          throw new Error('GitHub保存に失敗しました: ' + (githubRes?.data?.error || '不明なエラー'));
         }
 
-        // 2. 画像URL置換（DBから最新のマッピング取得）
-        let finalHtml = sanitizeRes.data.sanitized_html || preCleanedHtml;
-        if (lpId) {
-          const mappingsData = await base44.entities.LandingPageImageMapping.filter({
-            landing_page_id: lpId,
-            status: 'mapped',
-          }).catch(() => []);
+        const html_file_url = githubRes.data.file_url;
 
-          if (mappingsData.length > 0) {
-            const replacements = mappingsData
-              .filter(m => m.uploaded_url)
-              .map(m => ({
-                original_url: m.original_url,
-                file_url: m.uploaded_url,
-              }));
-
-            if (replacements.length > 0) {
-              const replaceRes = await base44.functions.invoke('replaceImageUrlsInHtml', {
-                html_code: finalHtml,
-                replacements,
-              });
-              finalHtml = replaceRes.data?.replaced_html || finalHtml;
-            }
-          }
-        }
-
-        // 3. LP保存
-        const saveRes = await base44.functions.invoke('saveLandingPageFromCode', {
-          lp_id: lpId,
+        // 2. LPメタデータを保存（html_codeには保存しない）
+        const lpData = {
           title: form.title,
           slug: form.slug,
           description: form.description,
           status: form.status,
           template_type: form.template_type,
-          html_code: preCleanedHtml,
           css_code: form.css_code,
-          sanitized_html: finalHtml,
-          extracted_image_urls: sanitizeRes.data?.extracted_image_urls || [],
-        });
+          source_type: 'pasted_code',
+          html_file_url,
+        };
 
-        return saveRes;
+        let savedLp;
+        if (lpId) {
+          savedLp = await base44.entities.LandingPage.update(lpId, lpData);
+        } else {
+          savedLp = await base44.entities.LandingPage.create(lpData);
+        }
+
+        return { lp: savedLp, html_file_url };
       } catch (err) {
         console.error('Save mutation error:', err);
         throw err;
@@ -187,13 +169,12 @@ export default function AdminLPCodeCreator() {
 
       toast({
         title: '保存しました',
-        description: `LP「${form.title}」を保存しました`,
+        description: `LP「${form.title}」をGitHubに保存しました`,
       });
       queryClient.invalidateQueries({ queryKey: ['lp'] });
       queryClient.invalidateQueries({ queryKey: ['planUsage'] });
-      if (res.data.lp.id) {
-        setPreviewUrl(res.data.preview_url);
-        setPreviewData(res.data.lp);
+      if (res?.lp?.id) {
+        setPreviewUrl(res.html_file_url);
       }
     },
     onError: (err) => {
