@@ -29,6 +29,17 @@ function LPViewInner({ queryParams, preview }) {
   const isCodeLP = lp?.source_type === 'pasted_code';
   const canView = !lp || lp.status === 'published' || preview === 'true';
 
+  // GitHub保存HTMLの取得
+  const [githubHtml, setGithubHtml] = useState(null);
+  useEffect(() => {
+    if (lp?.html_file_url) {
+      fetch(lp.html_file_url)
+        .then(r => r.text())
+        .then(html => setGithubHtml(html))
+        .catch(() => setGithubHtml(''));
+    }
+  }, [lp?.html_file_url]);
+
   // ページビュートラッキング
   useEffect(() => {
     if (lp?.id && (lp.status === 'published' || preview === 'true')) {
@@ -92,7 +103,15 @@ function LPViewInner({ queryParams, preview }) {
 
   // コード貼り付けLP
   if (isCodeLP) {
-    const htmlToDisplay = lp.sanitized_html || lp.html_code || '';
+    // html_file_url がある場合はGitHubから取得したHTMLを使用
+    if (lp.html_file_url && githubHtml === null) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+        </div>
+      );
+    }
+    const htmlToDisplay = (lp.html_file_url ? githubHtml : null) || lp.sanitized_html || lp.html_code || '';
     const cssToDisplay = lp.css_code || '';
     if (!htmlToDisplay) {
       return (
