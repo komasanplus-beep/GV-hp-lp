@@ -12,8 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.25",
-    "@base44/vite-plugin": "^1.0.6",
+    "@base44/sdk": "^0.8.32",
+    "@base44/vite-plugin": "^1.0.23",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^7.0.2",
     "@dnd-kit/utilities": "^3.2.2",
