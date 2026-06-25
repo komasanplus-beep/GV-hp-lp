@@ -1,0 +1,9 @@
+{
+  "name": "HP\u30fbLP\u5236\u4f5c\u30a2\u30d7\u30ea",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
