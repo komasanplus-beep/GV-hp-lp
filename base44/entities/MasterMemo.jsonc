@@ -1,0 +1,35 @@
+{
+  "name": "MasterMemo",
+  "type": "object",
+  "properties": {
+    "memo_text": {
+      "type": "string",
+      "description": "\u30e1\u30e2\u5185\u5bb9"
+    }
+  },
+  "required": [
+    "memo_text"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

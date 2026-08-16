@@ -1,0 +1,61 @@
+{
+  "name": "UserPlan",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string",
+      "description": "Plan \u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u306eID"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9 (\u30ad\u30e3\u30c3\u30b7\u30e5\u7528)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "trial",
+        "active",
+        "canceled",
+        "expired"
+      ],
+      "default": "active"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "required": [
+    "user_id",
+    "plan_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

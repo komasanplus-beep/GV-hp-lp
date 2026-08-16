@@ -1,0 +1,64 @@
+{
+  "name": "UserLimits",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "site_create_limit": {
+      "type": "number",
+      "default": 1,
+      "description": "\u4f5c\u6210\u53ef\u80fd\u30b5\u30a4\u30c8\u6570"
+    },
+    "lp_create_limit": {
+      "type": "number",
+      "default": 1,
+      "description": "\u4f5c\u6210\u53ef\u80fdLP\u6570"
+    },
+    "page_create_limit": {
+      "type": "number",
+      "default": 5,
+      "description": "\u30b5\u30a4\u30c8\u5185\u30da\u30fc\u30b8\u6570"
+    },
+    "ai_regenerate_limit": {
+      "type": "number",
+      "default": 3,
+      "description": "AI\u518d\u751f\u6210\u56de\u6570"
+    },
+    "blog_create_limit": {
+      "type": "number",
+      "default": 5,
+      "description": "\u30d6\u30ed\u30b0\u8a18\u4e8b\u6570"
+    },
+    "ab_test_limit": {
+      "type": "number",
+      "default": 1,
+      "description": "AB\u30c6\u30b9\u30c8\u6570"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "name": "LPAnalytics",
+  "type": "object",
+  "properties": {
+    "lp_id": {
+      "type": "string",
+      "description": "LandingPage \u306e ID"
+    },
+    "page_views": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30da\u30fc\u30b8\u30d3\u30e5\u30fc\u6570"
+    },
+    "cta_clicks": {
+      "type": "number",
+      "default": 0,
+      "description": "CTA\u30af\u30ea\u30c3\u30af\u6570"
+    },
+    "conversions": {
+      "type": "number",
+      "default": 0,
+      "description": "\u30b3\u30f3\u30d0\u30fc\u30b8\u30e7\u30f3\u6570"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u7528\u30e6\u30fc\u30b6\u30fcID"
+    }
+  },
+  "required": [
+    "lp_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

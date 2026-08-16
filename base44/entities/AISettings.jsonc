@@ -1,0 +1,60 @@
+{
+  "name": "AISettings",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string",
+      "default": "gpt-4o"
+    },
+    "temperature": {
+      "type": "number",
+      "default": 0.7
+    },
+    "max_tokens": {
+      "type": "number",
+      "default": 4096
+    },
+    "system_prompt": {
+      "type": "string"
+    },
+    "knowledge": {
+      "type": "string"
+    },
+    "web_search": {
+      "type": "boolean",
+      "default": true
+    },
+    "lmo_mode": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

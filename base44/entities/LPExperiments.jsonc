@@ -1,0 +1,58 @@
+{
+  "name": "LPExperiments",
+  "type": "object",
+  "properties": {
+    "lp_a_id": {
+      "type": "string",
+      "description": "\u30aa\u30ea\u30b8\u30ca\u30ebLP ID"
+    },
+    "lp_b_id": {
+      "type": "string",
+      "description": "\u30d0\u30ea\u30a2\u30f3\u30c8LP ID"
+    },
+    "traffic_split": {
+      "type": "number",
+      "default": 50,
+      "description": "A\u3078\u306e\u30c8\u30e9\u30d5\u30a3\u30c3\u30afA%"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "running",
+        "stopped",
+        "completed"
+      ],
+      "default": "draft"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lp_a_id",
+    "lp_b_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

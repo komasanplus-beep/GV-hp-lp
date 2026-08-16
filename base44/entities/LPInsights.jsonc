@@ -1,0 +1,66 @@
+{
+  "name": "LPInsights",
+  "type": "object",
+  "properties": {
+    "lp_id": {
+      "type": "string",
+      "description": "LandingPage \u306e ID"
+    },
+    "ai_score": {
+      "type": "number",
+      "description": "AI\u7dcf\u5408\u30b9\u30b3\u30a2 (0-100)"
+    },
+    "copy_score": {
+      "type": "number",
+      "description": "\u30b3\u30d4\u30fc\u30b9\u30b3\u30a2 (0-100)"
+    },
+    "seo_score": {
+      "type": "number",
+      "description": "SEO\u30b9\u30b3\u30a2 (0-100)"
+    },
+    "lmo_score": {
+      "type": "number",
+      "description": "LMO\u30b9\u30b3\u30a2 (0-100)"
+    },
+    "cta_score": {
+      "type": "number",
+      "description": "CTA\u30b9\u30b3\u30a2 (0-100)"
+    },
+    "suggestions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "AI\u6539\u5584\u63d0\u6848\u30ea\u30b9\u30c8"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u7528\u30e6\u30fc\u30b6\u30fcID"
+    }
+  },
+  "required": [
+    "lp_id"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

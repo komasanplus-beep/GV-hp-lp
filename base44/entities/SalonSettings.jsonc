@@ -1,0 +1,76 @@
+{
+  "name": "SalonSettings",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "\u30de\u30eb\u30c1\u30c6\u30ca\u30f3\u30c8\u7528\u30e6\u30fc\u30b6\u30fcID"
+    },
+    "site_id": {
+      "type": "string",
+      "description": "\u7d10\u4ed8\u3051\u30b5\u30a4\u30c8ID"
+    },
+    "salon_name": {
+      "type": "string"
+    },
+    "tagline": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string",
+      "format": "email"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "hero_title": {
+      "type": "string"
+    },
+    "hero_subtitle": {
+      "type": "string"
+    },
+    "hero_button_text": {
+      "type": "string"
+    },
+    "hero_image_url": {
+      "type": "string"
+    },
+    "instagram_url": {
+      "type": "string"
+    },
+    "line_url": {
+      "type": "string"
+    },
+    "booking_url": {
+      "type": "string"
+    },
+    "map_embed_url": {
+      "type": "string"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

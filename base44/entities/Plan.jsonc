@@ -1,0 +1,75 @@
+{
+  "name": "Plan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "\u30d7\u30e9\u30f3\u540d (FREE, STARTER, PRO, AGENCY)"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "\u4e00\u610f\u306e\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9 (free, starter, pro, agency)"
+    },
+    "max_lp": {
+      "type": "number",
+      "description": "\u4f5c\u6210\u53ef\u80fdLP\u6570 (-1=\u7121\u5236\u9650)",
+      "default": 1
+    },
+    "ai_limit": {
+      "type": "number",
+      "description": "\u6708\u9593AI\u751f\u6210\u56de\u6570",
+      "default": 10
+    },
+    "domain_limit": {
+      "type": "number",
+      "description": "\u63a5\u7d9a\u53ef\u80fd\u30c9\u30e1\u30a4\u30f3\u6570 (-1=\u7121\u5236\u9650, 0=\u30b5\u30d6\u30c9\u30e1\u30a4\u30f3\u306e\u307f)",
+      "default": 0
+    },
+    "ab_test_enabled": {
+      "type": "boolean",
+      "description": "AB\u30c6\u30b9\u30c8\u5229\u7528\u53ef\u5426",
+      "default": false
+    },
+    "member_limit": {
+      "type": "number",
+      "description": "\u30c1\u30fc\u30e0\u30e1\u30f3\u30d0\u30fc\u6570",
+      "default": 1
+    },
+    "storage_limit": {
+      "type": "number",
+      "description": "\u30b9\u30c8\u30ec\u30fc\u30b8\u5bb9\u91cf (MB)",
+      "default": 500
+    },
+    "price_monthly": {
+      "type": "number",
+      "description": "\u6708\u984d\u6599\u91d1",
+      "default": 0
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "plan_code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "SubscriptionPlan",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "plan_code": {
+      "type": "string",
+      "description": "\u4e00\u610f\u306e\u30d7\u30e9\u30f3\u30b3\u30fc\u30c9 (\u4f8b: basic, pro, premium)"
+    },
+    "price_monthly": {
+      "type": "number",
+      "description": "\u6708\u984d\u6599\u91d1"
+    },
+    "price_yearly": {
+      "type": "number",
+      "description": "\u5e74\u984d\u6599\u91d1"
+    },
+    "site_limit": {
+      "type": "number",
+      "description": "\u4f5c\u6210\u53ef\u80fd\u30b5\u30a4\u30c8\u6570"
+    },
+    "page_limit": {
+      "type": "number",
+      "description": "\u30b5\u30a4\u30c8\u5185\u30da\u30fc\u30b8\u6570"
+    },
+    "lp_limit": {
+      "type": "number",
+      "description": "\u4f5c\u6210\u53ef\u80fdLP\u6570"
+    },
+    "ai_limit": {
+      "type": "number",
+      "description": "AI\u751f\u6210\u56de\u6570"
+    },
+    "custom_domain": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u72ec\u81ea\u30c9\u30e1\u30a4\u30f3\u5229\u7528\u53ef\u5426"
+    },
+    "template_level": {
+      "type": "string",
+      "enum": [
+        "basic",
+        "pro",
+        "premium"
+      ],
+      "description": "\u5229\u7528\u53ef\u80fd\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30ec\u30d9\u30eb"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "plan_code"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

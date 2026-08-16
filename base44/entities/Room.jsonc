@@ -1,0 +1,76 @@
+{
+  "name": "Room",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Room name or type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Room description"
+    },
+    "price_per_night": {
+      "type": "number",
+      "description": "Price per night in USD"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Maximum number of guests"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "booked",
+        "maintenance"
+      ],
+      "default": "available"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Room image URLs"
+    },
+    "amenities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Room amenities"
+    },
+    "size": {
+      "type": "number",
+      "description": "Room size in sqm"
+    },
+    "bed_type": {
+      "type": "string",
+      "description": "Type of bed"
+    }
+  },
+  "required": [
+    "name",
+    "price_per_night",
+    "capacity"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
