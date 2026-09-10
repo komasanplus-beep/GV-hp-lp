@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { invokeLPAI } from '@/lib/lpAiGateway';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
@@ -59,7 +60,9 @@ AI検索（ChatGPT / Gemini / Perplexity）が引用しやすい情報を生成�
 }
       `;
 
-      const res = await base44.integrations.Core.InvokeLLM({
+      const res = await invokeLPAI({
+        operation: 'analyze_seo',
+        lp_id: lpId,
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
@@ -124,6 +127,11 @@ AI検索（ChatGPT / Gemini / Perplexity）が引用しやすい情報を生成�
               placeholder="例: 中小企業向けのクラウド会計ソフト。月額2,980円から。AIが自動で帳簿を作成。"
               className="text-sm"
             />
+            {analyzeMutation.isError && (
+              <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+                {analyzeMutation.error.message}
+              </div>
+            )}
             <Button
               className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-sm"
               disabled={!serviceDesc || analyzeMutation.isPending}
