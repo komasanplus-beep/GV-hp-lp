@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { invokeLPAI } from '@/lib/lpAiGateway';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import UserLayout from '@/components/user/UserLayout';
 import { Button } from '@/components/ui/button';
@@ -80,7 +81,9 @@ export default function AdminLPAnalytics() {
       const blocks = allBlocks.filter(b => b.lp_id === lp.id);
       const blockSummary = blocks.map(b => `[${b.block_type}]: ${JSON.stringify(b.data).slice(0, 200)}`).join('\n');
 
-      const result = await base44.integrations.Core.InvokeLLM({
+      const result = await invokeLPAI({
+        operation: 'analyze_insights',
+        lp_id: lp.id,
         prompt: `以下はランディングページ「${lp.title}」のブロック構成です。\n\n${blockSummary}\n\nこのLPについて以下4つの観点で0〜100点で評価し、改善提案を3〜5件JSON形式で出力してください。\n- copy_score: コピーライティングの質（訴求力・感情喚起）\n- seo_score: SEO最適化度（キーワード使用、見出し構造）\n- lmo_score: LMO対応度（AI検索最適化、簡潔な説明）\n- cta_score: CTA効果（アクション誘導の明確さ）\n- ai_score: 総合スコア（上記の平均）\n- suggestions: 具体的な改善提案の文字列配列（日本語）`,
         response_json_schema: {
           type: 'object',
