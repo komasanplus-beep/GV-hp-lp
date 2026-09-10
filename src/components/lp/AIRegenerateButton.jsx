@@ -103,7 +103,7 @@ JSONのみで返してください（説明文不要）:
   });
 
   const saveMutation = useMutation({
-    mutationFn: () => base44.entities.LPBlock.update(block.id, { data: result }),
+    mutationFn: () => base44.entities.LPBlock.update(block.id, { data: result?.data || result }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lpBlocks', lpId] });
       setOpen(false);
