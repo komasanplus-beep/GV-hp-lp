@@ -307,6 +307,11 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
               LP作成数（{plan.max_lp}件）の上限に達しています。既存LPを削除するかプランをアップグレードしてください。
             </div>
           )}
+          {(generateMutation.isError || freeTextMutation.isError) && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 text-sm text-red-700">
+              {(generateMutation.error || freeTextMutation.error)?.message}
+            </div>
+          )}
 
           {/* モード切替 */}
           <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-lg">
