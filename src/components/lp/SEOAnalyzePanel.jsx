@@ -5,7 +5,7 @@ import { invokeLPAI } from '@/lib/lpAiGateway';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Sparkles, Loader2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { Search, Sparkles, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function SEOAnalyzePanel({ lpId }) {
   const queryClient = useQueryClient();
