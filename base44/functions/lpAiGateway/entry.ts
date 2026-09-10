@@ -53,12 +53,13 @@ async function getPlanState(base44, userId) {
     month_year: monthYear,
   });
   const usage = usages?.[0] || null;
+  const ownedLps = await base44.asServiceRole.entities.LandingPage.filter({ user_id: userId });
   return {
     plan,
     usage,
     monthYear,
     aiUsed: Number(usage?.ai_used || 0),
-    lpCount: Number(usage?.lp_count || 0),
+    lpCount: Math.max(Number(usage?.lp_count || 0), ownedLps?.length || 0),
   };
 }
 
