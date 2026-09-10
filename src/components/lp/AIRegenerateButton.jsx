@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { invokeLPAI } from '@/lib/lpAiGateway';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
 
@@ -11,6 +13,7 @@ export default function AIRegenerateButton({ block, lpId, onSaved }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState(null);
+  const [instruction, setInstruction] = useState('');
 
   const { data: limitsList = [] } = useQuery({
     queryKey: ['myLimits'],
@@ -57,6 +60,7 @@ ${seoContext}
 ■ 再生成対象ブロック
 block_type: ${block.block_type}
 現在のデータ: ${JSON.stringify(block.data)}
+ユーザーの改善指示: ${instruction.trim() || '特になし。内容を読みやすく、訴求力が高まるように改善する'}
 
 ■ 再生成ルール
 ・指定された block_type のみ生成する
@@ -79,7 +83,10 @@ JSONのみで返してください（説明文不要）:
   "data": { ...改善されたデータ }
 }
       `;
-      const res = await base44.integrations.Core.InvokeLLM({
+      const res = await invokeLPAI({
+        operation: 'regenerate_block',
+        lp_id: lpId,
+        block_id: block.id,
         prompt,
         add_context_from_internet: false,
         response_json_schema: {
@@ -90,7 +97,7 @@ JSONのみで返してください（説明文不要）:
           },
         },
       });
-      return res?.data || res;
+      return res;
     },
     onSuccess: (data) => setResult(data),
   });
@@ -135,9 +142,22 @@ JSONのみで返してください（説明文不要）:
                 <p className="text-sm text-slate-600 mb-4">
                   AIがこのブロックの内容を自動的に書き直します。現在の内容を改善した新しいバージョンを生成します。
                 </p>
+                <Textarea
+                  value={instruction}
+                  onChange={(event) => setInstruction(event.target.value)}
+                  placeholder="例：保護者向けに安心感が伝わる文章へ改善してください"
+                  rows={3}
+                  className="mb-3"
+                />
                 <Button className="bg-amber-600 hover:bg-amber-700 w-full" onClick={() => regenMutation.mutate()}>
-                  <Sparkles className="w-4 h-4 mr-2" />再生成する
+                  <Sparkles className="w-4 h-4 mr-2" />この指示で再生成する
                 </Button>
+              </div>
+            )}
+
+            {regenMutation.isError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {regenMutation.error.message}
               </div>
             )}
 
