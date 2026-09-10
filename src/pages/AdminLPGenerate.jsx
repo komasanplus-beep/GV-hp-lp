@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { usePlan } from '@/components/plan/usePlan';
+import { incrementUsage } from '@/lib/planUsage';
 import { invokeLPAI } from '@/lib/lpAiGateway';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
