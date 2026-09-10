@@ -7,6 +7,7 @@ import UserLayout from '@/components/user/UserLayout';
 import ProtectedRoute from '@/components/admin/ProtectedRoute';
 import { usePlan } from '@/components/plan/usePlan';
 import { incrementUsage } from '@/lib/planUsage';
+import { invokeLPAI } from '@/lib/lpAiGateway';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -154,7 +155,8 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
 }
       `;
 
-      const result = await base44.integrations.Core.InvokeLLM({
+      const result = await invokeLPAI({
+        operation: 'generate_lp',
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
@@ -224,7 +226,8 @@ Hero, Problem, Solution, Feature, Benefit, Evidence, Voice, CaseStudy, Flow, FAQ
   "blocks": [{"block_type": "Hero", "data": {...}}, ...]
 }
       `;
-      return await base44.integrations.Core.InvokeLLM({
+      return await invokeLPAI({
+        operation: 'analyze_free_text',
         prompt,
         add_context_from_internet: true,
         response_json_schema: {
